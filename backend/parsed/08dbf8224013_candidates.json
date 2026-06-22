@@ -1,0 +1,4512 @@
+[
+  {
+    "candidate_id": "cand_0001",
+    "sentence_id": "sent_00003",
+    "text": "Tata Power is committed to sustainable and clean energy development and is shaping the power sector \ntransformation through new-age energy solutions (EV charging, solar rooftop, microgrids, storage solutions, ESCO, home automation \nand smart meters).",
+    "score": 0.4,
+    "features": {
+      "has_number": false,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 1,
+    "section_id": "sec_001",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 50.85919952392578,
+      "y0": 114.43199920654297,
+      "x1": 546.2083740234375,
+      "y1": 173.238037109375
+    }
+  },
+  {
+    "candidate_id": "cand_0002",
+    "sentence_id": "sent_00005",
+    "text": "In consonance with the Materiality assessment, 9 SDGs, 4 business SDGs and 5 CSR SDGs \nhave been prioritized for focused action in achieving Tata Power’s vision to ‘Empower a billion lives through sustainable, affordable \nand innovative energy solutions’.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 1,
+    "section_id": "sec_001",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 50.85919952392578,
+      "y0": 180.4200439453125,
+      "x1": 546.2291259765625,
+      "y1": 227.22906494140625
+    }
+  },
+  {
+    "candidate_id": "cand_0003",
+    "sentence_id": "sent_00006",
+    "text": "On March 31, 2024, Tata Power together with its subsidiaries and jointly controlled entities, had an installed/managed capacity of \n14,707 MW based on various fuel sources - thermal (coal, oil, gas), hydroelectric power, renewable energy (wind and solar PV) and waste \nheat recovery.",
+    "score": 0.9,
+    "features": {
+      "has_number": true,
+      "has_unit": true,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 1,
+    "section_id": "sec_001",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 50.85919952392578,
+      "y0": 234.41107177734375,
+      "x1": 546.192138671875,
+      "y1": 329.2081298828125
+    }
+  },
+  {
+    "candidate_id": "cand_0004",
+    "sentence_id": "sent_00007",
+    "text": "The Company (including its subsidiaries) has 40% of its capacity (in MW terms) in clean and green generation sources \n(hydro, wind, solar and waste heat recovery).",
+    "score": 0.7,
+    "features": {
+      "has_number": true,
+      "has_unit": true,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 1,
+    "section_id": "sec_001",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 50.85919952392578,
+      "y0": 234.41107177734375,
+      "x1": 546.192138671875,
+      "y1": 329.2081298828125
+    }
+  },
+  {
+    "candidate_id": "cand_0005",
+    "sentence_id": "sent_00026",
+    "text": "2\nRenewables\nComprises generation of power from renewable energy sources i.e. wind and solar.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 2,
+    "section_id": "sec_021",
+    "section_title": "16.\t \u0007Details of business activities (accounting for 90% of the turnover):",
+    "bbox": {
+      "x0": 72.86611938476562,
+      "y0": 620.7360229492188,
+      "x1": 513.7781372070312,
+      "y1": 639.9520263671875
+    }
+  },
+  {
+    "candidate_id": "cand_0006",
+    "sentence_id": "sent_00033",
+    "text": "National\nConventional Generation (Thermal + Hydro) – 11\nOffice Locations - 9*\n136\nWind - 23\nSolar - 64\nTransmission and Distribution - 27\nSolar cells and modules manufacturing - 2\nTotal - 127\nInternational\nConventional Generation (Thermal + Hydro) – 4\nRepresentative Offices - 3\n7",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 3,
+    "section_id": "sec_025",
+    "section_title": "18.\t Number of locations where plants and/or operations/offices of the entity are situated:",
+    "bbox": {
+      "x0": 72.85858154296875,
+      "y0": 161.74398803710938,
+      "x1": 540.16259765625,
+      "y1": 239.712158203125
+    }
+  },
+  {
+    "candidate_id": "cand_0007",
+    "sentence_id": "sent_00045",
+    "text": "1.\nPermanent (D)\n 22,372 \n 20,255 \n91\n2,117\n9",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 3,
+    "section_id": "sec_030",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86698913574219,
+      "y0": 494.85400390625,
+      "x1": 540.0029296875,
+      "y1": 504.4700012207031
+    }
+  },
+  {
+    "candidate_id": "cand_0008",
+    "sentence_id": "sent_00046",
+    "text": "2.\nOther than Permanent (E)*\n 1,280 \n 1,103 \n86\n177\n14",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 3,
+    "section_id": "sec_030",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86691284179688,
+      "y0": 508.2460021972656,
+      "x1": 540.0029296875,
+      "y1": 517.8619995117188
+    }
+  },
+  {
+    "candidate_id": "cand_0009",
+    "sentence_id": "sent_00047",
+    "text": "3.\nTotal employees (D + E)\n 23,652 \n 21,358 \n90\n2,294\n10",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 3,
+    "section_id": "sec_030",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86691284179688,
+      "y0": 521.2140502929688,
+      "x1": 540.0029296875,
+      "y1": 531.2620239257812
+    }
+  },
+  {
+    "candidate_id": "cand_0010",
+    "sentence_id": "sent_00056",
+    "text": "1.\nPermanent (D)\n 41 \n 35 \n85\n6\n15",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 3,
+    "section_id": "sec_032",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86801147460938,
+      "y0": 665.85400390625,
+      "x1": 540.0040283203125,
+      "y1": 675.4700317382812
+    }
+  },
+  {
+    "candidate_id": "cand_0011",
+    "sentence_id": "sent_00057",
+    "text": "2.\nOther than Permanent (E)\n 3 \n 2 \n67\n1\n33",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 3,
+    "section_id": "sec_032",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86801147460938,
+      "y0": 679.2459716796875,
+      "x1": 540.0039672851562,
+      "y1": 688.8619995117188
+    }
+  },
+  {
+    "candidate_id": "cand_0012",
+    "sentence_id": "sent_00058",
+    "text": "3.\nTotal employees (D + E)\n 44 \n 37 \n84\n7\n16",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 3,
+    "section_id": "sec_032",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86795043945312,
+      "y0": 692.2140502929688,
+      "x1": 540.00390625,
+      "y1": 702.2620239257812
+    }
+  },
+  {
+    "candidate_id": "cand_0013",
+    "sentence_id": "sent_00069",
+    "text": "6\n11\n6\n6\n11\n6\n2\n6\n2",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 4,
+    "section_id": "sec_036",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 178.7305908203125,
+      "y0": 253.58700561523438,
+      "x1": 539.986572265625,
+      "y1": 263.2030029296875
+    }
+  },
+  {
+    "candidate_id": "cand_0014",
+    "sentence_id": "sent_00088",
+    "text": "Being a Tata Group company, Tata Power abides by the Tata Code of Conduct (TCoC), which is a comprehensive document for ethical \nconduct for all internal and external stakeholders of the Company, thus, covering 100% of its operations.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 5,
+    "section_id": "sec_044",
+    "section_title": "GRI Index",
+    "bbox": {
+      "x0": 50.85919952392578,
+      "y0": 159.42901611328125,
+      "x1": 546.0004272460938,
+      "y1": 230.2320556640625
+    }
+  },
+  {
+    "candidate_id": "cand_0015",
+    "sentence_id": "sent_00089",
+    "text": "TCoC consists of 10 sections \nwith sub-clauses that cover employees, customers, communities and the environment, value chain partners, financial stakeholders, \ngovernments and group companies.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 5,
+    "section_id": "sec_044",
+    "section_title": "GRI Index",
+    "bbox": {
+      "x0": 50.85919952392578,
+      "y0": 159.42901611328125,
+      "x1": 546.0004272460938,
+      "y1": 230.2320556640625
+    }
+  },
+  {
+    "candidate_id": "cand_0016",
+    "sentence_id": "sent_00093",
+    "text": "Grievance Redressal \nMechanism in Place (Yes/No)\nFY 24*\nFY 23",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 5,
+    "section_id": "sec_044",
+    "section_title": "GRI Index",
+    "bbox": {
+      "x0": 109.9862060546875,
+      "y0": 240.06106567382812,
+      "x1": 470.12005615234375,
+      "y1": 257.2530822753906
+    }
+  },
+  {
+    "candidate_id": "cand_0017",
+    "sentence_id": "sent_00100",
+    "text": "1\nNil\nNA\n7\nNil\nNA",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 5,
+    "section_id": "sec_044",
+    "section_title": "GRI Index",
+    "bbox": {
+      "x0": 247.03700256347656,
+      "y0": 313.3620300292969,
+      "x1": 544.5330200195312,
+      "y1": 322.97802734375
+    }
+  },
+  {
+    "candidate_id": "cand_0018",
+    "sentence_id": "sent_00105",
+    "text": "co.in/InvestorCharter.html\n69\n1\nAs of March 31, \n2024, there is \none pending \ncomplaint received \nthrough the \nSCORES Platform.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 5,
+    "section_id": "sec_044",
+    "section_title": "GRI Index",
+    "bbox": {
+      "x0": 52.869049072265625,
+      "y0": 378.1460266113281,
+      "x1": 377.56512451171875,
+      "y1": 534.2581176757812
+    }
+  },
+  {
+    "candidate_id": "cand_0019",
+    "sentence_id": "sent_00107",
+    "text": "71\n3\nAs of March 31, \n2023, there are \nthree pending \ncomplaints \nreceived through \nthe SCORES \nPlatform and RTA.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 5,
+    "section_id": "sec_044",
+    "section_title": "GRI Index",
+    "bbox": {
+      "x0": 415.85296630859375,
+      "y0": 378.1461181640625,
+      "x1": 541.9810180664062,
+      "y1": 524.658203125
+    }
+  },
+  {
+    "candidate_id": "cand_0020",
+    "sentence_id": "sent_00108",
+    "text": "The Action Taken \nReport for these \ncomplaints were \nsubmitted by RTA \nbefore March 31, \n2023.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 5,
+    "section_id": "sec_044",
+    "section_title": "GRI Index",
+    "bbox": {
+      "x0": 415.85296630859375,
+      "y0": 378.1461181640625,
+      "x1": 541.9810180664062,
+      "y1": 524.658203125
+    }
+  },
+  {
+    "candidate_id": "cand_0021",
+    "sentence_id": "sent_00112",
+    "text": "115\n18\nTata Power is \ncurrently in \nthe process \nof evaluating \nthe pending \ncomplaints; \nAppropriate action \nwill be taken in \ndue course of time.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 5,
+    "section_id": "sec_044",
+    "section_title": "GRI Index",
+    "bbox": {
+      "x0": 411.7460021972656,
+      "y0": 538.0419921875,
+      "x1": 541.9781494140625,
+      "y1": 624.4580688476562
+    }
+  },
+  {
+    "candidate_id": "cand_0022",
+    "sentence_id": "sent_00113",
+    "text": "Customers\n1\nNil\n67\nNil\nValue Chain \nPartners",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 5,
+    "section_id": "sec_044",
+    "section_title": "GRI Index",
+    "bbox": {
+      "x0": 52.865997314453125,
+      "y0": 553.530029296875,
+      "x1": 472.25,
+      "y1": 586.1300659179688
+    }
+  },
+  {
+    "candidate_id": "cand_0023",
+    "sentence_id": "sent_00114",
+    "text": "30\nNil\n28\n19",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 5,
+    "section_id": "sec_044",
+    "section_title": "GRI Index",
+    "bbox": {
+      "x0": 242.93800354003906,
+      "y0": 566.9140014648438,
+      "x1": 472.25,
+      "y1": 579.0260620117188
+    }
+  },
+  {
+    "candidate_id": "cand_0024",
+    "sentence_id": "sent_00116",
+    "text": "4\nNil\n51\n15",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 5,
+    "section_id": "sec_044",
+    "section_title": "GRI Index",
+    "bbox": {
+      "x0": 247.0419921875,
+      "y0": 584.9060668945312,
+      "x1": 472.25,
+      "y1": 594.5220947265625
+    }
+  },
+  {
+    "candidate_id": "cand_0025",
+    "sentence_id": "sent_00123",
+    "text": "1\nClimate Strategy*\nOpportunity\nTransition to renewables is an opportunity for Tata Power to add value to \nsociety by providing Clean and Green Power and achieving its climate target \nof Net Zero before 2045.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 6,
+    "section_id": "sec_045",
+    "section_title": "26.\t Overview of the entity’s material responsible business conduct issues",
+    "bbox": {
+      "x0": 53.023399353027344,
+      "y0": 231.49398803710938,
+      "x1": 477.4435729980469,
+      "y1": 260.3099365234375
+    }
+  },
+  {
+    "candidate_id": "cand_0026",
+    "sentence_id": "sent_00124",
+    "text": "2\nEmissions Management Risk\nFailure to comply with emission \nnorms could lead to negative/ \ninevitable long-term impact on \nthe environment and society, \nwith imposition of levies/ fines/ \ndirections, escalation in costs \nrelated to monitoring and \nreporting.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 6,
+    "section_id": "sec_045",
+    "section_title": "26.\t Overview of the entity’s material responsible business conduct issues",
+    "bbox": {
+      "x0": 53.023406982421875,
+      "y0": 264.0859069824219,
+      "x1": 329.5586853027344,
+      "y1": 340.9017639160156
+    }
+  },
+  {
+    "candidate_id": "cand_0027",
+    "sentence_id": "sent_00126",
+    "text": "3\nEnergy Management\nRisk\nHigher Auxiliary Power \nconsumption due to lower \noperational efficiencies",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 6,
+    "section_id": "sec_045",
+    "section_title": "26.\t Overview of the entity’s material responsible business conduct issues",
+    "bbox": {
+      "x0": 53.031402587890625,
+      "y0": 344.677734375,
+      "x1": 312.6226806640625,
+      "y1": 373.4937438964844
+    }
+  },
+  {
+    "candidate_id": "cand_0028",
+    "sentence_id": "sent_00128",
+    "text": "4\nContinuous and \nAffordable Green Power*\nOpportunity\nProviding Continuous and affordable green power to our customers \nis an opportunity for Tata Power to enable them to reach their climate \ncommitments",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 6,
+    "section_id": "sec_045",
+    "section_title": "26.\t Overview of the entity’s material responsible business conduct issues",
+    "bbox": {
+      "x0": 53.039398193359375,
+      "y0": 377.2697448730469,
+      "x1": 455.1723937988281,
+      "y1": 406.08575439453125
+    }
+  },
+  {
+    "candidate_id": "cand_0029",
+    "sentence_id": "sent_00129",
+    "text": "5\nSafeguarding \nBiodiversity\nRisk\nOur operations and services have \nthe potential to negatively affect \nbiodiversity and ecosystem \nservices.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 6,
+    "section_id": "sec_045",
+    "section_title": "26.\t Overview of the entity’s material responsible business conduct issues",
+    "bbox": {
+      "x0": 53.039398193359375,
+      "y0": 409.86175537109375,
+      "x1": 334.4234619140625,
+      "y1": 486.67779541015625
+    }
+  },
+  {
+    "candidate_id": "cand_0030",
+    "sentence_id": "sent_00134",
+    "text": "6\nHazardous and Toxic \nWaste Management\nRisk\nOur operations and services \nresult in toxic and hazardous \nwaste which have the potential \nto negatively affect the \nenvironment",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 6,
+    "section_id": "sec_045",
+    "section_title": "26.\t Overview of the entity’s material responsible business conduct issues",
+    "bbox": {
+      "x0": 53.047393798828125,
+      "y0": 493.453857421875,
+      "x1": 328.27789306640625,
+      "y1": 541.4698486328125
+    }
+  },
+  {
+    "candidate_id": "cand_0031",
+    "sentence_id": "sent_00136",
+    "text": "7\nWater and Effluent \nManagement\nRisk\nOur operational activities involve \nprocesses in which water is an \nindispensable input.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 6,
+    "section_id": "sec_045",
+    "section_title": "26.\t Overview of the entity’s material responsible business conduct issues",
+    "bbox": {
+      "x0": 53.055389404296875,
+      "y0": 545.245849609375,
+      "x1": 334.06988525390625,
+      "y1": 574.0618896484375
+    }
+  },
+  {
+    "candidate_id": "cand_0032",
+    "sentence_id": "sent_00137",
+    "text": "Thus, it is even more important \nfor us to strive to reduce water \nuse and increase reutilisation \nthroughout the value chain.",
+    "score": 0.4,
+    "features": {
+      "has_number": false,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 6,
+    "section_id": "sec_045",
+    "section_title": "26.\t Overview of the entity’s material responsible business conduct issues",
+    "bbox": {
+      "x0": 222.76739501953125,
+      "y0": 577.0458374023438,
+      "x1": 327.6938171386719,
+      "y1": 615.4619140625
+    }
+  },
+  {
+    "candidate_id": "cand_0033",
+    "sentence_id": "sent_00147",
+    "text": "11\nOccupational Health  \nand Safety\nRisk\nFailure to ensure health and safety \ncould result in increased cost of \nlitigation, reduce availability of \nmanpower, reduced employee \nmorale, or even threaten \nthe viability of operations in \nworstcase scenarios.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": false
+    },
+    "page_number": 7,
+    "section_id": "sec_046",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 53.02349853515625,
+      "y0": 170.25503540039062,
+      "x1": 334.3627624511719,
+      "y1": 237.47088623046875
+    }
+  },
+  {
+    "candidate_id": "cand_0034",
+    "sentence_id": "sent_00160",
+    "text": "18\nNew Business \nOpportunities*\nOpportunity\nOpportunity to expand the customer base through new business services \nlike Solar rooftop, EV Charging, etc.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 7,
+    "section_id": "sec_046",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 53.07196044921875,
+      "y0": 455.9988098144531,
+      "x1": 468.4601135253906,
+      "y1": 475.2148132324219
+    }
+  },
+  {
+    "candidate_id": "cand_0035",
+    "sentence_id": "sent_00161",
+    "text": "19\nInnovation and \nCollaborations\nOpportunity\nOpportunity to adopt state of art new technologies like Carbon, Capture, \nUtilization and Storage (CCUS) Green Hydrogen, Small Module Reactors \n(SMR) etc.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 7,
+    "section_id": "sec_046",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 53.07196044921875,
+      "y0": 478.9908142089844,
+      "x1": 465.7001953125,
+      "y1": 507.80682373046875
+    }
+  },
+  {
+    "candidate_id": "cand_0036",
+    "sentence_id": "sent_00166",
+    "text": "22\nESG Governance\nOpportunity\nStrong ESG focus is reflected in transformation journey of Tata Power.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 7,
+    "section_id": "sec_046",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 53.0799560546875,
+      "y0": 605.5668334960938,
+      "x1": 506.5279846191406,
+      "y1": 624.7828979492188
+    }
+  },
+  {
+    "candidate_id": "cand_0037",
+    "sentence_id": "sent_00167",
+    "text": "Improved ESG performance by third party ratings.",
+    "score": 0.4,
+    "features": {
+      "has_number": false,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 7,
+    "section_id": "sec_046",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 53.0799560546875,
+      "y0": 605.5668334960938,
+      "x1": 506.5279846191406,
+      "y1": 624.7828979492188
+    }
+  },
+  {
+    "candidate_id": "cand_0038",
+    "sentence_id": "sent_00216",
+    "text": "ISO 14001 \n(Environmental \nManagement \nSystem)  \n \nISO 50001 \n(Energy \nManagement \nSystem",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 9,
+    "section_id": "sec_051",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 398.84454345703125,
+      "y0": 337.69970703125,
+      "x1": 441.7503967285156,
+      "y1": 407.91259765625
+    }
+  },
+  {
+    "candidate_id": "cand_0039",
+    "sentence_id": "sent_00220",
+    "text": "Please refer ‘Embedding ESG factors in business’ section on Page 69 of the Integrated Report FY24.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 9,
+    "section_id": "sec_051",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 208.9290008544922,
+      "y0": 458.864013671875,
+      "x1": 535.4523315429688,
+      "y1": 478.08001708984375
+    }
+  },
+  {
+    "candidate_id": "cand_0040",
+    "sentence_id": "sent_00223",
+    "text": "7.  \u0007Statement by director responsible \nfor the business responsibility report, \nhighlighting ESG related challenges, \ntargets and achievements (listed entity \nhas flexibility regarding the placement of \nthis disclosure)",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 9,
+    "section_id": "sec_052",
+    "section_title": "Governance",
+    "bbox": {
+      "x0": 53.02497863769531,
+      "y0": 547.0399780273438,
+      "x1": 200.33535766601562,
+      "y1": 604.6560668945312
+    }
+  },
+  {
+    "candidate_id": "cand_0041",
+    "sentence_id": "sent_00266",
+    "text": "Board of Directors (‘BoD’)\n8\nDuring the year, the Board engaged in \nvarious updates pertaining to business, \nregulatory, safety, ESG matters, etc.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 11,
+    "section_id": "sec_057",
+    "section_title": "1.\t\nPercentage coverage by training and awareness programmes on any of the Principles during the fin",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 287.5440368652344,
+      "x1": 415.424560546875,
+      "y1": 335.5599670410156
+    }
+  },
+  {
+    "candidate_id": "cand_0042",
+    "sentence_id": "sent_00324",
+    "text": "\u0007100% of our fuel inputs are sourced sustainability.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": false
+    },
+    "page_number": 13,
+    "section_id": "sec_072",
+    "section_title": "b. \t\n\u0007If yes, what percentage of inputs were sourced sustainably?",
+    "bbox": {
+      "x0": 51.041603088378906,
+      "y0": 555.4349975585938,
+      "x1": 277.62109375,
+      "y1": 566.2529907226562
+    }
+  },
+  {
+    "candidate_id": "cand_0043",
+    "sentence_id": "sent_00334",
+    "text": "3.\t\n\u0007Describe the processes in place to safely reclaim your products for reusing, recycling and disposing at the end of life, \nfor (a) Plastics (including packaging) (b) E-waste (c) Hazardous waste and (d) other waste:",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 13,
+    "section_id": "sec_072",
+    "section_title": "b. \t\n\u0007If yes, what percentage of inputs were sourced sustainably?",
+    "bbox": {
+      "x0": 51.041603088378906,
+      "y0": 699.0839233398438,
+      "x1": 546.093994140625,
+      "y1": 722.23193359375
+    }
+  },
+  {
+    "candidate_id": "cand_0044",
+    "sentence_id": "sent_00335",
+    "text": "\u0007Tata Power has robust waste management practices and aims to be Zero Waste to Landfill by 2030.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 13,
+    "section_id": "sec_072",
+    "section_title": "b. \t\n\u0007If yes, what percentage of inputs were sourced sustainably?",
+    "bbox": {
+      "x0": 51.03260040283203,
+      "y0": 726.4169311523438,
+      "x1": 440.80908203125,
+      "y1": 737.2349243164062
+    }
+  },
+  {
+    "candidate_id": "cand_0045",
+    "sentence_id": "sent_00340",
+    "text": "\u0007TPSSL received E-Waste certificate of registration on February 2, 2024.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 14,
+    "section_id": "sec_072",
+    "section_title": "b. \t\n\u0007If yes, what percentage of inputs were sourced sustainably?",
+    "bbox": {
+      "x0": 51.023597717285156,
+      "y0": 174.426025390625,
+      "x1": 546.2015380859375,
+      "y1": 197.24102783203125
+    }
+  },
+  {
+    "candidate_id": "cand_0046",
+    "sentence_id": "sent_00341",
+    "text": "As per E Waste Rules 2022 Chapter 5, PV panels are to be \nstored till 2035,till",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 14,
+    "section_id": "sec_072",
+    "section_title": "b. \t\n\u0007If yes, what percentage of inputs were sourced sustainably?",
+    "bbox": {
+      "x0": 51.023597717285156,
+      "y0": 174.426025390625,
+      "x1": 546.2015380859375,
+      "y1": 197.24102783203125
+    }
+  },
+  {
+    "candidate_id": "cand_0047",
+    "sentence_id": "sent_00351",
+    "text": "3510 \n(35105)\nManufacturing of solar \npanels\n2%\nCradle to Grave\nYes\nNo",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 14,
+    "section_id": "sec_072",
+    "section_title": "b. \t\n\u0007If yes, what percentage of inputs were sourced sustainably?",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 295.9440002441406,
+      "x1": 465.882080078125,
+      "y1": 315.15997314453125
+    }
+  },
+  {
+    "candidate_id": "cand_0048",
+    "sentence_id": "sent_00355",
+    "text": "PV panel waste as per E Waste Rules 2022 Chapter 5 is  to be stored till 2035, till the goverment comes with new guidelines and list of certified \nrecyclers",
+    "score": 0.7,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 14,
+    "section_id": "sec_072",
+    "section_title": "b. \t\n\u0007If yes, what percentage of inputs were sourced sustainably?",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 411.7440185546875,
+      "x1": 542.8184814453125,
+      "y1": 430.96002197265625
+    }
+  },
+  {
+    "candidate_id": "cand_0049",
+    "sentence_id": "sent_00371",
+    "text": "Male\n 20,255 \n 20,255 \n100\n 20,255 \n100\n NA \nNA\n 20,255 \n100\n NA \nNA",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 15,
+    "section_id": "sec_080",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 53.0260009765625,
+      "y0": 245.97207641601562,
+      "x1": 540.0179443359375,
+      "y1": 255.58807373046875
+    }
+  },
+  {
+    "candidate_id": "cand_0050",
+    "sentence_id": "sent_00372",
+    "text": "Female\n 2,117 \n 2,117 \n100\n 2,117 \n100\n 2,117 \n100\n NA \nNA\n NA \nNA",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 15,
+    "section_id": "sec_080",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 53.041961669921875,
+      "y0": 259.3641052246094,
+      "x1": 540.0499877929688,
+      "y1": 268.9801025390625
+    }
+  },
+  {
+    "candidate_id": "cand_0051",
+    "sentence_id": "sent_00373",
+    "text": "Total\n 22,372 \n 22,372 \n100\n 22,372 \n100\n 2,117 \n9\n 20,255 \n91\n NA \nNA",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 15,
+    "section_id": "sec_080",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 53.074005126953125,
+      "y0": 272.3321228027344,
+      "x1": 540.08203125,
+      "y1": 282.380126953125
+    }
+  },
+  {
+    "candidate_id": "cand_0052",
+    "sentence_id": "sent_00374",
+    "text": "Male\n 1,103 \n 1,103 \n100\n 1,103 \n100\n NA \nNA\n 1,103 \n100\n NA \nNA",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 15,
+    "section_id": "sec_081",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 53.10600280761719,
+      "y0": 299.5401916503906,
+      "x1": 540.1139526367188,
+      "y1": 309.15618896484375
+    }
+  },
+  {
+    "candidate_id": "cand_0053",
+    "sentence_id": "sent_00375",
+    "text": "Female\n 177 \n 177 \n100\n 177 \n100\n 177 \n100\n NA \nNA\n NA \nNA",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 15,
+    "section_id": "sec_081",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 53.137969970703125,
+      "y0": 312.9322204589844,
+      "x1": 540.14599609375,
+      "y1": 322.5482177734375
+    }
+  },
+  {
+    "candidate_id": "cand_0054",
+    "sentence_id": "sent_00376",
+    "text": "Total\n 1,280 \n 1,280 \n100\n 1,280 \n100\n 177 \n14\n 1,103 \n86\n NA \nNA",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 15,
+    "section_id": "sec_081",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 53.170013427734375,
+      "y0": 325.90020751953125,
+      "x1": 540.1780395507812,
+      "y1": 335.9482116699219
+    }
+  },
+  {
+    "candidate_id": "cand_0055",
+    "sentence_id": "sent_00382",
+    "text": "Cost incurred on wellbeing measures as a % of total revenue of the company\n0.5%\n0.5%",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 15,
+    "section_id": "sec_087",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.8666000366211,
+      "y0": 570.8689575195312,
+      "x1": 540.7066040039062,
+      "y1": 580.4849853515625
+    }
+  },
+  {
+    "candidate_id": "cand_0056",
+    "sentence_id": "sent_00383",
+    "text": "\u0007We have opted for “proxy” representation of this indicator from our Consolidated Financial Statement (Note – 35 Employee \nBenefit Expense) which is “Staff – Welfare Expense”.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 15,
+    "section_id": "sec_087",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 51.02410125732422,
+      "y0": 588.4320068359375,
+      "x1": 546.2625122070312,
+      "y1": 611.2470092773438
+    }
+  },
+  {
+    "candidate_id": "cand_0057",
+    "sentence_id": "sent_00418",
+    "text": "Male\n100\n100",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 16,
+    "section_id": "sec_091",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 535.4619750976562,
+      "x1": 302.026123046875,
+      "y1": 545.0780029296875
+    }
+  },
+  {
+    "candidate_id": "cand_0058",
+    "sentence_id": "sent_00419",
+    "text": "There are no permanent workers in the Company\nFemale\n29\n100",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 16,
+    "section_id": "sec_091",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.87411499023438,
+      "y0": 548.8539428710938,
+      "x1": 528.1678466796875,
+      "y1": 558.469970703125
+    }
+  },
+  {
+    "candidate_id": "cand_0059",
+    "sentence_id": "sent_00427",
+    "text": "Total Permanent Employees\n 22,372 \n 10,367 \n46\n 21,661 \n 11,181 \n52\nMale\n 20,255 \n 9,881 \n49\n 19,760 \n 10,622 \n54\nFemale\n 2,117 \n 486 \n23\n 1,901 \n 559 \n29\nTotal Permanent Workers\nMale\nThere are no permanent workers in the Company.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 17,
+    "section_id": "sec_095",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 217.0909881591797,
+      "x1": 540.026123046875,
+      "y1": 273.96307373046875
+    }
+  },
+  {
+    "candidate_id": "cand_0060",
+    "sentence_id": "sent_00431",
+    "text": "No. (E)\n% (E/D)\nNo. (F)\n% (F/D)\nEmployees\nMale\n21,358\n 6,979 \n33\n 8,671 \n41\n 20,991 \n 13,567 \n65\n 11,666 \n56\nFemale\n2,294\n 1,029 \n45\n 1,452 \n63\n 2,034 \n 1,191 \n59\n 1,404 \n69\nTotal \n23,652\n8,008\n34\n 10,123 \n43\n 23,025 \n 14,758 \n64\n 13,070 \n57\nWorkers\nMale\n62,827\n 46,193 \n86\n 22,822 \n36\n 47,016 \n 43,833 \n93\n 710 \n2\nFemale\n1,507\n 857 \n57\n 419 \n28\n 1,428 \n 408 \n29\n 88 \n6\nTotal \n64,334\n47,050\n73\n 23,241 \n36\n 48,444 \n 44,241 \n91\n 798 \n2",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 17,
+    "section_id": "sec_096",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86700439453125,
+      "y0": 333.8940734863281,
+      "x1": 540.4349975585938,
+      "y1": 434.072998046875
+    }
+  },
+  {
+    "candidate_id": "cand_0061",
+    "sentence_id": "sent_00436",
+    "text": "Male\n 21,358 \n 21,358 \n100\n 20,991 \n 20,991 \n100",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 17,
+    "section_id": "sec_098",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86799621582031,
+      "y0": 542.9789428710938,
+      "x1": 538.06005859375,
+      "y1": 552.594970703125
+    }
+  },
+  {
+    "candidate_id": "cand_0062",
+    "sentence_id": "sent_00437",
+    "text": "Female\n 2,294 \n 2,294 \n100\n 2,034 \n 2,034 \n100",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 17,
+    "section_id": "sec_098",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.8680419921875,
+      "y0": 556.3709716796875,
+      "x1": 538.06005859375,
+      "y1": 565.9869995117188
+    }
+  },
+  {
+    "candidate_id": "cand_0063",
+    "sentence_id": "sent_00438",
+    "text": "Total \n 23,652 \n 23,652 \n100\n 23,025 \n 23,025 \n100",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 17,
+    "section_id": "sec_098",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.8680419921875,
+      "y0": 569.3390502929688,
+      "x1": 538.0599975585938,
+      "y1": 579.3870239257812
+    }
+  },
+  {
+    "candidate_id": "cand_0064",
+    "sentence_id": "sent_00447",
+    "text": "\u0007In FY 24, we continue to enhance our Tata Power Safety Management System (TPSMS) by integrating innovative safety \ntechnologies and methodologies.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 18,
+    "section_id": "sec_101",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 51.02360534667969,
+      "y0": 144.09600830078125,
+      "x1": 546.1797485351562,
+      "y1": 179.24102783203125
+    }
+  },
+  {
+    "candidate_id": "cand_0065",
+    "sentence_id": "sent_00468",
+    "text": "Lost Time Injury Frequency Rate (LTIFR) (per one million-person hours worked) Employees\n 0.06 \n 0.26",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 18,
+    "section_id": "sec_102",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 590.6690063476562,
+      "x1": 541.6180419921875,
+      "y1": 600.2850341796875
+    }
+  },
+  {
+    "candidate_id": "cand_0066",
+    "sentence_id": "sent_00469",
+    "text": "Workers\n 0.31 \n 0.92",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 18,
+    "section_id": "sec_102",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 336.49005126953125,
+      "y0": 604.0609741210938,
+      "x1": 541.6180419921875,
+      "y1": 613.677001953125
+    }
+  },
+  {
+    "candidate_id": "cand_0067",
+    "sentence_id": "sent_00470",
+    "text": "Total recordable work-related injuries\nEmployees\n 3 \n 10",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 18,
+    "section_id": "sec_102",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.87405395507812,
+      "y0": 617.4530029296875,
+      "x1": 541.6260375976562,
+      "y1": 627.0690307617188
+    }
+  },
+  {
+    "candidate_id": "cand_0068",
+    "sentence_id": "sent_00471",
+    "text": "Workers\n 87 \n 127",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 18,
+    "section_id": "sec_102",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 336.498046875,
+      "y0": 630.844970703125,
+      "x1": 541.6260375976562,
+      "y1": 640.4609985351562
+    }
+  },
+  {
+    "candidate_id": "cand_0069",
+    "sentence_id": "sent_00472",
+    "text": "No. of fatalities\nEmployees\nNil\n 2",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 18,
+    "section_id": "sec_102",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.88204956054688,
+      "y0": 644.2369995117188,
+      "x1": 541.634033203125,
+      "y1": 653.85302734375
+    }
+  },
+  {
+    "candidate_id": "cand_0070",
+    "sentence_id": "sent_00473",
+    "text": "Workers\n 18 \n 19",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 18,
+    "section_id": "sec_102",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 336.5140686035156,
+      "y0": 657.6289672851562,
+      "x1": 541.6420288085938,
+      "y1": 667.2449951171875
+    }
+  },
+  {
+    "candidate_id": "cand_0071",
+    "sentence_id": "sent_00474",
+    "text": "High consequence work-related injury or ill-health (excluding fatalities)\nEmployees\n 3 \n 7",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 18,
+    "section_id": "sec_102",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.89804077148438,
+      "y0": 671.02099609375,
+      "x1": 541.6500244140625,
+      "y1": 680.6370239257812
+    }
+  },
+  {
+    "candidate_id": "cand_0072",
+    "sentence_id": "sent_00475",
+    "text": "Workers\n 46 \n 81",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 18,
+    "section_id": "sec_102",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 336.5300598144531,
+      "y0": 684.4129638671875,
+      "x1": 541.6580200195312,
+      "y1": 694.0289916992188
+    }
+  },
+  {
+    "candidate_id": "cand_0073",
+    "sentence_id": "sent_00477",
+    "text": "As per requirement of BRSR Core, there were 2 Permanent Disabilities in FY24.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 18,
+    "section_id": "sec_102",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 51.023597717285156,
+      "y0": 717.4349975585938,
+      "x1": 364.5673522949219,
+      "y1": 728.2529907226562
+    }
+  },
+  {
+    "candidate_id": "cand_0074",
+    "sentence_id": "sent_00478",
+    "text": "1.\t\n\u0007Corrective Action Preventive Actions (CAPA) from previous incidents are deployed horizontally across divisions, with \nmonthly tracking.",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 19,
+    "section_id": "sec_104",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 51.023597717285156,
+      "y0": 129.43499755859375,
+      "x1": 546.15771484375,
+      "y1": 152.25
+    }
+  },
+  {
+    "candidate_id": "cand_0075",
+    "sentence_id": "sent_00479",
+    "text": "2.\t\nBehaviour-based safety trainings and felt leadership programs are ongoing.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 19,
+    "section_id": "sec_104",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 51.0325927734375,
+      "y0": 156.43499755859375,
+      "x1": 375.0739440917969,
+      "y1": 167.25299072265625
+    }
+  },
+  {
+    "candidate_id": "cand_0076",
+    "sentence_id": "sent_00480",
+    "text": "3.\t\nHazard identification, Risk Assessment, and Management follow established procedures.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 19,
+    "section_id": "sec_104",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 51.041595458984375,
+      "y0": 171.43798828125,
+      "x1": 423.3616638183594,
+      "y1": 182.2559814453125
+    }
+  },
+  {
+    "candidate_id": "cand_0077",
+    "sentence_id": "sent_00481",
+    "text": "4.\t\nHierarchy of controls ensures risk control measures are applied, and Control Plans are deployed before job execution.",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 19,
+    "section_id": "sec_104",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 51.05059814453125,
+      "y0": 186.44097900390625,
+      "x1": 529.9358520507812,
+      "y1": 197.25897216796875
+    }
+  },
+  {
+    "candidate_id": "cand_0078",
+    "sentence_id": "sent_00482",
+    "text": "5.\t\nSafety Committees review resource adequacy and support safety management system deployment.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 19,
+    "section_id": "sec_104",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 51.059600830078125,
+      "y0": 201.4439697265625,
+      "x1": 467.92706298828125,
+      "y1": 212.261962890625
+    }
+  },
+  {
+    "candidate_id": "cand_0079",
+    "sentence_id": "sent_00483",
+    "text": "6.\t\nSafe and Healthy system of work is maintained through periodic safety audits and inspections across sites",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 19,
+    "section_id": "sec_104",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 51.068603515625,
+      "y0": 216.44696044921875,
+      "x1": 487.4882507324219,
+      "y1": 227.26495361328125
+    }
+  },
+  {
+    "candidate_id": "cand_0080",
+    "sentence_id": "sent_00486",
+    "text": "Health & Safety\n 1,82,636 \n 2,509 \nThere are no \ncomplaints, just \nobservations \nthat are done \nproactively, so that \nthey can be closed \ntimely",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 19,
+    "section_id": "sec_105",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86614990234375,
+      "y0": 302.3790588378906,
+      "x1": 352.7862243652344,
+      "y1": 369.59503173828125
+    }
+  },
+  {
+    "candidate_id": "cand_0081",
+    "sentence_id": "sent_00487",
+    "text": "189,813 \n 3,416 \nThere are no \ncomplaints, \njust \nobservations \nthat are done \nproactively, \nso that they \ncan be closed \ntimely",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 19,
+    "section_id": "sec_105",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 389.73016357421875,
+      "y0": 302.3790588378906,
+      "x1": 543.1142578125,
+      "y1": 388.7950439453125
+    }
+  },
+  {
+    "candidate_id": "cand_0082",
+    "sentence_id": "sent_00601",
+    "text": "Permanent\n 22,372 \n 8,084 \n36\n 21,661 \n 3,771 \n17",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 23,
+    "section_id": "sec_122",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86300659179688,
+      "y0": 334.17901611328125,
+      "x1": 534.718994140625,
+      "y1": 343.7950134277344
+    }
+  },
+  {
+    "candidate_id": "cand_0083",
+    "sentence_id": "sent_00602",
+    "text": "Other than permanent\n 1,280 \n 974 \n76\n 1,364 \n 196 \n14",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 23,
+    "section_id": "sec_122",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86297607421875,
+      "y0": 347.5710144042969,
+      "x1": 534.718994140625,
+      "y1": 357.18701171875
+    }
+  },
+  {
+    "candidate_id": "cand_0084",
+    "sentence_id": "sent_00603",
+    "text": "Total Employees\n 23,652 \n 9,058 \n38\n 23,025 \n 3,967 \n17",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 23,
+    "section_id": "sec_122",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86297607421875,
+      "y0": 360.53900146484375,
+      "x1": 534.7109375,
+      "y1": 370.5870056152344
+    }
+  },
+  {
+    "candidate_id": "cand_0085",
+    "sentence_id": "sent_00611",
+    "text": "Permanent\n 22,372 \nNil\n NA \n 22,372 \n100\n 21,661 \n Nil \n NA \n 21,661 \n100",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 23,
+    "section_id": "sec_125",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.86698913574219,
+      "y0": 516.4550170898438,
+      "x1": 539.9949951171875,
+      "y1": 526.5029907226562
+    }
+  },
+  {
+    "candidate_id": "cand_0086",
+    "sentence_id": "sent_00612",
+    "text": "Male\n 20,255 \n Nil \n NA \n 20,255 \n100\n 19,760 \n Nil \n NA \n 19,760 \n100",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 23,
+    "section_id": "sec_125",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.85903930664062,
+      "y0": 530.27099609375,
+      "x1": 539.987060546875,
+      "y1": 539.8870239257812
+    }
+  },
+  {
+    "candidate_id": "cand_0087",
+    "sentence_id": "sent_00613",
+    "text": "Female\n 2,117 \n Nil \n NA \n 2,117 \n100\n 1,901 \n Nil \n NA \n 1,901 \n100",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 23,
+    "section_id": "sec_125",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.85104370117188,
+      "y0": 543.6630249023438,
+      "x1": 539.9791259765625,
+      "y1": 553.279052734375
+    }
+  },
+  {
+    "candidate_id": "cand_0088",
+    "sentence_id": "sent_00614",
+    "text": "1,280 \n Nil \n NA \n 1,280 \n100\n 1,364 \n Nil \n NA \n 1,364 \n100",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 23,
+    "section_id": "sec_125",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 131.4191131591797,
+      "y0": 556.6310424804688,
+      "x1": 539.9710083007812,
+      "y1": 566.6790161132812
+    }
+  },
+  {
+    "candidate_id": "cand_0089",
+    "sentence_id": "sent_00652",
+    "text": "Sexual Harassment\n 3\nNil\nNA\n 3 \nNil\nNA",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 25,
+    "section_id": "sec_135",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.8666000366211,
+      "y0": 189.56900024414062,
+      "x1": 502.0105895996094,
+      "y1": 199.18499755859375
+    }
+  },
+  {
+    "candidate_id": "cand_0090",
+    "sentence_id": "sent_00653",
+    "text": "Discrimination at workplace\n9\nNil\nThis includes concern raised in \nrelation to employee transfer, \npromotion not received",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 25,
+    "section_id": "sec_135",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 72.8665771484375,
+      "y0": 206.07302856445312,
+      "x1": 360.22589111328125,
+      "y1": 234.88897705078125
+    }
+  },
+  {
+    "candidate_id": "cand_0091",
+    "sentence_id": "sent_00654",
+    "text": "5 \nNil\nThis includes concerns \nraised in relation to PMS \nrating, promotion not \nreceived, employee ward \nnot assessed properly  \nin exam.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 25,
+    "section_id": "sec_135",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 397.01055908203125,
+      "y0": 206.07296752929688,
+      "x1": 540.2098388671875,
+      "y1": 263.6888427734375
+    }
+  },
+  {
+    "candidate_id": "cand_0092",
+    "sentence_id": "sent_00676",
+    "text": "1. \t\n\u0007Onboarding/ selection - Applicable certificates, Labour Laws compliance including statutory requirements such as child \nlabour, forced and compulsory labour are asked during on-boarding of suppliers",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 25,
+    "section_id": "sec_138",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 51.02369689941406,
+      "y0": 723.4080200195312,
+      "x1": 546.212646484375,
+      "y1": 746.2230224609375
+    }
+  },
+  {
+    "candidate_id": "cand_0093",
+    "sentence_id": "sent_00688",
+    "text": "\u0007as a dipstick from a readiness perspective with specific reference and comparison as per requirements of voluntary and global \nstandard Social Accountability 8000 (SA 8000).",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 26,
+    "section_id": "sec_143",
+    "section_title": "Social Initiatives",
+    "bbox": {
+      "x0": 51.02360534667969,
+      "y0": 426.42901611328125,
+      "x1": 546.20166015625,
+      "y1": 473.238037109375
+    }
+  },
+  {
+    "candidate_id": "cand_0094",
+    "sentence_id": "sent_00705",
+    "text": "Parameter\nFY 24\nFY 23",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_149",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 186.05801391601562,
+      "x1": 539.9949340820312,
+      "y1": 194.8500213623047
+    }
+  },
+  {
+    "candidate_id": "cand_0095",
+    "sentence_id": "sent_00713",
+    "text": "0.000821 \n 0.000730",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_155",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 439.8900146484375,
+      "y0": 346.1812438964844,
+      "x1": 541.697998046875,
+      "y1": 355.7972412109375
+    }
+  },
+  {
+    "candidate_id": "cand_0096",
+    "sentence_id": "sent_00714",
+    "text": "0.000227 \n 0.000212",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_156",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 439.8899841308594,
+      "y0": 369.1732482910156,
+      "x1": 541.697998046875,
+      "y1": 378.78924560546875
+    }
+  },
+  {
+    "candidate_id": "cand_0097",
+    "sentence_id": "sent_00715",
+    "text": "0.00795\n0.00784",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 445.69000244140625,
+      "y0": 392.1652526855469,
+      "x1": 540.0020141601562,
+      "y1": 401.78125
+    }
+  },
+  {
+    "candidate_id": "cand_0098",
+    "sentence_id": "sent_00719",
+    "text": "2.\t\n\u0007Does the entity have any sites / facilities identified as designated consumers (DCs) under the Performance, Achieve and \nTrade (PAT) Scheme of the Government of India?",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.023597717285156,
+      "y0": 465.0989990234375,
+      "x1": 546.1166381835938,
+      "y1": 500.2440185546875
+    }
+  },
+  {
+    "candidate_id": "cand_0099",
+    "sentence_id": "sent_00722",
+    "text": "\u0007Yes, all thermal operating divisions of Tata Power were part of PAT cycle II (2016-17 to 2018-19) notified on March 31, 2016 and \naims to achieve an overall energy consumption reduction of 8.869 Millions of tonnes of oil equivalent (Mtoe).",
+    "score": 1.0,
+    "features": {
+      "has_number": true,
+      "has_unit": true,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.023597717285156,
+      "y0": 507.426025390625,
+      "x1": 546.1836547851562,
+      "y1": 542.238037109375
+    }
+  },
+  {
+    "candidate_id": "cand_0100",
+    "sentence_id": "sent_00724",
+    "text": "Cluster\nPAT Cycle\nDivisions\nNotified Target \n(Kcal/kwh) (FY15)\nAchieved (Kcal/\nkwh) (FY19)",
+    "score": 0.5,
+    "features": {
+      "has_number": false,
+      "has_unit": true,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 551.9330444335938,
+      "x1": 522.0807495117188,
+      "y1": 569.1250610351562
+    }
+  },
+  {
+    "candidate_id": "cand_0101",
+    "sentence_id": "sent_00727",
+    "text": "II\n(2016-17 to \n2018-19)",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 122.18609619140625,
+      "y0": 623.927978515625,
+      "x1": 161.9213104248047,
+      "y1": 652.7440185546875
+    }
+  },
+  {
+    "candidate_id": "cand_0102",
+    "sentence_id": "sent_00728",
+    "text": "Mundra\n 2,256 \n 2257 \n(Normalized) \nUnit 30 and 50 HP Heaters replacement along \nwith installation of Variable Frequency Drive \nin Condensate Extraction pump variable was \nplanned and commissioned.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.21009826660156,
+      "y0": 573.1439819335938,
+      "x1": 531.5518188476562,
+      "y1": 611.56005859375
+    }
+  },
+  {
+    "candidate_id": "cand_0103",
+    "sentence_id": "sent_00729",
+    "text": "Maithon\n 2,460 \n 2,445 Better than Notified Target",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.20211791992188,
+      "y0": 615.3359985351562,
+      "x1": 466.80938720703125,
+      "y1": 624.9520263671875
+    }
+  },
+  {
+    "candidate_id": "cand_0104",
+    "sentence_id": "sent_00730",
+    "text": "Trombay (Coal, Oil \nand Gas)\n 2,652 \n 2,566 Better than Notified Target",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.194091796875,
+      "y0": 628.72802734375,
+      "x1": 466.8013916015625,
+      "y1": 647.944091796875
+    }
+  },
+  {
+    "candidate_id": "cand_0105",
+    "sentence_id": "sent_00731",
+    "text": "Trombay (Gas)\n 2,006 \n 2,047 This was not achieved due to lower Plant load \nfactor in view of low APM gas availability.",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.18609619140625,
+      "y0": 651.7200317382812,
+      "x1": 538.159912109375,
+      "y1": 690.1361083984375
+    }
+  },
+  {
+    "candidate_id": "cand_0106",
+    "sentence_id": "sent_00733",
+    "text": "Jojobera\n 2,839 \n 2,836 Better than Notified Target",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 27,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.1781005859375,
+      "y0": 693.9120483398438,
+      "x1": 466.785400390625,
+      "y1": 703.528076171875
+    }
+  },
+  {
+    "candidate_id": "cand_0107",
+    "sentence_id": "sent_00737",
+    "text": "VII \n(2022-23 to \n2024-25)",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 122.18609619140625,
+      "y0": 162.11398315429688,
+      "x1": 161.9213104248047,
+      "y1": 190.929931640625
+    }
+  },
+  {
+    "candidate_id": "cand_0108",
+    "sentence_id": "sent_00738",
+    "text": "Coastal Gujarat Power Limited\n2,272 \n2,253",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.21009826660156,
+      "y0": 144.92996215820312,
+      "x1": 541.6980590820312,
+      "y1": 154.54595947265625
+    }
+  },
+  {
+    "candidate_id": "cand_0109",
+    "sentence_id": "sent_00739",
+    "text": "Maithon Right Bank Thermal Power Plant\n2,480 \n2,469",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.21005249023438,
+      "y0": 158.32199096679688,
+      "x1": 541.6980590820312,
+      "y1": 167.93798828125
+    }
+  },
+  {
+    "candidate_id": "cand_0110",
+    "sentence_id": "sent_00741",
+    "text": "(TATA Power Company)\n2,580 \n2,569",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.21005249023438,
+      "y0": 171.71401977539062,
+      "x1": 541.6980590820312,
+      "y1": 181.33001708984375
+    }
+  },
+  {
+    "candidate_id": "cand_0111",
+    "sentence_id": "sent_00742",
+    "text": "Trombay Combined Cycle Power Plant (TATA Power Company)\n2,055 \n2,039",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.21005249023438,
+      "y0": 185.10604858398438,
+      "x1": 541.6980590820312,
+      "y1": 194.7220458984375
+    }
+  },
+  {
+    "candidate_id": "cand_0112",
+    "sentence_id": "sent_00743",
+    "text": "Jojobera Power Plant (TATA Power Co)\n2,856 \n2,817",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.21005249023438,
+      "y0": 198.49807739257812,
+      "x1": 541.6980590820312,
+      "y1": 208.11407470703125
+    }
+  },
+  {
+    "candidate_id": "cand_0113",
+    "sentence_id": "sent_00746",
+    "text": "Discoms\nVII \n(2022-23 to \n2024-25)",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 278.4170227050781,
+      "x1": 161.9213104248047,
+      "y1": 307.23297119140625
+    }
+  },
+  {
+    "candidate_id": "cand_0114",
+    "sentence_id": "sent_00747",
+    "text": "Tata Power Company Limited - Mumbai Distribution\n0.19\n0.19",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.21009826660156,
+      "y0": 254.53695678710938,
+      "x1": 540.0020751953125,
+      "y1": 264.1529541015625
+    }
+  },
+  {
+    "candidate_id": "cand_0115",
+    "sentence_id": "sent_00748",
+    "text": "Tata Power Delhi Distribution Limited (TPDDL)\n6.83\n6.83",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.21804809570312,
+      "y0": 267.9289855957031,
+      "x1": 540.0100708007812,
+      "y1": 277.54498291015625
+    }
+  },
+  {
+    "candidate_id": "cand_0116",
+    "sentence_id": "sent_00749",
+    "text": "Tata Power Northern Odisha Distribution Limited (TPNODL)\n18.74\n17.60",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.22604370117188,
+      "y0": 281.3210144042969,
+      "x1": 540.01806640625,
+      "y1": 290.93701171875
+    }
+  },
+  {
+    "candidate_id": "cand_0117",
+    "sentence_id": "sent_00750",
+    "text": "Tata Power Central Odisha Distribution Limited (TPCODL)\n28.15\n25.59",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.22604370117188,
+      "y0": 294.7130432128906,
+      "x1": 540.01806640625,
+      "y1": 304.32904052734375
+    }
+  },
+  {
+    "candidate_id": "cand_0118",
+    "sentence_id": "sent_00751",
+    "text": "Tata Power Western Odisha Distribution Limited (TPWODL)\n21.14\n19.70",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.22604370117188,
+      "y0": 308.1050720214844,
+      "x1": 540.01806640625,
+      "y1": 317.7210693359375
+    }
+  },
+  {
+    "candidate_id": "cand_0119",
+    "sentence_id": "sent_00752",
+    "text": "Tata Power Southern Odisha Distribution Limited (TPSODL)\n29.76\n26.90",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 173.22604370117188,
+      "y0": 321.4971008300781,
+      "x1": 540.01806640625,
+      "y1": 331.11309814453125
+    }
+  },
+  {
+    "candidate_id": "cand_0120",
+    "sentence_id": "sent_00753",
+    "text": "\u0007The fourth cycle of PAT was notified on March 28, 2018.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 342.4320068359375,
+      "x1": 546.1648559570312,
+      "y1": 389.24102783203125
+    }
+  },
+  {
+    "candidate_id": "cand_0121",
+    "sentence_id": "sent_00754",
+    "text": "A total of 106 DCs with a total reduction target of 0.6998 MTOE were \nnotified under PAT cycle -IV.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 342.4320068359375,
+      "x1": 546.1648559570312,
+      "y1": 389.24102783203125
+    }
+  },
+  {
+    "candidate_id": "cand_0122",
+    "sentence_id": "sent_00755",
+    "text": "These DCs were from 8 sectors consisting of 6 existing sectors of PAT cycle -I and two new sectors \nnamely Petrochemicals and Commercial Buildings (Hotels).",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 342.4320068359375,
+      "x1": 546.1648559570312,
+      "y1": 389.24102783203125
+    }
+  },
+  {
+    "candidate_id": "cand_0123",
+    "sentence_id": "sent_00756",
+    "text": "One of our operating thermal plant comes under PAT cycle 4, details \nof which are as given below",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 342.4320068359375,
+      "x1": 546.1648559570312,
+      "y1": 389.24102783203125
+    }
+  },
+  {
+    "candidate_id": "cand_0124",
+    "sentence_id": "sent_00759",
+    "text": "Achieved (Kcal/kwh) \n(FY21)\nRemedial Action in case \ntarget not achieved",
+    "score": 0.5,
+    "features": {
+      "has_number": false,
+      "has_unit": true,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 378.55609130859375,
+      "y0": 403.13299560546875,
+      "x1": 540.3106079101562,
+      "y1": 420.3249816894531
+    }
+  },
+  {
+    "candidate_id": "cand_0125",
+    "sentence_id": "sent_00760",
+    "text": "Conventional \nGeneration\nIV (2018-19 to \n2020-21)",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 428.54400634765625,
+      "x1": 232.34527587890625,
+      "y1": 457.3600158691406
+    }
+  },
+  {
+    "candidate_id": "cand_0126",
+    "sentence_id": "sent_00762",
+    "text": "2,669\n2,588\n2,530\nBetter than Notified \nTarget",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_157",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 286.194091796875,
+      "y0": 428.54400634765625,
+      "x1": 528.8101196289062,
+      "y1": 447.760009765625
+    }
+  },
+  {
+    "candidate_id": "cand_0127",
+    "sentence_id": "sent_00764",
+    "text": "(i) Surface water\n1,29,32,02,788\n1,28,68,42,000",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_159",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 515.260986328125,
+      "x1": 540.0021362304688,
+      "y1": 524.8770141601562
+    }
+  },
+  {
+    "candidate_id": "cand_0128",
+    "sentence_id": "sent_00765",
+    "text": "(ii) Groundwater\n27,724\n66,000",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_159",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.8660888671875,
+      "y0": 528.6530151367188,
+      "x1": 540.0021362304688,
+      "y1": 538.26904296875
+    }
+  },
+  {
+    "candidate_id": "cand_0129",
+    "sentence_id": "sent_00766",
+    "text": "(iii) Third party water\n2,55,26,049\n1,47,68,000",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_159",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86611938476562,
+      "y0": 542.0449829101562,
+      "x1": 540.0021362304688,
+      "y1": 551.6610107421875
+    }
+  },
+  {
+    "candidate_id": "cand_0130",
+    "sentence_id": "sent_00767",
+    "text": "(iv) Seawater / desalinated water\n4,78,70,14,545\n3,26,58,08,000",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_159",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.8660888671875,
+      "y0": 555.4369506835938,
+      "x1": 540.0021362304688,
+      "y1": 565.052978515625
+    }
+  },
+  {
+    "candidate_id": "cand_0131",
+    "sentence_id": "sent_00769",
+    "text": "0.000520\n0.000472",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_161",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 437.61810302734375,
+      "y0": 608.5809936523438,
+      "x1": 540.0020141601562,
+      "y1": 618.6289672851562
+    }
+  },
+  {
+    "candidate_id": "cand_0132",
+    "sentence_id": "sent_00770",
+    "text": "0.000144\n0.000137",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_162",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 437.61810302734375,
+      "y0": 631.5730590820312,
+      "x1": 540.0020141601562,
+      "y1": 641.6210327148438
+    }
+  },
+  {
+    "candidate_id": "cand_0133",
+    "sentence_id": "sent_00771",
+    "text": "0.005036\n0.005070",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_163",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 437.61810302734375,
+      "y0": 654.5650024414062,
+      "x1": 540.0020141601562,
+      "y1": 664.6129760742188
+    }
+  },
+  {
+    "candidate_id": "cand_0134",
+    "sentence_id": "sent_00773",
+    "text": "Please refer Independent \nAssurance Statement (Pages 581-588) for detailed representation.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 28,
+    "section_id": "sec_164",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 684.4320068359375,
+      "x1": 546.152099609375,
+      "y1": 707.2470092773438
+    }
+  },
+  {
+    "candidate_id": "cand_0135",
+    "sentence_id": "sent_00775",
+    "text": "To Surface water\n1,24,89,82,509\n1,23,19,41,000",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_167",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 160.83702087402344,
+      "x1": 540.0020141601562,
+      "y1": 170.885009765625
+    }
+  },
+  {
+    "candidate_id": "cand_0136",
+    "sentence_id": "sent_00776",
+    "text": "No treatment*\n1,24,89,82,509\n1,23,19,41,000",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_167",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.8660888671875,
+      "y0": 174.65304565429688,
+      "x1": 540.0021362304688,
+      "y1": 184.26904296875
+    }
+  },
+  {
+    "candidate_id": "cand_0137",
+    "sentence_id": "sent_00781",
+    "text": "To Seawater\n4,53,60,99,593\n3,07,11,07,000",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_167",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.8660888671875,
+      "y0": 241.18919372558594,
+      "x1": 540.0020141601562,
+      "y1": 251.2371826171875
+    }
+  },
+  {
+    "candidate_id": "cand_0138",
+    "sentence_id": "sent_00782",
+    "text": "No treatment**\n4,53,60,86,788\n3,07,11,07,000",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_167",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.8660888671875,
+      "y0": 255.00521850585938,
+      "x1": 540.0021362304688,
+      "y1": 264.6212158203125
+    }
+  },
+  {
+    "candidate_id": "cand_0139",
+    "sentence_id": "sent_00783",
+    "text": "Primary Treatment - Neutralization\n12,805\n-",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_167",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.8660888671875,
+      "y0": 268.3972473144531,
+      "x1": 540.0020751953125,
+      "y1": 278.01324462890625
+    }
+  },
+  {
+    "candidate_id": "cand_0140",
+    "sentence_id": "sent_00784",
+    "text": "(iv) \t Sent to third-parties\n6,07,889\n-",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_167",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.8660888671875,
+      "y0": 281.3652648925781,
+      "x1": 540.0020751953125,
+      "y1": 291.41326904296875
+    }
+  },
+  {
+    "candidate_id": "cand_0141",
+    "sentence_id": "sent_00786",
+    "text": "Primary treatment\n6,07,889\n-",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_167",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.8660888671875,
+      "y0": 308.5733337402344,
+      "x1": 540.0020751953125,
+      "y1": 318.1893310546875
+    }
+  },
+  {
+    "candidate_id": "cand_0142",
+    "sentence_id": "sent_00791",
+    "text": "Please refer Independent \nAssurance Statement (Pages 581-588) for detailed representation.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_168",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 381.4320068359375,
+      "x1": 546.152099609375,
+      "y1": 404.24700927734375
+    }
+  },
+  {
+    "candidate_id": "cand_0143",
+    "sentence_id": "sent_00800",
+    "text": "80,677\n56,218",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_170",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 449.7861022949219,
+      "y0": 582.8689575195312,
+      "x1": 539.994140625,
+      "y1": 592.4849853515625
+    }
+  },
+  {
+    "candidate_id": "cand_0144",
+    "sentence_id": "sent_00801",
+    "text": "SOx\n1,63,954\n1,10,962",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_170",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.85812377929688,
+      "y0": 596.260986328125,
+      "x1": 539.994140625,
+      "y1": 605.8770141601562
+    }
+  },
+  {
+    "candidate_id": "cand_0145",
+    "sentence_id": "sent_00802",
+    "text": "Particulate matter (PM)\n6,908\n5,603",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_170",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.85809326171875,
+      "y0": 609.6530151367188,
+      "x1": 539.994140625,
+      "y1": 619.26904296875
+    }
+  },
+  {
+    "candidate_id": "cand_0146",
+    "sentence_id": "sent_00808",
+    "text": "Please refer Independent \nAssurance Statement (Pages 581-588) for detailed representation",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 29,
+    "section_id": "sec_170",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 681.4320068359375,
+      "x1": 546.152099609375,
+      "y1": 704.2470092773438
+    }
+  },
+  {
+    "candidate_id": "cand_0147",
+    "sentence_id": "sent_00810",
+    "text": "Total Scope 1 emissions (Break-up of the GHG into CO2, CH4, N2O, \nHFCs, PFCs, SF6, NF3, if available)",
+    "score": 0.8,
+    "features": {
+      "has_number": true,
+      "has_unit": true,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_171",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86500549316406,
+      "y0": 151.3550262451172,
+      "x1": 375.9630126953125,
+      "y1": 172.93099975585938
+    }
+  },
+  {
+    "candidate_id": "cand_0148",
+    "sentence_id": "sent_00812",
+    "text": "3,86,71,851\n   2,83,12,137",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_171",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 434.0190124511719,
+      "y0": 151.65103149414062,
+      "x1": 541.5470581054688,
+      "y1": 161.26702880859375
+    }
+  },
+  {
+    "candidate_id": "cand_0149",
+    "sentence_id": "sent_00813",
+    "text": "Total Scope 2 emissions (Break-up of the GHG into CO2, CH4, N2O, \nHFCs, PFCs, SF6, NF3, if available)",
+    "score": 0.8,
+    "features": {
+      "has_number": true,
+      "has_unit": true,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_171",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86500549316406,
+      "y0": 174.34703063964844,
+      "x1": 377.6590270996094,
+      "y1": 195.92300415039062
+    }
+  },
+  {
+    "candidate_id": "cand_0150",
+    "sentence_id": "sent_00815",
+    "text": "28,86,646\n23,62,899",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_171",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 439.77899169921875,
+      "y0": 174.64303588867188,
+      "x1": 539.8510131835938,
+      "y1": 184.259033203125
+    }
+  },
+  {
+    "candidate_id": "cand_0151",
+    "sentence_id": "sent_00817",
+    "text": "0.0000675\n 0.0000547",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_171",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 432.88299560546875,
+      "y0": 197.21104431152344,
+      "x1": 541.4349365234375,
+      "y1": 207.259033203125
+    }
+  },
+  {
+    "candidate_id": "cand_0152",
+    "sentence_id": "sent_00818",
+    "text": "Total Scope 1 and Scope 2 emission intensity per rupee of \nturnover adjusted for Purchasing Power Parity (PPP) (Total Scope \n1 and Scope 2 GHG emissions / Revenue from operations adjusted \nfor PPP)",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_172",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86700439453125,
+      "y0": 229.93101501464844,
+      "x1": 301.91259765625,
+      "y1": 268.6429443359375
+    }
+  },
+  {
+    "candidate_id": "cand_0153",
+    "sentence_id": "sent_00820",
+    "text": "0.0000186 \n 0.0000159",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_172",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 431.29901123046875,
+      "y0": 229.8030242919922,
+      "x1": 541.4349365234375,
+      "y1": 239.85101318359375
+    }
+  },
+  {
+    "candidate_id": "cand_0154",
+    "sentence_id": "sent_00821",
+    "text": "Total Scope 1 and Scope 2 emission intensity in terms of physical \noutput \n(Total Scope 1 and Scope 2 GHG emissions / Total Power Generation \nUnits (kWh))",
+    "score": 0.8,
+    "features": {
+      "has_number": true,
+      "has_unit": true,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_172",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86700439453125,
+      "y0": 272.123046875,
+      "x1": 302.65582275390625,
+      "y1": 310.8349609375
+    }
+  },
+  {
+    "candidate_id": "cand_0155",
+    "sentence_id": "sent_00823",
+    "text": "0.0006539\n 0.0005881",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_172",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 432.88299560546875,
+      "y0": 271.9950256347656,
+      "x1": 541.4349365234375,
+      "y1": 282.04302978515625
+    }
+  },
+  {
+    "candidate_id": "cand_0156",
+    "sentence_id": "sent_00825",
+    "text": "Please refer Independent \nAssurance Statement (Pages 581-588) for detailed representation",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_172",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 321.4320068359375,
+      "x1": 546.152099609375,
+      "y1": 344.24700927734375
+    }
+  },
+  {
+    "candidate_id": "cand_0157",
+    "sentence_id": "sent_00827",
+    "text": "\u0007Tata Power is committed to climate action and to create a positive impact for the community and environment in which it \noperates.",
+    "score": 0.4,
+    "features": {
+      "has_number": false,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 30,
+    "section_id": "sec_173",
+    "section_title": "8.\t\nDoes the entity have any project related to reducing Green House Gas emission? If Yes, then prov",
+    "bbox": {
+      "x0": 51.023597717285156,
+      "y0": 387.4320068359375,
+      "x1": 546.1119384765625,
+      "y1": 422.2440185546875
+    }
+  },
+  {
+    "candidate_id": "cand_0158",
+    "sentence_id": "sent_00828",
+    "text": "The Company is India’s first power utility to publicly pledge to Net Zero before 2045.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 30,
+    "section_id": "sec_173",
+    "section_title": "8.\t\nDoes the entity have any project related to reducing Green House Gas emission? If Yes, then prov",
+    "bbox": {
+      "x0": 51.023597717285156,
+      "y0": 387.4320068359375,
+      "x1": 546.1119384765625,
+      "y1": 422.2440185546875
+    }
+  },
+  {
+    "candidate_id": "cand_0159",
+    "sentence_id": "sent_00830",
+    "text": "\u0007This includes transitioning away from thermal power plants and ramping up renewables and other forms of clean energy, \ninvestments in improvement measures and operational efficiency technology for Station Heat Rate and Auxiliary Power \nConsumption to reduce GHG emissions.",
+    "score": 0.4,
+    "features": {
+      "has_number": false,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 30,
+    "section_id": "sec_173",
+    "section_title": "8.\t\nDoes the entity have any project related to reducing Green House Gas emission? If Yes, then prov",
+    "bbox": {
+      "x0": 51.023597717285156,
+      "y0": 429.426025390625,
+      "x1": 546.20263671875,
+      "y1": 464.238037109375
+    }
+  },
+  {
+    "candidate_id": "cand_0160",
+    "sentence_id": "sent_00832",
+    "text": "Parameter\nFY 24\nFY 23",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_174",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 510.0580139160156,
+      "x1": 539.9949340820312,
+      "y1": 518.8500366210938
+    }
+  },
+  {
+    "candidate_id": "cand_0161",
+    "sentence_id": "sent_00835",
+    "text": "(G)\n 293 \n 350 \nOther Non-hazardous waste generated (H).",
+    "score": 0.8,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_181",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.8660888671875,
+      "y0": 613.1920166015625,
+      "x1": 541.6980590820312,
+      "y1": 644.0960083007812
+    }
+  },
+  {
+    "candidate_id": "cand_0162",
+    "sentence_id": "sent_00838",
+    "text": "67,27,744\n59,63,380",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_181",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 439.9300842285156,
+      "y0": 624.8799438476562,
+      "x1": 540.0021362304688,
+      "y1": 634.4959716796875
+    }
+  },
+  {
+    "candidate_id": "cand_0163",
+    "sentence_id": "sent_00839",
+    "text": "Total (A+B + C + D + E + F + G + H)\n67,33,693\n59,63,730\nWaste intensity per rupee of turnover (Total waste generated (meteric tonnes /",
+    "score": 1.0,
+    "features": {
+      "has_number": true,
+      "has_unit": true,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_181",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.8660888671875,
+      "y0": 645.4480590820312,
+      "x1": 540.0020141601562,
+      "y1": 676.47998046875
+    }
+  },
+  {
+    "candidate_id": "cand_0164",
+    "sentence_id": "sent_00841",
+    "text": "0.0000109 \n 0.0000106",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_181",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 431.45013427734375,
+      "y0": 656.8400268554688,
+      "x1": 541.5860595703125,
+      "y1": 666.8880004882812
+    }
+  },
+  {
+    "candidate_id": "cand_0165",
+    "sentence_id": "sent_00842",
+    "text": "0.0000030 \n 0.0000031",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_181",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 431.45013427734375,
+      "y0": 677.83203125,
+      "x1": 541.5860595703125,
+      "y1": 687.8800048828125
+    }
+  },
+  {
+    "candidate_id": "cand_0166",
+    "sentence_id": "sent_00843",
+    "text": "0.0001060\n0.0001143",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 30,
+    "section_id": "sec_182",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 433.03411865234375,
+      "y0": 698.8240356445312,
+      "x1": 540.0020141601562,
+      "y1": 708.8720092773438
+    }
+  },
+  {
+    "candidate_id": "cand_0167",
+    "sentence_id": "sent_00845",
+    "text": "For each category of waste generated, total waste recovered through recycling, re-using or \nother recovery operations (in metric tonnes)\t\n\t\nCategory of Waste",
+    "score": 0.6,
+    "features": {
+      "has_number": false,
+      "has_unit": true,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 31,
+    "section_id": "sec_184",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 127.20903015136719,
+      "x1": 389.36859130859375,
+      "y1": 158.113037109375
+    }
+  },
+  {
+    "candidate_id": "cand_0168",
+    "sentence_id": "sent_00847",
+    "text": "C&D waste\n 3,192",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 31,
+    "section_id": "sec_185",
+    "section_title": "(ii) \t Re-used\n 3,791 \n -",
+    "bbox": {
+      "x0": 72.86611938476562,
+      "y0": 187.67312622070312,
+      "x1": 473.6661682128906,
+      "y1": 197.28912353515625
+    }
+  },
+  {
+    "candidate_id": "cand_0169",
+    "sentence_id": "sent_00848",
+    "text": "Paper waste\n 388",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 31,
+    "section_id": "sec_185",
+    "section_title": "(ii) \t Re-used\n 3,791 \n -",
+    "bbox": {
+      "x0": 72.86611938476562,
+      "y0": 201.06515502929688,
+      "x1": 473.6661682128906,
+      "y1": 210.68115234375
+    }
+  },
+  {
+    "candidate_id": "cand_0170",
+    "sentence_id": "sent_00849",
+    "text": "Leftover food and vegetable waste\n 211",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 31,
+    "section_id": "sec_185",
+    "section_title": "(ii) \t Re-used\n 3,791 \n -",
+    "bbox": {
+      "x0": 72.86611938476562,
+      "y0": 214.45718383789062,
+      "x1": 473.6661682128906,
+      "y1": 224.07318115234375
+    }
+  },
+  {
+    "candidate_id": "cand_0171",
+    "sentence_id": "sent_00851",
+    "text": "(i) \t\nIncineration\n0.0013\n-",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 31,
+    "section_id": "sec_188",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86618041992188,
+      "y0": 291.0173034667969,
+      "x1": 540.002197265625,
+      "y1": 300.63330078125
+    }
+  },
+  {
+    "candidate_id": "cand_0172",
+    "sentence_id": "sent_00852",
+    "text": "(ii) \t Landfilling\n20,49,160\n-",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 31,
+    "section_id": "sec_188",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.8662109375,
+      "y0": 304.4093322753906,
+      "x1": 540.002197265625,
+      "y1": 314.02532958984375
+    }
+  },
+  {
+    "candidate_id": "cand_0173",
+    "sentence_id": "sent_00861",
+    "text": "10.\t\n\u0007Briefly describe the waste management practices adopted in your establishments.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 31,
+    "section_id": "sec_190",
+    "section_title": "Total\n75,94,749\n58,28,617",
+    "bbox": {
+      "x0": 51.023597717285156,
+      "y0": 447.09600830078125,
+      "x1": 546.1235961914062,
+      "y1": 482.24102783203125
+    }
+  },
+  {
+    "candidate_id": "cand_0174",
+    "sentence_id": "sent_00863",
+    "text": "\u0007Tata Power has robust waste management practices and aims to be Zero Waste to Landfill by 2030.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 31,
+    "section_id": "sec_190",
+    "section_title": "Total\n75,94,749\n58,28,617",
+    "bbox": {
+      "x0": 51.023597717285156,
+      "y0": 489.42303466796875,
+      "x1": 546.164794921875,
+      "y1": 560.22607421875
+    }
+  },
+  {
+    "candidate_id": "cand_0175",
+    "sentence_id": "sent_00870",
+    "text": "\u0007The major waste for Tata Power is the Fly Ash generated from thermal power stations.",
+    "score": 0.4,
+    "features": {
+      "has_number": false,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 31,
+    "section_id": "sec_190",
+    "section_title": "Total\n75,94,749\n58,28,617",
+    "bbox": {
+      "x0": 51.02362060546875,
+      "y0": 603.4080810546875,
+      "x1": 546.1969604492188,
+      "y1": 674.2110595703125
+    }
+  },
+  {
+    "candidate_id": "cand_0176",
+    "sentence_id": "sent_00878",
+    "text": "1\nHydro Power Plants like Bhira, \nBhivpuri and Khopoli are in \nthe region of northern western \nghats which is one of the major \nbiodiversity hotspots in the world",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 32,
+    "section_id": "sec_190",
+    "section_title": "Total\n75,94,749\n58,28,617",
+    "bbox": {
+      "x0": 75.70079803466797,
+      "y0": 188.54403686523438,
+      "x1": 207.50717163085938,
+      "y1": 236.5599365234375
+    }
+  },
+  {
+    "candidate_id": "cand_0177",
+    "sentence_id": "sent_00891",
+    "text": "Bhivpuri Pump Storage \nProject - Draft EIA\nS.O. 1533 (E) \nSeptember 14, 2006",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 32,
+    "section_id": "sec_191",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 416.54400634765625,
+      "x1": 540.2813720703125,
+      "y1": 464.5600280761719
+    }
+  },
+  {
+    "candidate_id": "cand_0178",
+    "sentence_id": "sent_00892",
+    "text": "Yes\nNo\nProposal underwent \nPublic Hearing in the \nmonth of Apr - 24.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 32,
+    "section_id": "sec_191",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 416.54400634765625,
+      "x1": 540.2813720703125,
+      "y1": 464.5600280761719
+    }
+  },
+  {
+    "candidate_id": "cand_0179",
+    "sentence_id": "sent_00900",
+    "text": "Yes, the Company is 100% compliant with the applicable environmental law/ regulations/ guidelines in India.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 32,
+    "section_id": "sec_191",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 556.9440307617188,
+      "x1": 433.2685546875,
+      "y1": 566.56005859375
+    }
+  },
+  {
+    "candidate_id": "cand_0180",
+    "sentence_id": "sent_00906",
+    "text": "To Surface water\n7,987\n42,532",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 32,
+    "section_id": "sec_194",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86609649658203,
+      "y0": 713.260986328125,
+      "x1": 540.0020751953125,
+      "y1": 722.8770141601562
+    }
+  },
+  {
+    "candidate_id": "cand_0181",
+    "sentence_id": "sent_00907",
+    "text": "To Groundwater\n4,837\n11,965",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 32,
+    "section_id": "sec_194",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86605834960938,
+      "y0": 726.6530151367188,
+      "x1": 540.0020751953125,
+      "y1": 736.26904296875
+    }
+  },
+  {
+    "candidate_id": "cand_0182",
+    "sentence_id": "sent_00908",
+    "text": "(iii) \t Third party water\n1,07,51,414\n91,17,850",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 32,
+    "section_id": "sec_194",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86605834960938,
+      "y0": 740.0449829101562,
+      "x1": 540.0020751953125,
+      "y1": 749.6610107421875
+    }
+  },
+  {
+    "candidate_id": "cand_0183",
+    "sentence_id": "sent_00926",
+    "text": "Please refer Independent \nAssurance Statement (Pages 581-588) for detailed representation",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 33,
+    "section_id": "sec_201",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 414.4320068359375,
+      "x1": 546.152099609375,
+      "y1": 437.24700927734375
+    }
+  },
+  {
+    "candidate_id": "cand_0184",
+    "sentence_id": "sent_00928",
+    "text": "Total Scope 3 emissions (Break-up of the GHG into CO2, CH4, \nN2O, HFCs, PFCs, SF6, NF3, if available)",
+    "score": 0.8,
+    "features": {
+      "has_number": true,
+      "has_unit": true,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 33,
+    "section_id": "sec_202",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86398315429688,
+      "y0": 477.5730285644531,
+      "x1": 539.43701171875,
+      "y1": 499.1490173339844
+    }
+  },
+  {
+    "candidate_id": "cand_0185",
+    "sentence_id": "sent_00929",
+    "text": "Metric tonnes of CO2 equivalent\n2,64,64,246\n2,47,87,344",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": true,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 33,
+    "section_id": "sec_202",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86398315429688,
+      "y0": 477.5730285644531,
+      "x1": 539.43701171875,
+      "y1": 499.1490173339844
+    }
+  },
+  {
+    "candidate_id": "cand_0186",
+    "sentence_id": "sent_00930",
+    "text": "0.000043 \n 0.000044",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 33,
+    "section_id": "sec_203",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 439.32501220703125,
+      "y0": 500.86102294921875,
+      "x1": 541.1329956054688,
+      "y1": 510.4770202636719
+    }
+  },
+  {
+    "candidate_id": "cand_0187",
+    "sentence_id": "sent_00931",
+    "text": "Total Scope 3 emission intensity (optional) – Total Scope 3 \nemissions / total Power generation units (kWh)\nMetric tonnes of CO2 equivalent / \nUnits (kWh)",
+    "score": 0.8,
+    "features": {
+      "has_number": true,
+      "has_unit": true,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 33,
+    "section_id": "sec_203",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 72.86898803710938,
+      "y0": 523.5570068359375,
+      "x1": 401.3401794433594,
+      "y1": 543.0690307617188
+    }
+  },
+  {
+    "candidate_id": "cand_0188",
+    "sentence_id": "sent_00932",
+    "text": "0.000416 \n 0.000475",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 33,
+    "section_id": "sec_203",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 439.32501220703125,
+      "y0": 523.8529663085938,
+      "x1": 541.1329956054688,
+      "y1": 533.468994140625
+    }
+  },
+  {
+    "candidate_id": "cand_0189",
+    "sentence_id": "sent_00934",
+    "text": "Please refer Independent \nAssurance Statement (Pages 581-588) for detailed representation.",
+    "score": 0.4,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": false,
+      "in_esg_section": true
+    },
+    "page_number": 33,
+    "section_id": "sec_203",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 549.4320068359375,
+      "x1": 546.152099609375,
+      "y1": 572.2470092773438
+    }
+  },
+  {
+    "candidate_id": "cand_0190",
+    "sentence_id": "sent_00936",
+    "text": "3.\t\n\u0007With respect to the ecologically sensitive areas reported at Question 11 of Essential Indicators above, provide \ndetails of significant direct & indirect impact of the entity on biodiversity in such areas along-with prevention and \nremediation activities.",
+    "score": 0.6,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": true
+    },
+    "page_number": 33,
+    "section_id": "sec_203",
+    "section_title": "Environmental Performance",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 597.0989990234375,
+      "x1": 546.1207275390625,
+      "y1": 632.2440185546875
+    }
+  },
+  {
+    "candidate_id": "cand_0191",
+    "sentence_id": "sent_00941",
+    "text": "4.\t\n\u0007If the entity has undertaken any specific initiatives or used innovative technology or solutions to improve resource \nefficiency, or reduce impact due to emissions / effluent discharge / waste generated, please provide details of the same \nas well as outcome of such initiatives, as per the following format:",
+    "score": 0.7,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 34,
+    "section_id": "sec_204",
+    "section_title": "Afforestation Drive and Mahseer Conservation Program at Hydro:",
+    "bbox": {
+      "x0": 51.02360153198242,
+      "y0": 114.0989990234375,
+      "x1": 546.1514892578125,
+      "y1": 149.2440185546875
+    }
+  },
+  {
+    "candidate_id": "cand_0192",
+    "sentence_id": "sent_00944",
+    "text": "\u0007Tata Power has a robust Business Continuity and Disaster Management Plan (BCDMP) and is certified as per ISO 22301:2012 \nfrom the British Standards Institute (BSI).",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": false
+    },
+    "page_number": 34,
+    "section_id": "sec_205",
+    "section_title": "5.\t\nDoes the entity have a business continuity and disaster management plan? Give details in 100 wor",
+    "bbox": {
+      "x0": 51.02360534667969,
+      "y0": 219.4320068359375,
+      "x1": 546.2559204101562,
+      "y1": 266.24102783203125
+    }
+  },
+  {
+    "candidate_id": "cand_0193",
+    "sentence_id": "sent_00953",
+    "text": "3\nNational Solar Energy Federation of India (NSEFI)\nBoth State and National level",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 34,
+    "section_id": "sec_210",
+    "section_title": "1.\t\na. \t\nNumber of affiliations with trade and industry chambers/ associations: 5",
+    "bbox": {
+      "x0": 92.7086181640625,
+      "y0": 551.3279418945312,
+      "x1": 531.883056640625,
+      "y1": 560.9439697265625
+    }
+  },
+  {
+    "candidate_id": "cand_0194",
+    "sentence_id": "sent_00954",
+    "text": "4\nSolar Power Developers Association (SPDA)\nBoth State and National level",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 34,
+    "section_id": "sec_210",
+    "section_title": "1.\t\na. \t\nNumber of affiliations with trade and industry chambers/ associations: 5",
+    "bbox": {
+      "x0": 92.7086181640625,
+      "y0": 564.719970703125,
+      "x1": 531.883056640625,
+      "y1": 574.3359985351562
+    }
+  },
+  {
+    "candidate_id": "cand_0195",
+    "sentence_id": "sent_00984",
+    "text": "12\nCarbon Credit Trading Scheme \n(CCTS)\nComments submitted officially\nYes\nNA\nMoP Website\nhttps://powermin.\ngov.in/",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 35,
+    "section_id": "sec_214",
+    "section_title": "1.\t\nDetails of public policy positions advocated by the entity:",
+    "bbox": {
+      "x0": 71.02301025390625,
+      "y0": 621.8059692382812,
+      "x1": 537.3822021484375,
+      "y1": 650.6220092773438
+    }
+  },
+  {
+    "candidate_id": "cand_0196",
+    "sentence_id": "sent_01000",
+    "text": "Directly sourced from MSMEs/ small producers\n19%\n21%",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": false
+    },
+    "page_number": 36,
+    "section_id": "sec_220",
+    "section_title": "4.\t\nPercentage of input material (inputs to total inputs by value) sourced from suppliers:",
+    "bbox": {
+      "x0": 72.86599731445312,
+      "y0": 465.8690185546875,
+      "x1": 539.4340209960938,
+      "y1": 475.4850158691406
+    }
+  },
+  {
+    "candidate_id": "cand_0197",
+    "sentence_id": "sent_01062",
+    "text": "•\t\nSolar-roof – 1800 209 5161",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 39,
+    "section_id": "sec_234",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 217.74609375,
+      "y0": 170.45492553710938,
+      "x1": 317.49664306640625,
+      "y1": 180.0709228515625
+    }
+  },
+  {
+    "candidate_id": "cand_0198",
+    "sentence_id": "sent_01085",
+    "text": "ESCO – 15\nTPADL – 86,080\nDistribution \nMumbai – 1,26,505\nSolar Rooftop – \n10,488",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 39,
+    "section_id": "sec_238",
+    "section_title": "3.\t\nNumber of consumer complaints in respect of the following:",
+    "bbox": {
+      "x0": 132.51693725585938,
+      "y0": 596.0662231445312,
+      "x1": 198.00534057617188,
+      "y1": 654.2583618164062
+    }
+  },
+  {
+    "candidate_id": "cand_0199",
+    "sentence_id": "sent_01086",
+    "text": "Distribution \nMumbai – 157\nSolar Rooftop - 63",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 39,
+    "section_id": "sec_238",
+    "section_title": "3.\t\nNumber of consumer complaints in respect of the following:",
+    "bbox": {
+      "x0": 204.92990112304688,
+      "y0": 596.0662231445312,
+      "x1": 266.8227233886719,
+      "y1": 625.17041015625
+    }
+  },
+  {
+    "candidate_id": "cand_0200",
+    "sentence_id": "sent_01088",
+    "text": "TPADL – 57,230\nSolar Rooftop – \n7,558",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 39,
+    "section_id": "sec_238",
+    "section_title": "3.\t\nNumber of consumer complaints in respect of the following:",
+    "bbox": {
+      "x0": 351.01629638671875,
+      "y0": 596.0662231445312,
+      "x1": 404.4654541015625,
+      "y1": 625.17041015625
+    }
+  },
+  {
+    "candidate_id": "cand_0201",
+    "sentence_id": "sent_01089",
+    "text": "Solar Rooftop - 79\nThese include \nboth commercial \nand technical \ncomplaints along \nFire and Safety \nComplaints \nresolved within \nService-Level \nAgreement (SLA)",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 39,
+    "section_id": "sec_238",
+    "section_title": "3.\t\nNumber of consumer complaints in respect of the following:",
+    "bbox": {
+      "x0": 411.2850036621094,
+      "y0": 596.0662231445312,
+      "x1": 542.1082763671875,
+      "y1": 683.3463745117188
+    }
+  },
+  {
+    "candidate_id": "cand_0202",
+    "sentence_id": "sent_01124",
+    "text": "•\t\nSolar-roof – 1800 \n209 5161",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 41,
+    "section_id": "sec_245",
+    "section_title": "Business Responsibility and Sustainability Report",
+    "bbox": {
+      "x0": 219.39259338378906,
+      "y0": 181.18991088867188,
+      "x1": 289.63348388671875,
+      "y1": 200.4058837890625
+    }
+  },
+  {
+    "candidate_id": "cand_0203",
+    "sentence_id": "sent_01199",
+    "text": "•\t Customer \nSatisfaction Survey \n(CSAT) carried out \nand rating of 99% \nachieved",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": true,
+      "has_esg_keyword": false,
+      "in_esg_section": false
+    },
+    "page_number": 42,
+    "section_id": "sec_249",
+    "section_title": "3.\t\n\u0007Mechanisms in place to inform consumers of any risk of disruption/discontinuation of essential ",
+    "bbox": {
+      "x0": 134.86509704589844,
+      "y0": 469.0428161621094,
+      "x1": 198.73867797851562,
+      "y1": 511.0567932128906
+    }
+  },
+  {
+    "candidate_id": "cand_0204",
+    "sentence_id": "sent_01202",
+    "text": "•\t To provide \ncustomers \nwith all the \ninformation they \nneed on New \nConnection, \nRegulation, \nSafety Tips, \nEnergy \nConservation \nAdvice, etc., \nwe have built a \n24x7 call centre, \n14 customer \ncare centres, \nwebsite, mobile \napplication, \nsocial media, \nand all of the \nfield offices.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 42,
+    "section_id": "sec_249",
+    "section_title": "3.\t\n\u0007Mechanisms in place to inform consumers of any risk of disruption/discontinuation of essential ",
+    "bbox": {
+      "x0": 251.87010192871094,
+      "y0": 505.645751953125,
+      "x1": 309.1266174316406,
+      "y1": 673.65966796875
+    }
+  },
+  {
+    "candidate_id": "cand_0205",
+    "sentence_id": "sent_01203",
+    "text": "•\t In order \nto provide \ncustomers \nwith all the \ninformation they \nneed on New \nConnection, \nRegulation, \nSafety Tips, \nEnergy \nConservation \nAdvice, etc., \nwe have built a \n24x7 call centre, \n14 customer \ncare centre, \nwebsite, mobile \napplication, \n24*7social media \ndesk and Fuse \ncall centres.",
+    "score": 0.5,
+    "features": {
+      "has_number": true,
+      "has_unit": false,
+      "has_action_verb": false,
+      "has_esg_keyword": true,
+      "in_esg_section": false
+    },
+    "page_number": 42,
+    "section_id": "sec_249",
+    "section_title": "3.\t\n\u0007Mechanisms in place to inform consumers of any risk of disruption/discontinuation of essential ",
+    "bbox": {
+      "x0": 309.64111328125,
+      "y0": 469.0426330566406,
+      "x1": 367.1020202636719,
+      "y1": 645.45654296875
+    }
+  }
+]

@@ -1,0 +1,332 @@
+[
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "\u2551   Pharos Integrity 1.0 \u2014 Full Integration Test             \u2551"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "\u2551   2026-03-09 17:56:36                                       \u2551"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "============================================================"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "STEP 1 \u2014 Scanning ESG_Reports dataset"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "============================================================"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "  Found: business-responsibility-and-sustainability-report-2023-24.pdf \u2192 Business (2024) [1.77 MB]"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "  Found: business-responsibility-and-sustainability-report.pdf \u2192 Business (2024) [0.67 MB]"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "  Found: infosys-esg-report-2022-23.pdf \u2192 Infosys (2023) [15.72 MB]"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "  Found: infosys-esg-report-2024-25.pdf \u2192 Infosys (2025) [30.62 MB]"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "  Found: Microsoft-2024-Environmental-Sustainability-Report.pdf \u2192 Microsoft (2024) [19.1 MB]"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "Total reports detected: 5"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "Limiting to 2 reports for this run."
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "Processing: Business (2024)"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501"
+  },
+  {
+    "timestamp": "17:56:36",
+    "level": "INFO",
+    "message": "\nSTEP 2 \u2014 Parsing: business-responsibility-and-sustainability-report-2023-24.pdf"
+  },
+  {
+    "timestamp": "17:56:52",
+    "level": "INFO",
+    "message": "  Pages: 42"
+  },
+  {
+    "timestamp": "17:56:52",
+    "level": "INFO",
+    "message": "  Blocks: 1445"
+  },
+  {
+    "timestamp": "17:56:52",
+    "level": "INFO",
+    "message": "  Sections: 249"
+  },
+  {
+    "timestamp": "17:56:52",
+    "level": "INFO",
+    "message": "  Sentences: 1213"
+  },
+  {
+    "timestamp": "17:56:52",
+    "level": "INFO",
+    "message": "  Table rows: 163"
+  },
+  {
+    "timestamp": "17:56:52",
+    "level": "INFO",
+    "message": "  Chunks: 205"
+  },
+  {
+    "timestamp": "17:56:52",
+    "level": "INFO",
+    "message": "\nSTEPS 3-5 \u2014 Extraction Pipeline: Business"
+  },
+  {
+    "timestamp": "18:24:57",
+    "level": "INFO",
+    "message": "  Text claims: 309"
+  },
+  {
+    "timestamp": "18:24:57",
+    "level": "INFO",
+    "message": "  Table claims: 0"
+  },
+  {
+    "timestamp": "18:24:57",
+    "level": "INFO",
+    "message": "  With location: 173"
+  },
+  {
+    "timestamp": "18:24:57",
+    "level": "INFO",
+    "message": "  Total after dedup: 309"
+  },
+  {
+    "timestamp": "18:24:57",
+    "level": "INFO",
+    "message": "\nSTEP 6 \u2014 Embedding + Ingestion: Business"
+  },
+  {
+    "timestamp": "18:25:06",
+    "level": "WARN",
+    "message": "  Final batch insert failed: {'message': 'invalid input syntax for type date: \"null\"', 'code': '22007', 'hint': None, 'details': None}"
+  },
+  {
+    "timestamp": "18:25:06",
+    "level": "INFO",
+    "message": "  Ingested: 0 | Rejected: 298"
+  },
+  {
+    "timestamp": "18:25:06",
+    "level": "INFO",
+    "message": "\n  \u2713 Business (2024) complete in 1710.0s"
+  },
+  {
+    "timestamp": "18:25:06",
+    "level": "INFO",
+    "message": "\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501"
+  },
+  {
+    "timestamp": "18:25:06",
+    "level": "INFO",
+    "message": "Processing: Business (2024)"
+  },
+  {
+    "timestamp": "18:25:06",
+    "level": "INFO",
+    "message": "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501"
+  },
+  {
+    "timestamp": "18:25:06",
+    "level": "INFO",
+    "message": "\nSTEP 2 \u2014 Parsing: business-responsibility-and-sustainability-report.pdf"
+  },
+  {
+    "timestamp": "18:25:26",
+    "level": "INFO",
+    "message": "  Pages: 80"
+  },
+  {
+    "timestamp": "18:25:26",
+    "level": "INFO",
+    "message": "  Blocks: 1943"
+  },
+  {
+    "timestamp": "18:25:26",
+    "level": "INFO",
+    "message": "  Sections: 353"
+  },
+  {
+    "timestamp": "18:25:26",
+    "level": "INFO",
+    "message": "  Sentences: 2136"
+  },
+  {
+    "timestamp": "18:25:26",
+    "level": "INFO",
+    "message": "  Table rows: 272"
+  },
+  {
+    "timestamp": "18:25:26",
+    "level": "INFO",
+    "message": "  Chunks: 308"
+  },
+  {
+    "timestamp": "18:25:26",
+    "level": "INFO",
+    "message": "\nSTEPS 3-5 \u2014 Extraction Pipeline: Business"
+  },
+  {
+    "timestamp": "19:12:14",
+    "level": "INFO",
+    "message": "  Text claims: 587"
+  },
+  {
+    "timestamp": "19:12:14",
+    "level": "INFO",
+    "message": "  Table claims: 0"
+  },
+  {
+    "timestamp": "19:12:14",
+    "level": "INFO",
+    "message": "  With location: 433"
+  },
+  {
+    "timestamp": "19:12:14",
+    "level": "INFO",
+    "message": "  Total after dedup: 587"
+  },
+  {
+    "timestamp": "19:12:14",
+    "level": "INFO",
+    "message": "\nSTEP 6 \u2014 Embedding + Ingestion: Business"
+  },
+  {
+    "timestamp": "19:12:23",
+    "level": "WARN",
+    "message": "  Batch insert failed: {'message': 'no partition of relation \"claims\" found for row', 'code': '23514', 'hint': None, 'details': 'Partition key of the failing row contains (metric_family) = (emissions.scope2).'}"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "WARN",
+    "message": "  Final batch insert failed: {'message': 'invalid input syntax for type date: \"null\"', 'code': '22007', 'hint': None, 'details': None}"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "  Ingested: 0 | Rejected: 555"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "\n  \u2713 Business (2024) complete in 2838.6s"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "\n============================================================"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "STEP 7 \u2014 Cross-Report Contradiction Analysis"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "============================================================"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "  Unique signatures: 205"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "  Contradictions detected: 0"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "\n  Checking metric timeline anomalies..."
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "  Timeline anomalies detected: 0"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "\n============================================================"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "STEP 8 \u2014 Saving Artifacts"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "============================================================"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "  Saved: claims_snapshot.csv (896 rows)"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "  Saved: contradictions.json (0 entries)"
+  },
+  {
+    "timestamp": "19:12:24",
+    "level": "INFO",
+    "message": "  Saved: timeline_anomalies.json (0 entries)"
+  }
+]

@@ -1,0 +1,812 @@
+[
+  {
+    "claim_id": "44bf6197-32d",
+    "aspect": "sustainability",
+    "normalized_aspect": "uncategorized",
+    "action": "sourced",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 2.0,
+      "unit": "%",
+      "direction": "absolute",
+      "normalized_value": 2.0,
+      "normalized_unit": "%"
+    },
+    "location": {
+      "raw_text": "solar panels manufacturing",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "3510 \n(35105)\nManufacturing of solar \npanels\n2%\nCradle to Grave\nYes\nNo",
+      "page_number": 14,
+      "chunk_id": "chunk_0047",
+      "block_id": "cand_0047",
+      "section_label": "b. \t\n\u0007If yes, what percentage of inputs were sourced sustainably?",
+      "bbox": {
+        "x0": 72.86609649658203,
+        "y0": 295.9440002441406,
+        "x1": 465.882080078125,
+        "y1": 315.15997314453125
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.5,
+    "vagueness_score": 0.3,
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "global",
+    "claim_signature": "uncategorized|unknown_time|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "921d54dd-5d0",
+    "aspect": "gender diversity",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 2117.0,
+      "unit": "employees",
+      "direction": "absolute",
+      "normalized_value": 2117.0,
+      "normalized_unit": "employees"
+    },
+    "location": {
+      "raw_text": "global",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": "2023-04-01",
+      "end_date": "2024-03-31",
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Female\n 2,117 \n 2,117 \n100\n 2,117 \n100\n 2,117 \n100\n NA \nNA\n NA \nNA",
+      "page_number": 15,
+      "chunk_id": "chunk_0050",
+      "block_id": "cand_0050",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 53.041961669921875,
+        "y0": 259.3641052246094,
+        "x1": 540.0499877929688,
+        "y1": 268.9801025390625
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "directly_observable",
+    "groundability_score": 0.9,
+    "vagueness_score": 0.0,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "2024",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|2024|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "c15475c1-4a0",
+    "aspect": "gender diversity",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 100.0,
+      "unit": "%",
+      "direction": "absolute",
+      "normalized_value": 100.0,
+      "normalized_unit": "%"
+    },
+    "location": {
+      "raw_text": "global",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": "2023-04-01",
+      "end_date": "2024-03-31",
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Female\n 2,117 \n 2,117 \n100\n 2,117 \n100\n 2,117 \n100\n NA \nNA\n NA \nNA",
+      "page_number": 15,
+      "chunk_id": "chunk_0050",
+      "block_id": "cand_0050",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 53.041961669921875,
+        "y0": 259.3641052246094,
+        "x1": 540.0499877929688,
+        "y1": 268.9801025390625
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "directly_observable",
+    "groundability_score": 0.9,
+    "vagueness_score": 0.0,
+    "metric_key": "social.diversity.gender.percent",
+    "time_bucket": "2024",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.percent|2024|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "72338795-404",
+    "aspect": "wellbeing measures",
+    "normalized_aspect": "uncategorized",
+    "action": "incurred",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.5,
+      "unit": "%",
+      "direction": "absolute",
+      "normalized_value": 0.5,
+      "normalized_unit": "%"
+    },
+    "location": {
+      "raw_text": "the company",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Cost incurred on wellbeing measures as a % of total revenue of the company\n0.5%\n0.5%",
+      "page_number": 15,
+      "chunk_id": "chunk_0055",
+      "block_id": "cand_0055",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.8666000366211,
+        "y0": 570.8689575195312,
+        "x1": 540.7066040039062,
+        "y1": 580.4849853515625
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.5,
+    "vagueness_score": 0.3,
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "global",
+    "claim_signature": "uncategorized|unknown_time|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "39ab3d1a-3e4",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 22372.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 22372.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Company",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Total Permanent Employees\n 22,372 \n 10,367 \n46\n 21,661 \n 11,181 \n52\nMale\n 20,255 \n 9,881 \n49\n 19,760 \n 10,622 \n54\nFemale\n 2,117 \n 486 \n23\n 1,901 \n 559 \n29\nTotal Permanent Workers\nMale\nThere are no permanent workers in the Company.",
+      "page_number": 17,
+      "chunk_id": "chunk_0059",
+      "block_id": "cand_0059",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86609649658203,
+        "y0": 217.0909881591797,
+        "x1": 540.026123046875,
+        "y1": 273.96307373046875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.5,
+    "vagueness_score": 0.3,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "unknown_time",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|unknown_time|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "ca66a659-3cf",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 10667.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 10667.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Company",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Total Permanent Employees\n 22,372 \n 10,367 \n46\n 21,661 \n 11,181 \n52\nMale\n 20,255 \n 9,881 \n49\n 19,760 \n 10,622 \n54\nFemale\n 2,117 \n 486 \n23\n 1,901 \n 559 \n29\nTotal Permanent Workers\nMale\nThere are no permanent workers in the Company.",
+      "page_number": 17,
+      "chunk_id": "chunk_0059",
+      "block_id": "cand_0059",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86609649658203,
+        "y0": 217.0909881591797,
+        "x1": 540.026123046875,
+        "y1": 273.96307373046875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.5,
+    "vagueness_score": 0.3,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "unknown_time",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|unknown_time|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "5e007f3e-1af",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 21661.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 21661.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Company",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Total Permanent Employees\n 22,372 \n 10,367 \n46\n 21,661 \n 11,181 \n52\nMale\n 20,255 \n 9,881 \n49\n 19,760 \n 10,622 \n54\nFemale\n 2,117 \n 486 \n23\n 1,901 \n 559 \n29\nTotal Permanent Workers\nMale\nThere are no permanent workers in the Company.",
+      "page_number": 17,
+      "chunk_id": "chunk_0059",
+      "block_id": "cand_0059",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86609649658203,
+        "y0": 217.0909881591797,
+        "x1": 540.026123046875,
+        "y1": 273.96307373046875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.5,
+    "vagueness_score": 0.3,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "unknown_time",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|unknown_time|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "ae50a02c-d85",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 11281.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 11281.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Company",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Total Permanent Employees\n 22,372 \n 10,367 \n46\n 21,661 \n 11,181 \n52\nMale\n 20,255 \n 9,881 \n49\n 19,760 \n 10,622 \n54\nFemale\n 2,117 \n 486 \n23\n 1,901 \n 559 \n29\nTotal Permanent Workers\nMale\nThere are no permanent workers in the Company.",
+      "page_number": 17,
+      "chunk_id": "chunk_0059",
+      "block_id": "cand_0059",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86609649658203,
+        "y0": 217.0909881591797,
+        "x1": 540.026123046875,
+        "y1": 273.96307373046875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.5,
+    "vagueness_score": 0.3,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "unknown_time",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|unknown_time|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "f5637cbb-307",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 20255.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 20255.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Company",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Total Permanent Employees\n 22,372 \n 10,367 \n46\n 21,661 \n 11,181 \n52\nMale\n 20,255 \n 9,881 \n49\n 19,760 \n 10,622 \n54\nFemale\n 2,117 \n 486 \n23\n 1,901 \n 559 \n29\nTotal Permanent Workers\nMale\nThere are no permanent workers in the Company.",
+      "page_number": 17,
+      "chunk_id": "chunk_0059",
+      "block_id": "cand_0059",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86609649658203,
+        "y0": 217.0909881591797,
+        "x1": 540.026123046875,
+        "y1": 273.96307373046875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.5,
+    "vagueness_score": 0.3,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "unknown_time",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|unknown_time|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "0c80b26e-63d",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 64734.0,
+      "unit": "employees",
+      "direction": "absolute",
+      "normalized_value": 64734.0,
+      "normalized_unit": "employees"
+    },
+    "location": {
+      "raw_text": "Total",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": "2023-04-01",
+      "end_date": "2024-03-31",
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "No. (E)\n% (E/D)\nNo. (F)\n% (F/D)\nEmployees\nMale\n21,358\n 6,979 \n33\n 8,671 \n41\n 20,991 \n 13,567 \n65\n 11,666 \n56\nFemale\n2,294\n 1,029 \n45\n 1,452 \n63\n 2,034 \n 1,191 \n59\n 1,404 \n69\nTotal \n23,652\n8,008\n34\n 10,123 \n43\n 23,025 \n 14,758 \n64\n 13,070 \n57\nWorkers\nMale\n62,827\n 46,193 \n86\n 22,822 \n36\n 47,016 \n 43,833 \n93\n 710 \n2\nFemale\n1,507\n 857 \n57\n 419 \n28\n 1,428 \n 408 \n29\n 88 \n6\nTotal \n64,334\n47,050\n73\n 23,241 \n36\n 48,444 \n 44,241 \n91\n 798 \n2",
+      "page_number": 17,
+      "chunk_id": "chunk_0060",
+      "block_id": "cand_0060",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86700439453125,
+        "y0": 333.8940734863281,
+        "x1": 540.4349975585938,
+        "y1": 434.072998046875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "directly_observable",
+    "groundability_score": 0.9,
+    "vagueness_score": 0.0,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "2024",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|2024|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "244d16fd-313",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 47050.0,
+      "unit": "employees",
+      "direction": "absolute",
+      "normalized_value": 47050.0,
+      "normalized_unit": "employees"
+    },
+    "location": {
+      "raw_text": "Workers",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": "2023-04-01",
+      "end_date": "2024-03-31",
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "No. (E)\n% (E/D)\nNo. (F)\n% (F/D)\nEmployees\nMale\n21,358\n 6,979 \n33\n 8,671 \n41\n 20,991 \n 13,567 \n65\n 11,666 \n56\nFemale\n2,294\n 1,029 \n45\n 1,452 \n63\n 2,034 \n 1,191 \n59\n 1,404 \n69\nTotal \n23,652\n8,008\n34\n 10,123 \n43\n 23,025 \n 14,758 \n64\n 13,070 \n57\nWorkers\nMale\n62,827\n 46,193 \n86\n 22,822 \n36\n 47,016 \n 43,833 \n93\n 710 \n2\nFemale\n1,507\n 857 \n57\n 419 \n28\n 1,428 \n 408 \n29\n 88 \n6\nTotal \n64,334\n47,050\n73\n 23,241 \n36\n 48,444 \n 44,241 \n91\n 798 \n2",
+      "page_number": 17,
+      "chunk_id": "chunk_0060",
+      "block_id": "cand_0060",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86700439453125,
+        "y0": 333.8940734863281,
+        "x1": 540.4349975585938,
+        "y1": 434.072998046875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "directly_observable",
+    "groundability_score": 0.9,
+    "vagueness_score": 0.0,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "2024",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|2024|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "227fd641-652",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 23025.0,
+      "unit": "employees",
+      "direction": "absolute",
+      "normalized_value": 23025.0,
+      "normalized_unit": "employees"
+    },
+    "location": {
+      "raw_text": "Total",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": "2023-04-01",
+      "end_date": "2024-03-31",
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "No. (E)\n% (E/D)\nNo. (F)\n% (F/D)\nEmployees\nMale\n21,358\n 6,979 \n33\n 8,671 \n41\n 20,991 \n 13,567 \n65\n 11,666 \n56\nFemale\n2,294\n 1,029 \n45\n 1,452 \n63\n 2,034 \n 1,191 \n59\n 1,404 \n69\nTotal \n23,652\n8,008\n34\n 10,123 \n43\n 23,025 \n 14,758 \n64\n 13,070 \n57\nWorkers\nMale\n62,827\n 46,193 \n86\n 22,822 \n36\n 47,016 \n 43,833 \n93\n 710 \n2\nFemale\n1,507\n 857 \n57\n 419 \n28\n 1,428 \n 408 \n29\n 88 \n6\nTotal \n64,334\n47,050\n73\n 23,241 \n36\n 48,444 \n 44,241 \n91\n 798 \n2",
+      "page_number": 17,
+      "chunk_id": "chunk_0060",
+      "block_id": "cand_0060",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86700439453125,
+        "y0": 333.8940734863281,
+        "x1": 540.4349975585938,
+        "y1": 434.072998046875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "directly_observable",
+    "groundability_score": 0.9,
+    "vagueness_score": 0.0,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "2024",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|2024|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "4766ba3f-8f7",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 44241.0,
+      "unit": "employees",
+      "direction": "absolute",
+      "normalized_value": 44241.0,
+      "normalized_unit": "employees"
+    },
+    "location": {
+      "raw_text": "Workers",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": "2023-04-01",
+      "end_date": "2024-03-31",
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "No. (E)\n% (E/D)\nNo. (F)\n% (F/D)\nEmployees\nMale\n21,358\n 6,979 \n33\n 8,671 \n41\n 20,991 \n 13,567 \n65\n 11,666 \n56\nFemale\n2,294\n 1,029 \n45\n 1,452 \n63\n 2,034 \n 1,191 \n59\n 1,404 \n69\nTotal \n23,652\n8,008\n34\n 10,123 \n43\n 23,025 \n 14,758 \n64\n 13,070 \n57\nWorkers\nMale\n62,827\n 46,193 \n86\n 22,822 \n36\n 47,016 \n 43,833 \n93\n 710 \n2\nFemale\n1,507\n 857 \n57\n 419 \n28\n 1,428 \n 408 \n29\n 88 \n6\nTotal \n64,334\n47,050\n73\n 23,241 \n36\n 48,444 \n 44,241 \n91\n 798 \n2",
+      "page_number": 17,
+      "chunk_id": "chunk_0060",
+      "block_id": "cand_0060",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86700439453125,
+        "y0": 333.8940734863281,
+        "x1": 540.4349975585938,
+        "y1": 434.072998046875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "directly_observable",
+    "groundability_score": 0.9,
+    "vagueness_score": 0.0,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "2024",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|2024|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "9e085d69-820",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 798.0,
+      "unit": "employees",
+      "direction": "absolute",
+      "normalized_value": 798.0,
+      "normalized_unit": "employees"
+    },
+    "location": {
+      "raw_text": "Workers",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": "2023-04-01",
+      "end_date": "2024-03-31",
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "No. (E)\n% (E/D)\nNo. (F)\n% (F/D)\nEmployees\nMale\n21,358\n 6,979 \n33\n 8,671 \n41\n 20,991 \n 13,567 \n65\n 11,666 \n56\nFemale\n2,294\n 1,029 \n45\n 1,452 \n63\n 2,034 \n 1,191 \n59\n 1,404 \n69\nTotal \n23,652\n8,008\n34\n 10,123 \n43\n 23,025 \n 14,758 \n64\n 13,070 \n57\nWorkers\nMale\n62,827\n 46,193 \n86\n 22,822 \n36\n 47,016 \n 43,833 \n93\n 710 \n2\nFemale\n1,507\n 857 \n57\n 419 \n28\n 1,428 \n 408 \n29\n 88 \n6\nTotal \n64,334\n47,050\n73\n 23,241 \n36\n 48,444 \n 44,241 \n91\n 798 \n2",
+      "page_number": 17,
+      "chunk_id": "chunk_0060",
+      "block_id": "cand_0060",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86700439453125,
+        "y0": 333.8940734863281,
+        "x1": 540.4349975585938,
+        "y1": 434.072998046875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "directly_observable",
+    "groundability_score": 0.9,
+    "vagueness_score": 0.0,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "2024",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|2024|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "65796176-9d4",
+    "aspect": "Safety",
+    "normalized_aspect": "social.health_safety.ltifr",
+    "action": "reduced",
+    "claim_type": "performance",
+    "metric": {
+      "value": 0.06,
+      "unit": "per one million-person hours worked",
+      "direction": "decrease",
+      "normalized_value": 0.06,
+      "normalized_unit": "per one million-person hours worked"
+    },
+    "location": {
+      "raw_text": "global",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": "2023-04-01",
+      "end_date": "2024-03-31",
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Lost Time Injury Frequency Rate (LTIFR) (per one million-person hours worked) Employees\n 0.06 \n 0.26",
+      "page_number": 18,
+      "chunk_id": "chunk_0065",
+      "block_id": "cand_0065",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86609649658203,
+        "y0": 590.6690063476562,
+        "x1": 541.6180419921875,
+        "y1": 600.2850341796875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "directly_observable",
+    "groundability_score": 0.9,
+    "vagueness_score": 0.0,
+    "metric_key": "social.health_safety.ltifr.peronemillionpersonhoursworked",
+    "time_bucket": "2024",
+    "location_scope": "global",
+    "claim_signature": "social.health_safety.ltifr.peronemillionpersonhoursworked|2024|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "1c09838c-8c4",
+    "aspect": "Safety",
+    "normalized_aspect": "social.health_safety.ltifr",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 0.26,
+      "unit": "per one million-person hours worked",
+      "direction": "increase",
+      "normalized_value": 0.26,
+      "normalized_unit": "per one million-person hours worked"
+    },
+    "location": {
+      "raw_text": "global",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": "2023-04-01",
+      "end_date": "2024-03-31",
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Lost Time Injury Frequency Rate (LTIFR) (per one million-person hours worked) Employees\n 0.06 \n 0.26",
+      "page_number": 18,
+      "chunk_id": "chunk_0065",
+      "block_id": "cand_0065",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 72.86609649658203,
+        "y0": 590.6690063476562,
+        "x1": 541.6180419921875,
+        "y1": 600.2850341796875
+      }
+    },
+    "confidence": 0.9,
+    "observability_type": "directly_observable",
+    "groundability_score": 0.9,
+    "vagueness_score": 0.0,
+    "metric_key": "social.health_safety.ltifr.peronemillionpersonhoursworked",
+    "time_bucket": "2024",
+    "location_scope": "global",
+    "claim_signature": "social.health_safety.ltifr.peronemillionpersonhoursworked|2024|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "3cedbcfe-c84",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 18.0,
+      "unit": "employees",
+      "direction": "increase",
+      "normalized_value": 18.0,
+      "normalized_unit": "employees"
+    },
+    "location": {
+      "raw_text": "Workers",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Workers\n 18 \n 19",
+      "page_number": 18,
+      "chunk_id": "chunk_0070",
+      "block_id": "cand_0070",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 336.5140686035156,
+        "y0": 657.6289672851562,
+        "x1": 541.6420288085938,
+        "y1": 667.2449951171875
+      }
+    },
+    "confidence": 0.8,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.5,
+    "vagueness_score": 0.3,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "unknown_time",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|unknown_time|global",
+    "source_type": "text"
+  },
+  {
+    "claim_id": "b8f19229-0d2",
+    "aspect": "employees",
+    "normalized_aspect": "social.diversity.gender",
+    "action": "increased",
+    "claim_type": "performance",
+    "metric": {
+      "value": 19.0,
+      "unit": "employees",
+      "direction": "increase",
+      "normalized_value": 19.0,
+      "normalized_unit": "employees"
+    },
+    "location": {
+      "raw_text": "Workers",
+      "specificity": "global"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Workers\n 18 \n 19",
+      "page_number": 18,
+      "chunk_id": "chunk_0070",
+      "block_id": "cand_0070",
+      "section_label": "Social Initiatives",
+      "bbox": {
+        "x0": 336.5140686035156,
+        "y0": 657.6289672851562,
+        "x1": 541.6420288085938,
+        "y1": 667.2449951171875
+      }
+    },
+    "confidence": 0.8,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.5,
+    "vagueness_score": 0.3,
+    "metric_key": "social.diversity.gender.count",
+    "time_bucket": "unknown_time",
+    "location_scope": "global",
+    "claim_signature": "social.diversity.gender.count|unknown_time|global",
+    "source_type": "text"
+  }
+]

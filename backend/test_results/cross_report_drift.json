@@ -1,0 +1,18 @@
+[
+  {
+    "company": "Business",
+    "year": 2024,
+    "claims_extracted": 309,
+    "table_claims": 0,
+    "text_claims": 309,
+    "locations_detected": 173
+  },
+  {
+    "company": "Business",
+    "year": 2024,
+    "claims_extracted": 587,
+    "table_claims": 0,
+    "text_claims": 587,
+    "locations_detected": 433
+  }
+]

@@ -1,0 +1,1541 @@
+[
+  {
+    "table_id": "tbl_007",
+    "page_number": 1,
+    "row_index": 0,
+    "cells": {
+      "": "7"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_008",
+    "page_number": 1,
+    "row_index": 0,
+    "cells": {
+      "": "8"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_009",
+    "page_number": 1,
+    "row_index": 0,
+    "cells": {
+      "": "9"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_010",
+    "page_number": 5,
+    "row_index": 0,
+    "cells": {
+      "1": "Nil",
+      "Nil": "Nil",
+      "NA": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_010",
+    "page_number": 5,
+    "row_index": 1,
+    "cells": {
+      "1": "69",
+      "Nil": "1",
+      "NA": "As of March 31,\n2024, there is\none pending\ncomplaint received\nthrough the\nSCORES Platform.\nThe Action Taken\nReport for this\ncomplaint was\nsubmitted by\nRegistrar and\nTransfer Agents\n(RTA) on SEBI\nScores, but it is\npending with SEBI\nfor closure."
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_010",
+    "page_number": 5,
+    "row_index": 2,
+    "cells": {
+      "1": "70",
+      "Nil": "1",
+      "NA": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_010",
+    "page_number": 5,
+    "row_index": 3,
+    "cells": {
+      "1": "1",
+      "Nil": "Nil",
+      "NA": ""
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_010",
+    "page_number": 5,
+    "row_index": 4,
+    "cells": {
+      "1": "30",
+      "Nil": "Nil",
+      "NA": ""
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_010",
+    "page_number": 5,
+    "row_index": 5,
+    "cells": {
+      "1": "4",
+      "Nil": "Nil",
+      "NA": ""
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_011",
+    "page_number": 12,
+    "row_index": 0,
+    "cells": {
+      "Nil": "Nil",
+      "NA": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_012",
+    "page_number": 12,
+    "row_index": 0,
+    "cells": {
+      "7%": "21"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_012",
+    "page_number": 12,
+    "row_index": 1,
+    "cells": {
+      "7%": "88%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_012",
+    "page_number": 12,
+    "row_index": 2,
+    "cells": {
+      "7%": "2%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_012",
+    "page_number": 12,
+    "row_index": 3,
+    "cells": {
+      "7%": "446"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_012",
+    "page_number": 12,
+    "row_index": 4,
+    "cells": {
+      "7%": "18%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_012",
+    "page_number": 12,
+    "row_index": 5,
+    "cells": {
+      "7%": "27%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_012",
+    "page_number": 12,
+    "row_index": 6,
+    "cells": {
+      "7%": "5%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_012",
+    "page_number": 12,
+    "row_index": 7,
+    "cells": {
+      "7%": "5%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_012",
+    "page_number": 12,
+    "row_index": 8,
+    "cells": {
+      "7%": "90%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_013",
+    "page_number": 13,
+    "row_index": 0,
+    "cells": {
+      "` 12.21 crore\n(0.02% of turnover)": "65%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_014",
+    "page_number": 14,
+    "row_index": 0,
+    "cells": {
+      "NA": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_014",
+    "page_number": 14,
+    "row_index": 1,
+    "cells": {
+      "NA": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_014",
+    "page_number": 14,
+    "row_index": 2,
+    "cells": {
+      "NA": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_015",
+    "page_number": 15,
+    "row_index": 0,
+    "cells": {
+      "93": "99",
+      "100": "100",
+      "Y": "Y"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_015",
+    "page_number": 15,
+    "row_index": 1,
+    "cells": {
+      "93": "3",
+      "100": "100",
+      "Y": "Y"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_015",
+    "page_number": 15,
+    "row_index": 2,
+    "cells": {
+      "93": "7",
+      "100": "NA",
+      "Y": "Y"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_016",
+    "page_number": 17,
+    "row_index": 0,
+    "cells": {
+      "22,372": "20,255",
+      "10,367": "9,881",
+      "46": "49"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_016",
+    "page_number": 17,
+    "row_index": 1,
+    "cells": {
+      "22,372": "2,117",
+      "10,367": "486",
+      "46": "23"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_017",
+    "page_number": 17,
+    "row_index": 0,
+    "cells": {
+      "21,358": "2,294",
+      "6,979": "1,029",
+      "33": "45",
+      "8,671": "1,452",
+      "41": "63"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_017",
+    "page_number": 17,
+    "row_index": 1,
+    "cells": {
+      "21,358": "23,652",
+      "6,979": "8,008",
+      "33": "34",
+      "8,671": "10,123",
+      "41": "43"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_018",
+    "page_number": 17,
+    "row_index": 0,
+    "cells": {
+      "62,827": "1,507",
+      "46,193": "857",
+      "86": "57",
+      "22,822": "419",
+      "36": "28"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_018",
+    "page_number": 17,
+    "row_index": 1,
+    "cells": {
+      "62,827": "64,334",
+      "46,193": "47,050",
+      "86": "73",
+      "22,822": "23,241",
+      "36": "36"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_019",
+    "page_number": 17,
+    "row_index": 0,
+    "cells": {
+      "21,358": "2,294",
+      "100": "100"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_019",
+    "page_number": 17,
+    "row_index": 1,
+    "cells": {
+      "21,358": "23,652",
+      "100": "100"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_020",
+    "page_number": 18,
+    "row_index": 0,
+    "cells": {
+      "0.06": "0.31"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_020",
+    "page_number": 18,
+    "row_index": 1,
+    "cells": {
+      "0.06": "3"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_020",
+    "page_number": 18,
+    "row_index": 2,
+    "cells": {
+      "0.06": "87"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_020",
+    "page_number": 18,
+    "row_index": 3,
+    "cells": {
+      "0.06": "Nil"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_020",
+    "page_number": 18,
+    "row_index": 4,
+    "cells": {
+      "0.06": "18"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_020",
+    "page_number": 18,
+    "row_index": 5,
+    "cells": {
+      "0.06": "3"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_020",
+    "page_number": 18,
+    "row_index": 6,
+    "cells": {
+      "0.06": "46"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_021",
+    "page_number": 19,
+    "row_index": 0,
+    "cells": {
+      "Nil": "There are no\ncomplaints, just\nobservations\nthat are done\nproactively, so that\nthey can be closed\ntimely"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_022",
+    "page_number": 20,
+    "row_index": 0,
+    "cells": {
+      "3": "64",
+      "9": "100",
+      "Nil": "Nil"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_023",
+    "page_number": 23,
+    "row_index": 0,
+    "cells": {
+      "22,372": "1,280",
+      "8,084": "974",
+      "36": "76"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_023",
+    "page_number": 23,
+    "row_index": 1,
+    "cells": {
+      "22,372": "23,652",
+      "8,084": "9,058",
+      "36": "38"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_024",
+    "page_number": 23,
+    "row_index": 0,
+    "cells": {
+      "-": "30"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_024",
+    "page_number": 23,
+    "row_index": 1,
+    "cells": {
+      "-": "30"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_025",
+    "page_number": 23,
+    "row_index": 0,
+    "cells": {
+      "22,372": "20,255",
+      "Nil": "Nil",
+      "NA": "NA",
+      "100": "100"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_025",
+    "page_number": 23,
+    "row_index": 1,
+    "cells": {
+      "22,372": "2,117",
+      "Nil": "Nil",
+      "NA": "NA",
+      "100": "100"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_025",
+    "page_number": 23,
+    "row_index": 2,
+    "cells": {
+      "22,372": "1,280",
+      "Nil": "Nil",
+      "NA": "NA",
+      "100": "100"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_025",
+    "page_number": 23,
+    "row_index": 3,
+    "cells": {
+      "22,372": "1,103",
+      "Nil": "Nil",
+      "NA": "NA",
+      "100": "100"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_025",
+    "page_number": 23,
+    "row_index": 4,
+    "cells": {
+      "22,372": "177",
+      "Nil": "Nil",
+      "NA": "NA",
+      "100": "100"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_026",
+    "page_number": 25,
+    "row_index": 0,
+    "cells": {
+      "3": "9",
+      "Nil": "Nil",
+      "NA": "This includes concern raised in\nrelation to employee transfer,\npromotion not received"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_026",
+    "page_number": 25,
+    "row_index": 1,
+    "cells": {
+      "3": "Nil",
+      "Nil": "Nil",
+      "NA": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_026",
+    "page_number": 25,
+    "row_index": 2,
+    "cells": {
+      "3": "Nil",
+      "Nil": "Nil",
+      "NA": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_026",
+    "page_number": 25,
+    "row_index": 3,
+    "cells": {
+      "3": "Nil",
+      "Nil": "Nil",
+      "NA": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_026",
+    "page_number": 25,
+    "row_index": 4,
+    "cells": {
+      "3": "Nil",
+      "Nil": "Nil",
+      "NA": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_027",
+    "page_number": 25,
+    "row_index": 0,
+    "cells": {
+      "3": "0.08%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_027",
+    "page_number": 25,
+    "row_index": 1,
+    "cells": {
+      "3": "1. Action taken – 1 case\n2. Conciliation – 2 cases"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 0,
+    "cells": {
+      "": "1,63,728"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 1,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 2,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 3,
+    "cells": {
+      "": "1,63,728"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 5,
+    "cells": {
+      "": "4,63,248"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 6,
+    "cells": {
+      "": "50,48,13,458"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 7,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 8,
+    "cells": {
+      "": "50,52,76,706"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 9,
+    "cells": {
+      "": "50,54,40,434"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 10,
+    "cells": {
+      "": "0.000821"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 11,
+    "cells": {
+      "": "0.000227"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_028",
+    "page_number": 27,
+    "row_index": 12,
+    "cells": {
+      "": "0.00795"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_029",
+    "page_number": 28,
+    "row_index": 0,
+    "cells": {
+      "": "1,29,32,02,788"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_029",
+    "page_number": 28,
+    "row_index": 1,
+    "cells": {
+      "": "27,724"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_029",
+    "page_number": 28,
+    "row_index": 2,
+    "cells": {
+      "": "2,55,26,049"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_029",
+    "page_number": 28,
+    "row_index": 3,
+    "cells": {
+      "": "4,78,70,14,545"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_029",
+    "page_number": 28,
+    "row_index": 4,
+    "cells": {
+      "": "Nil"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_029",
+    "page_number": 28,
+    "row_index": 5,
+    "cells": {
+      "": "6,10,57,71,106"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_029",
+    "page_number": 28,
+    "row_index": 6,
+    "cells": {
+      "": "32,00,81,114"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_029",
+    "page_number": 28,
+    "row_index": 7,
+    "cells": {
+      "": "0.000520"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_029",
+    "page_number": 28,
+    "row_index": 8,
+    "cells": {
+      "": "0.000144"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_029",
+    "page_number": 28,
+    "row_index": 9,
+    "cells": {
+      "": "0.005036"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 0,
+    "cells": {
+      "": "1,24,89,82,509"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 1,
+    "cells": {
+      "": "1,24,89,82,509"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 2,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 3,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 4,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 5,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 6,
+    "cells": {
+      "": "4,53,60,99,593"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 7,
+    "cells": {
+      "": "4,53,60,86,788"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 8,
+    "cells": {
+      "": "12,805"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 9,
+    "cells": {
+      "": "6,07,889"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 10,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 11,
+    "cells": {
+      "": "6,07,889"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 12,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 13,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 14,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_030",
+    "page_number": 29,
+    "row_index": 15,
+    "cells": {
+      "": "5,78,56,89,991"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_031",
+    "page_number": 29,
+    "row_index": 0,
+    "cells": {
+      "80,677": "1,63,954"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_031",
+    "page_number": 29,
+    "row_index": 1,
+    "cells": {
+      "80,677": "6,908"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_031",
+    "page_number": 29,
+    "row_index": 2,
+    "cells": {
+      "80,677": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_031",
+    "page_number": 29,
+    "row_index": 3,
+    "cells": {
+      "80,677": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_031",
+    "page_number": 29,
+    "row_index": 4,
+    "cells": {
+      "80,677": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_031",
+    "page_number": 29,
+    "row_index": 5,
+    "cells": {
+      "80,677": "NA"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_032",
+    "page_number": 30,
+    "row_index": 0,
+    "cells": {
+      "3,86,71,851": "28,86,646"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_032",
+    "page_number": 30,
+    "row_index": 1,
+    "cells": {
+      "3,86,71,851": "0.0000675"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_032",
+    "page_number": 30,
+    "row_index": 2,
+    "cells": {
+      "3,86,71,851": "0.0000186"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_032",
+    "page_number": 30,
+    "row_index": 3,
+    "cells": {
+      "3,86,71,851": "0.0006539"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 0,
+    "cells": {
+      "": "2,070"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 1,
+    "cells": {
+      "": "215"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 2,
+    "cells": {
+      "": "0.0013"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 3,
+    "cells": {
+      "": "3,194"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 4,
+    "cells": {
+      "": "177"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 5,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 6,
+    "cells": {
+      "": "293"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 7,
+    "cells": {
+      "": "67,27,744"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 8,
+    "cells": {
+      "": "67,33,693"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 9,
+    "cells": {
+      "": "0.0000109"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 10,
+    "cells": {
+      "": "0.0000030"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_033",
+    "page_number": 30,
+    "row_index": 11,
+    "cells": {
+      "": "0.0001060"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 1,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 2,
+    "cells": {
+      "": "3,791"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 3,
+    "cells": {
+      "": "3,192"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 4,
+    "cells": {
+      "": "388"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 5,
+    "cells": {
+      "": "211"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 6,
+    "cells": {
+      "": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 7,
+    "cells": {
+      "": "3,791"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 10,
+    "cells": {
+      "": "0.0013"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 11,
+    "cells": {
+      "": "20,49,160"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 12,
+    "cells": {
+      "": "55,45,589"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 13,
+    "cells": {
+      "": "37,012"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 14,
+    "cells": {
+      "": "34,91,377"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 15,
+    "cells": {
+      "": "2,09,859"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 16,
+    "cells": {
+      "": "16,39,220"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 17,
+    "cells": {
+      "": "1,68,121"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_034",
+    "page_number": 31,
+    "row_index": 18,
+    "cells": {
+      "": "75,94,749"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_035",
+    "page_number": 32,
+    "row_index": 0,
+    "cells": {
+      "": "7,987"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_035",
+    "page_number": 32,
+    "row_index": 1,
+    "cells": {
+      "": "4,837"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_035",
+    "page_number": 32,
+    "row_index": 2,
+    "cells": {
+      "": "1,07,51,414"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_035",
+    "page_number": 32,
+    "row_index": 3,
+    "cells": {
+      "": "Nil"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_035",
+    "page_number": 32,
+    "row_index": 4,
+    "cells": {
+      "": "Nil"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_036",
+    "page_number": 33,
+    "row_index": 0,
+    "cells": {
+      "1,07,64,238": "1,07,64,238"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_036",
+    "page_number": 33,
+    "row_index": 1,
+    "cells": {
+      "1,07,64,238": "0.0000175"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_036",
+    "page_number": 33,
+    "row_index": 2,
+    "cells": {
+      "1,07,64,238": "0.0001693"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_036",
+    "page_number": 33,
+    "row_index": 4,
+    "cells": {
+      "1,07,64,238": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_036",
+    "page_number": 33,
+    "row_index": 7,
+    "cells": {
+      "1,07,64,238": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_036",
+    "page_number": 33,
+    "row_index": 10,
+    "cells": {
+      "1,07,64,238": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_036",
+    "page_number": 33,
+    "row_index": 13,
+    "cells": {
+      "1,07,64,238": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_036",
+    "page_number": 33,
+    "row_index": 16,
+    "cells": {
+      "1,07,64,238": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_036",
+    "page_number": 33,
+    "row_index": 19,
+    "cells": {
+      "1,07,64,238": "-"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_037",
+    "page_number": 33,
+    "row_index": 0,
+    "cells": {
+      "2,64,64,246": "0.000043"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_037",
+    "page_number": 33,
+    "row_index": 1,
+    "cells": {
+      "2,64,64,246": "0.000416"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_038",
+    "page_number": 36,
+    "row_index": 0,
+    "cells": {
+      "19%": "66%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_039",
+    "page_number": 36,
+    "row_index": 0,
+    "cells": {
+      "10%": "13%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_039",
+    "page_number": 36,
+    "row_index": 1,
+    "cells": {
+      "10%": "9%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_039",
+    "page_number": 36,
+    "row_index": 2,
+    "cells": {
+      "10%": "68%"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_040",
+    "page_number": 39,
+    "row_index": 0,
+    "cells": {
+      "Nil": "Nil"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_040",
+    "page_number": 39,
+    "row_index": 1,
+    "cells": {
+      "Nil": "Nil"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_040",
+    "page_number": 39,
+    "row_index": 2,
+    "cells": {
+      "Nil": "These include\nboth commercial\nand technical\ncomplaints along\nFire and Safety\nComplaints\nresolved within\nService-Level\nAgreement (SLA)"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_040",
+    "page_number": 39,
+    "row_index": 3,
+    "cells": {
+      "Nil": "Nil"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_040",
+    "page_number": 39,
+    "row_index": 4,
+    "cells": {
+      "Nil": "Nil"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_040",
+    "page_number": 39,
+    "row_index": 5,
+    "cells": {
+      "Nil": "Nil"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_041",
+    "page_number": 40,
+    "row_index": 0,
+    "cells": {
+      "Nil": "Nil"
+    },
+    "section_id": null
+  },
+  {
+    "table_id": "tbl_041",
+    "page_number": 40,
+    "row_index": 1,
+    "cells": {
+      "Nil": "Not Applicable"
+    },
+    "section_id": null
+  }
+]

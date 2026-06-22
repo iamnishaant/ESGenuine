@@ -1,0 +1,223 @@
+openapi: 3.0.3
+info:
+  title: Pharos Integrity Platform API
+  description: Backend API contracts for ESG integrity evaluation — frozen at Week 1.
+  version: 2.0.0
+servers:
+  - url: http://localhost:8000
+
+paths:
+  # ─── Document Upload & Parsing ───
+  /v1/upload:
+    post:
+      summary: Upload ESG PDF and run 8-step parsing pipeline
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Pipeline results with statistics.
+
+  /v1/documents:
+    get:
+      summary: List all parsed documents
+      responses:
+        '200':
+          description: Document registry.
+
+  /v1/documents/{doc_id}:
+    get:
+      summary: Full parsed document result
+      parameters:
+        - name: doc_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Complete pipeline output.
+
+  /v1/documents/{doc_id}/structure:
+    get:
+      summary: Document graph structure (for UI navigation)
+      description: Returns the section hierarchy, block types, and graph edges. UI uses this for text highlighting, page jumping, and claim explorer navigation.
+      parameters:
+        - name: doc_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Document graph per document_graph_schema.json.
+
+  /v1/documents/{doc_id}/sections:
+    get:
+      summary: Section hierarchy tree
+      parameters:
+        - name: doc_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Sections list.
+
+  /v1/documents/{doc_id}/sentences:
+    get:
+      summary: All sentences with provenance
+      parameters:
+        - name: doc_id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: section
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Filtered sentence list.
+
+  /v1/documents/{doc_id}/candidates:
+    get:
+      summary: Claim candidates (Step 6 output)
+      parameters:
+        - name: doc_id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: min_score
+          in: query
+          required: false
+          schema: { type: number }
+      responses:
+        '200':
+          description: Candidate claims with scores and features.
+
+  /v1/documents/{doc_id}/chunks:
+    get:
+      summary: Semantic chunks with context windows (Step 7 output)
+      parameters:
+        - name: doc_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Context-windowed chunks for ML model input.
+
+  /v1/documents/{doc_id}/tables:
+    get:
+      summary: Structured table data (Step 5 output)
+      parameters:
+        - name: doc_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Table rows with column-mapped cells.
+
+  /v1/documents/{doc_id}/provenance:
+    get:
+      summary: Full provenance chain (Step 8 output)
+      parameters:
+        - name: doc_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: chunk → sentence → block → page → bbox links.
+
+  # ─── Claim Processing (Week 3+) ───
+  /v1/claims/extract:
+    post:
+      summary: Extract AAMLT claims from a parsed document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                document_id: { type: string }
+      responses:
+        '200':
+          description: Extracted claims list.
+
+  /v1/claims/{id}/score:
+    get:
+      summary: Integrity Gap score for a claim
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Score breakdown with uncertainty.
+
+  /v1/claims/{id}/graph:
+    get:
+      summary: Claim contradiction graph edges
+      description: Returns all claims that contradict/support/duplicate this claim.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Graph edges for this claim.
+
+  /v1/claims/{id}/audit:
+    get:
+      summary: Audit trail for a claim
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Chronological event log.
+
+  # ─── Evidence (Week 5+) ───
+  /v1/evidence/fetch:
+    post:
+      summary: Trigger satellite data retrieval
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                claim_id: { type: string }
+      responses:
+        '202':
+          description: Evidence job accepted.
+
+  # ─── Portfolio (Week 8+) ───
+  /v1/portfolio/overview:
+    get:
+      summary: Portfolio-level aggregation
+      responses:
+        '200':
+          description: Aggregated integrity scores across reports.
+
+  # ─── Health ───
+  /health:
+    get:
+      summary: Service health check
+      responses:
+        '200':
+          description: OK.
