@@ -153,7 +153,7 @@ const IntegrityAudit = () => {
           <CardHeader className="pb-2"><CardTitle className="text-sm">Claim Verdicts &amp; Verification Method</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {(factcheck.data?.results ?? []).slice(0, 12).map((r) => {
-              const method = verificationMethod(r.metric_key, r.claim_value != null);
+              const method = verificationMethod(r.metric_key, r.claim_value != null, r.observability_type);
               const MIcon = METHOD_ICON[method];
               return (
                 <div key={r.claim_id} className="flex items-start gap-3 border-b border-border/30 pb-2">

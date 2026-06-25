@@ -229,7 +229,7 @@ _SB_CLAIM_COLS = (
     "claim_id,doc_id,report_id,company_name,page_number,chunk_id,source_sentence,"
     "aspect,normalized_aspect,metric_family,metric_key,metric_value,metric_unit,"
     "metric_direction,time_start,time_end,time_bucket,location_text,location_scope,"
-    "claim_type,vagueness_score,groundability_score,claim_signature"
+    "claim_type,vagueness_score,groundability_score,observability_type,claim_signature"
 )
 
 

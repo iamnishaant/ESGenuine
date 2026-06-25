@@ -7,6 +7,7 @@ taxonomy and computes Greenwashing risk signals (Vagueness, Claim Type).
 """
 
 import json
+import re
 from typing import Dict, Tuple
 
 # ══════════════════════════════════════════════
@@ -275,27 +276,40 @@ class UnitCanonicalizer:
     _CONV: Dict[str, Tuple[str, float]] = {
         # emissions
         "tco2e": ("tCO2e", 1.0), "ktco2e": ("tCO2e", 1e3), "mtco2e": ("tCO2e", 1e6),
+        "gco2e": ("tCO2e", 1e-6), "kgco2e": ("tCO2e", 1e-3),
         # mass
         "tonnes": ("tonnes", 1.0), "tonne": ("tonnes", 1.0), "ton": ("tonnes", 1.0),
-        "kg": ("tonnes", 1e-3), "kilograms": ("tonnes", 1e-3),
+        "kg": ("tonnes", 1e-3), "kilograms": ("tonnes", 1e-3), "kilogram": ("tonnes", 1e-3),
+        "g": ("tonnes", 1e-6), "gram": ("tonnes", 1e-6), "grams": ("tonnes", 1e-6),
         "kt": ("tonnes", 1e3), "mt": ("tonnes", 1.0),  # 'mt' read as metric tonne
         # energy
         "kwh": ("MWh", 1e-3), "mwh": ("MWh", 1.0), "gwh": ("MWh", 1e3), "twh": ("MWh", 1e6),
-        "gj": ("MWh", 0.2777778), "tj": ("MWh", 277.7778),
+        "mj": ("MWh", 2.777778e-4), "gj": ("MWh", 0.2777778), "tj": ("MWh", 277.7778),
+        "pj": ("MWh", 277777.8),
         # volume
-        "litres": ("m3", 1e-3), "litre": ("m3", 1e-3), "liters": ("m3", 1e-3),
+        "litres": ("m3", 1e-3), "litre": ("m3", 1e-3), "liters": ("m3", 1e-3), "liter": ("m3", 1e-3),
+        "l": ("m3", 1e-3),
         "m3": ("m3", 1.0), "m³": ("m3", 1.0), "kl": ("m3", 1.0),
-        "kilolitres": ("m3", 1.0), "ml": ("m3", 1e3), "megalitres": ("m3", 1e3),
+        "kilolitres": ("m3", 1.0), "kilolitre": ("m3", 1.0), "ml": ("m3", 1e3),
+        "megalitres": ("m3", 1e3), "megalitre": ("m3", 1e3),
         # area
         "hectares": ("hectares", 1.0), "hectare": ("hectares", 1.0), "ha": ("hectares", 1.0),
         "acres": ("hectares", 0.404686), "acre": ("hectares", 0.404686),
-        "km2": ("hectares", 100.0), "km²": ("hectares", 100.0),
+        "km2": ("hectares", 100.0), "km²": ("hectares", 100.0), "sqkm": ("hectares", 100.0),
         # dimensionless / passthrough
         "%": ("%", 1.0), "percent": ("%", 1.0),
     }
 
-    # Magnitude words that scale a base unit (e.g. "million tonnes").
-    _MAGNITUDE = [("billion", 1e9), ("bn", 1e9), ("million", 1e6), ("thousand", 1e3)]
+    # Magnitude words that scale a base unit (e.g. "million tonnes"). Includes the
+    # Indian-numbering words common in BRSR / Indian ESG reports (lakh = 1e5, crore = 1e7).
+    _MAGNITUDE = [("trillion", 1e12), ("billion", 1e9), ("bn", 1e9), ("crore", 1e7),
+                  ("million", 1e6), ("lakh", 1e5), ("thousand", 1e3)]
+
+    # Trailing reporting-cadence qualifiers — a temporal suffix, NOT a ratio denominator.
+    # "tonnes CO2e per year" is still an absolute tCO2e, so strip these before the
+    # intensity/ratio guard (which otherwise drops anything containing "per"/"/").
+    _CADENCE_SUFFIXES = (" per year", " per annum", " per yr", " per a", " annually",
+                         "/year", "/yr", "/a", " p.a.", " pa")
 
     @classmethod
     def to_canonical(cls, value, unit) -> Tuple:
@@ -305,6 +319,12 @@ class UnitCanonicalizer:
         u = (unit or "").strip().lower()
         if not u:
             return value, None
+        # 0) drop a trailing reporting cadence ("… per year") — it's temporal, not a
+        #    ratio denominator, so it must not trip the intensity guard below.
+        for suf in cls._CADENCE_SUFFIXES:
+            if u.endswith(suf):
+                u = u[: -len(suf)].strip()
+                break
         # 1) exact canonical map (fast path)
         if u in cls._CONV:
             base, factor = cls._CONV[u]
@@ -312,11 +332,12 @@ class UnitCanonicalizer:
                 return value * factor, base
             except TypeError:
                 return value, (unit or None)
-        # 2) intensity / ratio units ("X per Y", "tonnes/tonne of steel") are NOT a base
-        #    quantity — keep them distinct so they're never compared with absolutes.
+        # 2) intensity / ratio units ("X per Y", "tonnes/tonne of steel", "gCO2e/MJ") are
+        #    NOT a base quantity — keep them distinct so they're never compared with absolutes.
         if "/" in u or " per " in u:
             return value, (unit or None)
-        # 3) substring heuristic for verbose / compound units (Mt CO2e, million tonnes…)
+        # 3) substring heuristic for verbose / compound units (Mt CO2e, million tonnes,
+        #    million hectares, grams CO2e…). `mag` captures a numbering word multiplier.
         mag = 1.0
         for w, m in cls._MAGNITUDE:
             if w in u:
@@ -326,16 +347,20 @@ class UnitCanonicalizer:
             if "co2" in u or "ghg" in u:
                 f = mag
                 if "ktco2" in u or "kt co2" in u or "kilotonne" in u:
-                    f = max(f, 1e3)
+                    f *= 1e3
                 elif "mtco2" in u or "mt co2" in u or "megatonne" in u:
-                    f = max(f, 1e6)
+                    f *= 1e6
+                elif "kgco2" in u or "kg co2" in u or "kilogram" in u:
+                    f *= 1e-3
+                elif "gco2" in u or re.search(r"\bg(ram)?s?\b", u):
+                    f *= 1e-6
                 return value * f, "tCO2e"
             if "tonne" in u or "tons" in u or u == "ton":
                 f = mag
                 if "ktonne" in u or "kilotonne" in u:
-                    f = max(f, 1e3)
+                    f *= 1e3
                 elif "megatonne" in u:
-                    f = max(f, 1e6)
+                    f *= 1e6
                 return value * f, "tonnes"
             if "wh" in u:  # energy: kWh / MWh / GWh / TWh
                 if "twh" in u:
@@ -347,6 +372,13 @@ class UnitCanonicalizer:
                 else:  # mwh / wh default
                     f = 1.0
                 return value * f * mag, "MWh"
+            if "hectare" in u or "acre" in u:
+                f = mag * (0.404686 if "acre" in u else 1.0)
+                return value * f, "hectares"
+            if "km2" in u or "km²" in u or "sq km" in u or "square kilomet" in u:
+                return value * mag * 100.0, "hectares"
+            if "litre" in u or "liter" in u:  # verbose volume (megalitre handled in _CONV)
+                return value * mag * 1e-3, "m3"
         except TypeError:
             return value, (unit or None)
         return value, (unit or None)

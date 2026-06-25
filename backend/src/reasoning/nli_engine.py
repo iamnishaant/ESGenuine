@@ -19,23 +19,48 @@ class ContradictionEngine:
         # Swapped to a lightweight, fast NLI model to avoid massive RAM hangs on local CPU
         self.nli_model = pipeline("text-classification", model="typeform/distilbert-base-uncased-mnli")
 
+    @staticmethod
+    def _normalize_label(raw) -> str:
+        """Map a model label to one of contradiction/neutral/entailment.
+        Handles named labels (CONTRADICTION/…) and is defensive about LABEL_x ids
+        (returned as-is lowercased, so they never accidentally read as a contradiction)."""
+        l = str(raw or "").lower()
+        if "contra" in l:
+            return "contradiction"
+        if "entail" in l:
+            return "entailment"
+        if "neutral" in l:
+            return "neutral"
+        return l
+
     def _textual_entailment(self, text_a: str, text_b: str) -> dict:
         """
-        Runs RoBERTa-MNLI to determine if text_b contradicts text_a.
-        MNLI labels typically map to: 0 -> contradiction, 1 -> neutral, 2 -> entailment
+        Decide whether text_b (hypothesis) contradicts text_a (premise) using
+        DistilBERT-MNLI as a proper premise/hypothesis PAIR.
+
+        FIX (self_improvement.md / take_step_forward.md §3.3): the previous version
+        concatenated both sentences into one string with a bogus `</s></body>`
+        separator and ran *single-sequence* classification — the model never received
+        a premise/hypothesis pair, so every "Textual" verdict was unreliable. The HF
+        text-classification pipeline tokenizes {"text": premise, "text_pair": hypothesis}
+        as a real NLI pair (premise [SEP] hypothesis).
         """
-        # Format for MNLI models: "premise </s></body> hypothesis"
-        input_text = f"{text_a} </s></body> {text_b}"
-        result = self.nli_model(input_text)[0]
-        
-        label = result['label'].lower()
-        score = result['score']
-        
-        is_contradiction = score > 0.6 and label == "contradiction"
+        a = (text_a or "").strip()
+        b = (text_b or "").strip()
+        if not a or not b:
+            return {"is_contradiction": False, "label": "neutral", "confidence": 0.0}
+
+        result = self.nli_model({"text": a, "text_pair": b})
+        if isinstance(result, list):
+            result = result[0]
+
+        label = self._normalize_label(result["label"])
+        score = float(result["score"])
+        is_contradiction = label == "contradiction" and score > 0.6
         return {
             "is_contradiction": is_contradiction,
             "label": label,
-            "confidence": score
+            "confidence": score,
         }
 
     # Metric keys that carry no comparable numeric semantics.
@@ -146,11 +171,15 @@ class ContradictionEngine:
         """
         # 1. Run strict numeric rules first (they are cheaper and more definitive)
         numeric_result = self._numeric_conflict(claim_a, claim_b)
-        
-        # 2. Run NLI reasoning to catch subtle textual contradictions
-        text_a = claim_a.get("source_sentence", "")
-        text_b = claim_b.get("source_sentence", "")
-        nli_result = self._textual_entailment(text_a, text_b)
+
+        # 2. NLI is only a fallback for subtle textual contradictions. If the numeric
+        #    rules already decided, skip the expensive (and lower-confidence) NLI pass.
+        if numeric_result:
+            nli_result = {"is_contradiction": False, "label": "skipped", "confidence": 0.0}
+        else:
+            text_a = claim_a.get("source_sentence", "")
+            text_b = claim_b.get("source_sentence", "")
+            nli_result = self._textual_entailment(text_a, text_b)
         
         severity = "None"
         conflict_type = "None"

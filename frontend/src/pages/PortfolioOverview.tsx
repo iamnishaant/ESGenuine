@@ -15,20 +15,53 @@ import { AppLayout } from '@/components/AppLayout';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { useClaims } from '@/hooks/useClaims';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { getPortfolioIntegrity, type PortfolioIntegrity } from '@/lib/api';
+
+// Backend greenwashing_risk ("Low"/"Moderate"/"High") → the UI's risk band.
+const riskFromBackend = (r?: string | null): 'low' | 'medium' | 'high' =>
+  r === 'Low' ? 'low' : r === 'High' ? 'high' : 'medium';
 
 const PortfolioOverview = () => {
   const { companies, loading } = useClaims();
 
-  const totalClaims = companies.reduce((acc, c) => acc + c.claims.verified + c.claims.review + c.claims.gap, 0);
-  const avgScore = companies.length > 0 ? Math.round(companies.reduce((acc, c) => acc + c.integrityScore, 0) / companies.length) : 0;
-  const gapCount = companies.reduce((acc, c) => acc + c.claims.gap, 0);
+  // Reconcile the headline Integrity Score with the backend audit (single source of
+  // truth). The Portfolio used to compute its own groundability-mean score that never
+  // matched the Integrity Audit page; we now overlay the backend build_report() score
+  // and only fall back to the local number if the backend is unreachable.
+  const [backendScores, setBackendScores] = useState<Map<string, PortfolioIntegrity>>(new Map());
+  useEffect(() => {
+    let cancelled = false;
+    getPortfolioIntegrity()
+      .then((res) => {
+        if (cancelled) return;
+        const m = new Map<string, PortfolioIntegrity>();
+        res.companies.forEach((c) => m.set((c.company_name || c.company_id).trim().toLowerCase(), c));
+        setBackendScores(m);
+      })
+      .catch(() => { /* backend down → keep local fallback scores */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Companies with the backend score overlaid where available.
+  const resolved = useMemo(() => companies.map((c) => {
+    const b = backendScores.get((c.name || '').trim().toLowerCase());
+    if (b && b.integrity_score != null) {
+      return { ...c, integrityScore: Math.round(b.integrity_score), riskLevel: riskFromBackend(b.greenwashing_risk),
+               grade: b.grade, scoreSource: 'backend' as const };
+    }
+    return { ...c, scoreSource: 'local' as const };
+  }), [companies, backendScores]);
+
+  const totalClaims = resolved.reduce((acc, c) => acc + c.claims.verified + c.claims.review + c.claims.gap, 0);
+  const avgScore = resolved.length > 0 ? Math.round(resolved.reduce((acc, c) => acc + c.integrityScore, 0) / resolved.length) : 0;
+  const gapCount = resolved.reduce((acc, c) => acc + c.claims.gap, 0);
 
   // Group by broad region heuristically based on location string
   const regionData = useMemo(() => {
     const regions = new Map<string, { companies: Set<string>, avgScoreSum: number, claims: number }>();
-    
-    companies.forEach(company => {
+
+    resolved.forEach(company => {
       // If no locations, put in Global
       if (company.locations.length === 0) {
         if (!regions.has('Global')) regions.set('Global', { companies: new Set(), avgScoreSum: 0, claims: 0 });
@@ -65,20 +98,20 @@ const PortfolioOverview = () => {
         claims: data.claims
       }))
       .sort((a, b) => b.companies - a.companies);
-  }, [companies]);
+  }, [resolved]);
 
   // Real risk distribution computed from company risk levels (no hardcoded split).
   const riskDist = useMemo(() => {
-    const total = companies.length || 1;
-    const low = companies.filter(c => c.riskLevel === 'low').length;
-    const medium = companies.filter(c => c.riskLevel === 'medium').length;
-    const high = companies.filter(c => c.riskLevel === 'high').length;
+    const total = resolved.length || 1;
+    const low = resolved.filter(c => c.riskLevel === 'low').length;
+    const medium = resolved.filter(c => c.riskLevel === 'medium').length;
+    const high = resolved.filter(c => c.riskLevel === 'high').length;
     return {
       low: Math.round((low / total) * 100),
       medium: Math.round((medium / total) * 100),
       high: Math.round((high / total) * 100),
     };
-  }, [companies]);
+  }, [resolved]);
 
   if (loading) {
     return (
@@ -121,8 +154,8 @@ const PortfolioOverview = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           {[
-            { label: 'Total Companies', value: companies.length, icon: Building2, color: 'text-primary', tooltip: '' },
-            { label: 'Average Integrity', value: `${avgScore}%`, icon: CheckCircle2, color: 'text-success', tooltip: 'Weighted by claim materiality and verifiability confidence.' },
+            { label: 'Total Companies', value: resolved.length, icon: Building2, color: 'text-primary', tooltip: '' },
+            { label: 'Average Integrity', value: `${avgScore}%`, icon: CheckCircle2, color: 'text-success', tooltip: 'ESG Integrity Score (100 − greenwashing penalties) from the backend audit, averaged across companies. Same methodology as the Integrity Audit page; each company scored on its latest report.' },
             { label: 'Total Claims', value: totalClaims, icon: Globe2, color: 'text-foreground', tooltip: '' },
             { label: 'Active Gaps', value: gapCount, icon: AlertTriangle, color: 'text-danger', tooltip: '' },
           ].map((stat, i) => (
@@ -159,10 +192,10 @@ const PortfolioOverview = () => {
             >
               <div className="px-4 py-3 border-b border-border/30 flex items-center justify-between">
                 <h3 className="text-sm font-medium text-foreground">Portfolio Companies</h3>
-                <span className="text-xs text-muted-foreground">{companies.length} companies</span>
+                <span className="text-xs text-muted-foreground">{resolved.length} companies</span>
               </div>
               <div className="divide-y divide-border/20">
-                {companies.map((company, index) => (
+                {resolved.map((company, index) => (
                   <motion.div
                     key={company.id}
                     className="p-4 hover:bg-muted/20 transition-colors cursor-pointer group"

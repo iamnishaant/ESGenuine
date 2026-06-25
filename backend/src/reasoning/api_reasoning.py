@@ -56,7 +56,8 @@ class AskRequest(BaseModel):
 _CLAIM_COLS = (
     "claim_id,doc_id,report_id,company_id,company_name,report_year,page_number,source_sentence,"
     "aspect,normalized_aspect,metric_family,metric_key,metric_value,metric_unit,"
-    "metric_direction,time_bucket,location_scope,claim_type,vagueness_score,groundability_score"
+    "metric_direction,time_bucket,location_scope,claim_type,vagueness_score,groundability_score,"
+    "observability_type"
 )
 
 
@@ -108,7 +109,11 @@ async def get_contradictions(doc_id: str):
                     "severity": severity,
                     "conflict_type": eval_result["conflict_type"],
                     "reasoning": eval_result["reasoning"],
-                    "confidence": eval_result["nli_data"]["confidence"] if "nli_data" in eval_result else 1.0
+                    # Numeric contradictions are deterministic (confidence 1.0); only the
+                    # "Textual" path carries a model confidence. (Previously every numeric
+                    # conflict reported the NLI model's meaningless score.)
+                    "confidence": eval_result["nli_data"]["confidence"]
+                    if eval_result.get("conflict_type") == "Textual" else 1.0
                 })
 
     return {
@@ -222,6 +227,39 @@ def _fetch_company_claims(company_id: str):
             break
         start += 1000
     return out
+
+
+@router.get("/portfolio/integrity")
+async def portfolio_integrity():
+    """Per-company integrity scores computed with the SAME build_report() the Integrity
+    Audit page uses — so the Portfolio headline score and the Integrity Audit score agree
+    (single source of truth; fixes the "two products" score divergence where the frontend
+    computed its own groundability-mean score that never matched the backend). Each company
+    is scored on its latest report year."""
+    all_claims = _fetch_all_claims()
+    by_company = collections.defaultdict(list)
+    for c in all_claims:
+        cid = c.get("company_id") or c.get("company_name") or "unknown"
+        by_company[cid].append(c)
+
+    out = []
+    for cid, claims in by_company.items():
+        years = [c.get("report_year") for c in claims if c.get("report_year") is not None]
+        latest = max(years) if years else None
+        scored = [c for c in claims if c.get("report_year") == latest] if latest is not None else claims
+        report = build_report(scored, _numeric_contradictions(scored))
+        out.append({
+            "company_id": cid,
+            "company_name": (scored[0].get("company_name") if scored else None) or cid,
+            "report_year": latest,
+            "doc_id": scored[0].get("doc_id") if scored else None,
+            "integrity_score": report.get("integrity_score"),
+            "grade": report.get("grade"),
+            "greenwashing_risk": report.get("greenwashing_risk"),
+            "total_claims": (report.get("meta") or {}).get("total_claims", len(scored)),
+        })
+    out.sort(key=lambda r: (r["integrity_score"] is None, -(r["integrity_score"] or 0)))
+    return {"count": len(out), "companies": out}
 
 
 @router.get("/{doc_id}/fact-check")

@@ -38,6 +38,7 @@ export interface IntegrityReport {
 export interface FactCheckResult {
   claim_id: string; claim_text: string; metric_key: string; reference_year: string;
   claim_value: number | null; claim_unit: string | null;
+  observability_type?: string | null;
   verdict: 'SUPPORTED' | 'CONTRADICTED' | 'UNVERIFIED'; confidence: number;
   reasoning: string; evidence: Array<Record<string, unknown>>;
 }
@@ -50,6 +51,11 @@ export interface ScorecardMetric {
   rank: number; of: number; percentile: number; peer_median: number; verdict: string;
 }
 export interface Scorecard { company: string; metrics_compared: number; metrics: ScorecardMetric[]; }
+export interface PortfolioIntegrity {
+  company_id: string; company_name: string; report_year: number | null; doc_id: string | null;
+  integrity_score: number | null; grade: string | null; greenwashing_risk: string | null;
+  total_claims: number;
+}
 export interface AskAnswer {
   question: string; answer: string; engine: string;
   citations: Array<{ n: number; company: string; year: number; page: number; doc_id: string; text: string; similarity: number }>;
@@ -60,6 +66,10 @@ export const getIntegrityReport = (docId: string) => get<IntegrityReport>(`/repo
 export const getGreenwashingFlags = (docId: string) => get<{ total_flags: number; flags: GreenwashFlag[] }>(`/reports/${docId}/greenwashing-flags`);
 export const getFactCheck = (docId: string, limit = 50) => get<FactCheckReport>(`/reports/${docId}/fact-check?limit=${limit}`);
 export const getScorecard = (companyId: string) => get<Scorecard>(`/benchmark/company/${companyId}`);
+// Single source of truth for the headline Integrity Score: same build_report() the
+// Integrity Audit page uses, so Portfolio and Integrity Audit never disagree.
+export const getPortfolioIntegrity = () =>
+  get<{ count: number; companies: PortfolioIntegrity[] }>(`/reports/portfolio/integrity`);
 export const getTrajectory = (companyId: string, metricKey: string, targetValue?: number, targetYear?: number) => {
   const q = new URLSearchParams();
   if (targetValue != null) q.set('target_value', String(targetValue));
@@ -77,6 +87,10 @@ export const getAuditSummary = (docId: string) => get<Record<string, unknown>>(`
 // financial claims are verified by DATA/DOCUMENT cross-checking (the fact-check
 // engine), never by imagery. This router keeps the UI honest about *how* a claim
 // can be checked.
+//
+// Source of truth is the backend `observability_type` the extractor computes and now
+// persists. The OPTICAL keyword list below is only a FALLBACK for legacy rows ingested
+// before observability_type was persisted — do not let the two definitions drift.
 const OPTICAL = [
   'reforestation', 'deforestation', 'land use', 'vegetation', 'forest', 'plantation',
   'solar', 'wind', 'water surface', 'green cover', 'mining', 'flooding', 'wetland',
@@ -84,7 +98,19 @@ const OPTICAL = [
 ];
 export type VerificationMethod = 'imagery' | 'data_crosscheck' | 'document_review';
 
-export function verificationMethod(aspect?: string, hasMetric?: boolean): VerificationMethod {
+export function verificationMethod(
+  aspect?: string,
+  hasMetric?: boolean,
+  observabilityType?: string | null,
+): VerificationMethod {
+  // Preferred path: trust the persisted backend signal.
+  switch ((observabilityType || '').toLowerCase()) {
+    case 'optical_possible': return 'imagery';
+    case 'directly_observable':
+    case 'reported_metric': return 'data_crosscheck';
+    case 'not_observable': return 'document_review';
+  }
+  // Fallback (legacy rows with no observability_type): keyword heuristic.
   const a = (aspect || '').toLowerCase();
   if (OPTICAL.some((k) => a.includes(k))) return 'imagery';
   if (hasMetric) return 'data_crosscheck';

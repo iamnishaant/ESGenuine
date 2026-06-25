@@ -88,6 +88,7 @@ def check_claim(claim: Dict[str, Any], evidence: List[Dict[str, Any]]) -> Dict[s
         "claim_id": claim.get("claim_id"),
         "claim_text": (claim.get("source_sentence") or "")[:200],
         "metric_key": claim.get("metric_key"),
+        "observability_type": claim.get("observability_type"),
         "reference_year": _real_year(claim.get("time_bucket")),
         "claim_value": cv, "claim_unit": cu,
     }

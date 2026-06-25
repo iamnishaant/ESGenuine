@@ -88,6 +88,7 @@ def _row(claim, doc_id: str, emb: list, meta: Dict[str, Any]) -> dict:
         "claim_type": claim.claim_type,
         "vagueness_score": claim.vagueness_score,
         "groundability_score": claim.groundability_score,
+        "observability_type": getattr(claim, "observability_type", None) or "not_observable",
         "claim_signature": claim.claim_signature,
         "embedding": emb,
         "company_id": meta.get("company_id"),

@@ -95,6 +95,11 @@ ALTER TABLE claims ADD COLUMN IF NOT EXISTS company_name  TEXT;
 ALTER TABLE claims ADD COLUMN IF NOT EXISTS report_year   INT;
 ALTER TABLE claims ADD COLUMN IF NOT EXISTS report_id     TEXT;
 
+-- 5b. Persist the verification-routing signal the extractor already computes.
+-- Values: 'directly_observable' | 'reported_metric' | 'optical_possible' | 'not_observable'.
+-- The frontend reads this instead of re-deriving routing from a duplicated keyword list.
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS observability_type TEXT;
+
 -- 6. Cross-report compound index  (company + year + signature for fast bucketing)
 CREATE INDEX IF NOT EXISTS claims_cross_report_idx
 ON claims (company_id, report_year, claim_signature);
