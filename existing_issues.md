@@ -6,6 +6,22 @@
 
 ---
 
+## Status rollup — 2026-06-26
+
+All 🔴 Critical and 🟠 major data defects are **resolved & verified on live data**. #1–#19 are closed except the items explicitly listed below. Verified this date:
+- **#1** `match_claims` vector RPC exists & is callable (no longer PGRST202). **#2** reasoning endpoints return real conflicts (was a consequence of #1+#3).
+- **#3** `doc_id` is a real document id (`tata_power_2024`), not a chunk id. **#6** companies labeled correctly (Tata Power / Shell / Microsoft / Infosys — not "Business").
+- **#13** all 6 reports carry accurate `claim_count` (181 / 527 / 727 / 369 / 249 / 332) — no empty shells (Microsoft + Infosys ingested with 70B).
+- **#7** contradiction noise addressed (#18 cross-year fix + unit-guard + #19 dimension split). **#18** count over-fire fixed. **#19** deterministic layer fixed + backfilled (top batch).
+- Score saturation fixed (count-weighted v2.0) + human-in-the-loop review (v2.1).
+
+**Still open — by choice or accepted ceiling (the remaining ~15%):**
+- **LLM extraction ceiling** (residual of #7/#19): aspect/scope *mislabels* (diversity claims tagged `biodiversity`; 58Mt vs 305Mt both tagged `scope1` same year). Not deterministically fixable — needs 70B re-extraction with tighter aspect derivation. The product's standing data-quality remainder.
+- **Evidence-corpus depth** (fact-check coverage 4–46%): needs *sourced* real reference figures (no-fabricate rule) — not an engine defect; blocked on external data.
+- **Minor cosmetics (unverified / untouched):** #4 mojibake in some parsed text, #5 noisy table rows, #10 `/sections` missing `total`, #11 `/health` version string, #12 in-memory filename lost on restart.
+
+---
+
 ## Batch 2026-06-26 — #19 deterministic layer RESOLVED + test-leak fix
 
 ### ✅ #19 metric_key conflation — deterministic layer fixed (split dimensions) + backfilled
