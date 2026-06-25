@@ -66,6 +66,15 @@ class AskRequest(BaseModel):
     doc_id: Optional[str] = None
     k: int = 8
 
+
+class ReviewIn(BaseModel):
+    """A reviewer's verdict on one flagged item (human-in-the-loop)."""
+    subject_id: str                 # claim_id | contradiction hash | '__report__'
+    flag_type: str
+    verdict: str                    # 'dismissed' (false positive, +score) | 'confirmed' (valid)
+    note: Optional[str] = None
+    reviewer: Optional[str] = None
+
 # Columns the reasoning/report surface needs (excludes the large embedding vector).
 _CLAIM_COLS = (
     "claim_id,doc_id,report_id,company_id,company_name,report_year,page_number,source_sentence,"
@@ -79,6 +88,22 @@ def _fetch_doc_claims(doc_id: str):
     sb = get_supabase()
     res = sb.table("claims").select(_CLAIM_COLS).eq("doc_id", doc_id).execute()
     return res.data or []
+
+
+def _fetch_reviews(doc_id: str):
+    """Reviewer verdicts for this document's flags (drives the review-adjusted score).
+    Tolerant of the table not existing yet (pre-migration) — returns [] so reports still load."""
+    if not doc_id:
+        return []
+    try:
+        sb = get_supabase()
+        res = (sb.table("claim_reviews")
+               .select("subject_id,flag_type,verdict,note,reviewer,created_at")
+               .eq("doc_id", doc_id).execute())
+        return res.data or []
+    except Exception as e:
+        print(f"[reviews] fetch failed for {doc_id} (proceeding without): {e}")
+        return []
 
 @router.get("/{doc_id}/contradictions")
 async def get_contradictions(doc_id: str):
@@ -188,7 +213,45 @@ async def get_integrity_report(doc_id: str):
         contradictions = (await get_contradictions(doc_id)).get("conflicts", [])
     except HTTPException:
         contradictions = []
-    return build_report(claims, contradictions)
+    return build_report(claims, contradictions, _fetch_reviews(doc_id))
+
+
+@router.get("/{doc_id}/review-queue")
+async def get_review_queue(doc_id: str):
+    """Every reviewable flagged item for this report (per-claim flags, contradictions,
+    report-level flags) + the model's stated reason + the reviewer's current verdict (if any).
+    Drives the human-in-the-loop review UI."""
+    claims = _fetch_doc_claims(doc_id)
+    if not claims:
+        raise HTTPException(status_code=404, detail="No claims found for this document.")
+    contradictions = _numeric_contradictions(claims)[0]
+    items = GreenwashTaxonomy.attribute(claims, contradictions=contradictions)
+    verdicts = {(r["subject_id"], r["flag_type"]): r for r in _fetch_reviews(doc_id)}
+    for it in items:
+        r = verdicts.get((it["subject_id"], it["flag_type"]))
+        it["verdict"] = r.get("verdict") if r else None
+        it["note"] = r.get("note") if r else None
+    # Unreviewed first (actionable), then dismissed, then confirmed.
+    _order = {None: 0, "dismissed": 1, "confirmed": 2}
+    items.sort(key=lambda it: _order.get(it.get("verdict"), 0))
+    return {"doc_id": doc_id, "total": len(items),
+            "reviewed": sum(1 for it in items if it.get("verdict")), "items": items}
+
+
+@router.post("/{doc_id}/reviews")
+async def post_review(doc_id: str, body: ReviewIn):
+    """Upsert a reviewer verdict on one flagged item (one current verdict per item).
+    A 'dismissed' verdict raises the integrity score on the next recompute."""
+    if body.verdict not in ("dismissed", "confirmed"):
+        raise HTTPException(status_code=400, detail="verdict must be 'dismissed' or 'confirmed'.")
+    sb = get_supabase()
+    row = {"doc_id": doc_id, "subject_id": body.subject_id, "flag_type": body.flag_type,
+           "verdict": body.verdict, "note": body.note, "reviewer": body.reviewer}
+    try:
+        sb.table("claim_reviews").upsert(row, on_conflict="doc_id,subject_id,flag_type").execute()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Could not save review: {e}")
+    return {"status": "ok", **row}
 
 
 def _fetch_all_claims():
@@ -235,12 +298,15 @@ async def portfolio_integrity():
         years = [c.get("report_year") for c in claims if c.get("report_year") is not None]
         latest = max(years) if years else None
         scored = [c for c in claims if c.get("report_year") == latest] if latest is not None else claims
-        report = build_report(scored, _numeric_contradictions(scored)[0])
+        doc_id = scored[0].get("doc_id") if scored else None
+        # Apply reviewer dismissals so the portfolio grade reflects human review app-wide
+        # (consistent with the Integrity Audit page's adjusted score).
+        report = build_report(scored, _numeric_contradictions(scored)[0], _fetch_reviews(doc_id))
         out.append({
             "company_id": cid,
             "company_name": (scored[0].get("company_name") if scored else None) or cid,
             "report_year": latest,
-            "doc_id": scored[0].get("doc_id") if scored else None,
+            "doc_id": doc_id,
             "integrity_score": report.get("integrity_score"),
             "grade": report.get("grade"),
             "greenwashing_risk": report.get("greenwashing_risk"),

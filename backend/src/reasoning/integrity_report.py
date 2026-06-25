@@ -27,7 +27,8 @@ _STRUCTURAL_PREVALENCE = 0.5
 
 # Bump when the scoring formula / flag set changes so a stored score's provenance is clear.
 # 2.0: flat per-flag-type penalty → count-weighted (penalty × prevalence). Shifts every score.
-_REPORT_VERSION = "2.0"
+# 2.1: honor human reviews — 'dismissed' flags drop out of the score; raw score still reported.
+_REPORT_VERSION = "2.1"
 
 
 # Mirror of frontend verificationMethod() (lib/api.ts) — keep the two in sync.
@@ -63,9 +64,32 @@ def _num(v):
         return None
 
 
+def _score_flags(flags, total):
+    """Count-weighted score for a flag list: 100 − Σ(severity weight × prevalence).
+    prevalence = fraction of claims that triggered the flag (structural count=0 flags use a
+    fixed prevalence). Returns (score_float, penalty_breakdown sorted most-impactful first).
+    Pure, so it can be run on both the adjusted and the raw (pre-review) flag sets."""
+    score = 100.0
+    breakdown = []
+    for f in flags:
+        weight = _SEV_WEIGHT.get(f.severity, 0)
+        prevalence = min(1.0, f.count / total) if f.count else _STRUCTURAL_PREVALENCE
+        pts = round(weight * prevalence, 1)
+        score -= pts
+        breakdown.append({
+            "type": f.type, "title": f.title, "severity": f.severity,
+            "count": f.count, "prevalence": round(prevalence, 3), "points_deducted": pts,
+        })
+    score = max(0.0, min(100.0, score))
+    breakdown.sort(key=lambda p: p["points_deducted"], reverse=True)
+    return score, breakdown
+
+
 def build_report(claims: List[Dict[str, Any]],
-                 contradictions: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+                 contradictions: Optional[List[Dict[str, Any]]] = None,
+                 reviews: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     contradictions = contradictions or []
+    reviews = reviews or []
     total = len(claims)
     if total == 0:
         return {"status": "No Data", "integrity_score": None, "grade": None, "flags": []}
@@ -100,33 +124,30 @@ def build_report(claims: List[Dict[str, Any]],
         },
     }
 
-    # ── greenwashing flags (taxonomy) ───────────────────────────────────────────
-    flags = GreenwashTaxonomy.analyze(claims, contradictions=contradictions)
+    # ── greenwashing flags (taxonomy), honoring human reviews ────────────────────
+    # A 'dismissed' review removes that item from its flag's count → prevalence drops →
+    # penalty drops → grade rises. The score is COUNT-WEIGHTED: each flag removes
+    # (severity weight × prevalence) points, so a pervasive problem dominates a rare one
+    # (the old flat per-type penalty gave every real report ~all flag types → everyone F).
+    dismissed = {(str(r.get("subject_id")), r.get("flag_type"))
+                 for r in reviews if (r.get("verdict") == "dismissed")}
+
+    flags = GreenwashTaxonomy.analyze(claims, contradictions=contradictions, dismissed=dismissed)
     flag_dicts = [f.to_dict() for f in flags]
     flag_counts = collections.Counter(f.severity for f in flags)
 
-    # ── integrity score: 100 minus COUNT-WEIGHTED per-flag severity penalties ────
-    # Each flag removes (severity weight × prevalence) points, where prevalence is the
-    # fraction of claims that triggered it. So a flag affecting 4% of claims costs ~1/25th
-    # of the same flag affecting all of them — the score reflects how *pervasive* each
-    # problem is, not merely how many distinct problem types are present. (The old flat
-    # per-type penalty gave every real report ~all flag types → everyone scored F.)
-    # Structural binary flags (no per-claim count, e.g. DISCLOSURE_GAP) use a fixed prevalence.
-    score = 100.0
-    penalty_breakdown = []
-    for f in flags:
-        weight = _SEV_WEIGHT.get(f.severity, 0)
-        prevalence = min(1.0, f.count / total) if f.count else _STRUCTURAL_PREVALENCE
-        pts = round(weight * prevalence, 1)
-        score -= pts
-        penalty_breakdown.append({
-            "type": f.type, "title": f.title, "severity": f.severity,
-            "count": f.count, "prevalence": round(prevalence, 3), "points_deducted": pts,
-        })
-    score = max(0.0, min(100.0, score))
-    # Most-impactful first, so the UI can render "this flag cost you N points".
-    penalty_breakdown.sort(key=lambda p: p["points_deducted"], reverse=True)
+    score, penalty_breakdown = _score_flags(flags, total)
     grade = _grade(score)
+
+    # Raw (pre-review) score: always recomputed so the UI can show "raw → adjusted" and a
+    # reviewer can refine but never silently hide the original machine score.
+    if dismissed:
+        raw_score, _ = _score_flags(
+            GreenwashTaxonomy.analyze(claims, contradictions=contradictions), total)
+    else:
+        raw_score = score
+    raw_grade = _grade(raw_score)
+    reviews_applied = len(dismissed)
 
     risk = "Low" if score >= 70 else ("Moderate" if score >= 50 else "High")
 
@@ -151,6 +172,10 @@ def build_report(claims: List[Dict[str, Any]],
         "meta": meta,
         "integrity_score": round(score, 1),
         "grade": grade,
+        # Pre-review machine score (== adjusted when no dismissals) + how many reviews moved it.
+        "integrity_score_raw": round(raw_score, 1),
+        "grade_raw": raw_grade,
+        "reviews_applied": reviews_applied,
         "greenwashing_risk": risk,
         "summary": summary,
         "statistics": stats,

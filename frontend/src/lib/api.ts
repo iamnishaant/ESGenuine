@@ -41,6 +41,8 @@ export interface IntegrityReport {
   status: string;
   meta?: { company_name?: string; report_year?: number; doc_id?: string; total_claims?: number };
   integrity_score?: number; grade?: string; greenwashing_risk?: string; summary?: string;
+  // Pre-review machine score + how many reviewer dismissals moved it (raw == adjusted when 0).
+  integrity_score_raw?: number; grade_raw?: string; reviews_applied?: number;
   statistics?: IntegrityStatistics;
   flag_summary?: { total: number; by_severity: Record<string, number> };
   penalty_breakdown?: PenaltyBreakdownItem[];
@@ -85,6 +87,27 @@ export interface AskAnswer {
 }
 
 // ── endpoint wrappers ────────────────────────────────────────────────────────
+// ── human-in-the-loop flag review ────────────────────────────────────────────
+export interface ReviewItem {
+  subject_id: string;          // claim_id | contradiction hash | '__report__'
+  flag_type: string;
+  kind: 'claim' | 'contradiction' | 'report';
+  title: string;
+  reason: string;
+  source_sentence?: string | null;
+  page_number?: number | null;
+  verdict?: 'dismissed' | 'confirmed' | null;
+  note?: string | null;
+}
+export interface ReviewQueue { doc_id: string; total: number; reviewed: number; items: ReviewItem[]; }
+export interface ReviewInput {
+  subject_id: string; flag_type: string;
+  verdict: 'dismissed' | 'confirmed'; note?: string; reviewer?: string;
+}
+export const getReviewQueue = (docId: string) => get<ReviewQueue>(`/reports/${docId}/review-queue`);
+export const postReview = (docId: string, body: ReviewInput) =>
+  post<{ status: string } & ReviewInput>(`/reports/${docId}/reviews`, body);
+
 export const getIntegrityReport = (docId: string) => get<IntegrityReport>(`/reports/${docId}/integrity-report`);
 export const getGreenwashingFlags = (docId: string) => get<{ total_flags: number; flags: GreenwashFlag[] }>(`/reports/${docId}/greenwashing-flags`);
 export const getFactCheck = (docId: string, limit = 50) => get<FactCheckReport>(`/reports/${docId}/fact-check?limit=${limit}`);

@@ -31,7 +31,7 @@ def test_build_report_penalty_breakdown_and_provenance():
     rep = build_report(claims, contradictions=[])
     assert rep["status"] == "ok"
     # provenance present
-    assert rep["report_version"] == "2.0"
+    assert rep["report_version"] == "2.1"
     assert isinstance(rep["computed_at"], str) and "T" in rep["computed_at"]
     # decomposition present and well-formed
     bd = rep["penalty_breakdown"]
@@ -64,6 +64,32 @@ def test_score_is_count_weighted_by_prevalence():
     hv = next(p for p in heavy["penalty_breakdown"] if p["type"] == "VAGUE")
     assert hv["prevalence"] > lv["prevalence"]
     assert hv["points_deducted"] > lv["points_deducted"]
+
+
+def test_review_dismissal_raises_score_raw_unchanged():
+    """Human-in-the-loop: dismissing flagged claims as false positives removes them from
+    the flag's count → score rises; the raw (pre-review) score is still reported; a
+    'confirmed' verdict changes nothing."""
+    claims = ([_claim(f"v{i}", ctype="narrative", vague=0.9) for i in range(45)] +
+              [_claim(f"c{i}", ctype="narrative", vague=0.0, ground=0.9) for i in range(5)])
+    base = build_report(claims, contradictions=[])
+
+    reviews = [{"subject_id": f"v{i}", "flag_type": "VAGUE", "verdict": "dismissed"} for i in range(30)]
+    adj = build_report(claims, contradictions=[], reviews=reviews)
+    assert adj["integrity_score"] > base["integrity_score"]        # dismissals raised the score
+    assert adj["integrity_score_raw"] == base["integrity_score"]   # raw == machine score, unhidden
+    assert adj["reviews_applied"] == 30
+    # the surviving VAGUE flag now counts 15 (45 − 30 dismissed), not 45
+    vague = next(p for p in adj["penalty_breakdown"] if p["type"] == "VAGUE")
+    assert vague["count"] == 15
+    # reconciliation still holds on the adjusted set
+    assert round(adj["integrity_score"]) == round(max(0, 100 - sum(p["points_deducted"] for p in adj["penalty_breakdown"])))
+
+    # 'confirmed' verdicts must NOT move the score
+    conf = build_report(claims, contradictions=[],
+                        reviews=[{"subject_id": "v0", "flag_type": "VAGUE", "verdict": "confirmed"}])
+    assert conf["integrity_score"] == base["integrity_score"]
+    assert conf["reviews_applied"] == 0
 
 
 def test_build_report_no_data():
@@ -135,6 +161,7 @@ def test_weighted_credibility_and_materiality():
 _ALL_TESTS = [
     test_build_report_penalty_breakdown_and_provenance,
     test_score_is_count_weighted_by_prevalence,
+    test_review_dismissal_raises_score_raw_unchanged,
     test_build_report_no_data,
     test_fact_check_coverage,
     test_check_claim_unverified_reasons_are_actionable,

@@ -131,3 +131,24 @@ ON reports (company_id, report_year);
 -- Fast "have I already ingested this exact PDF?" probe (content-hash dedup).
 CREATE INDEX IF NOT EXISTS reports_file_hash_idx
 ON reports (file_hash);
+
+-- 8. Human-in-the-loop flag reviews. A reviewer dismisses a false-positive flag (or
+-- confirms a valid one); build_report() honors 'dismissed' verdicts to adjust the score
+-- (the raw machine score is still recomputed alongside). subject_id is polymorphic:
+-- claim_id (per-claim flags) | contradiction hash (CONTRADICTION) | '__report__' (report-level).
+CREATE TABLE IF NOT EXISTS claim_reviews (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    doc_id      TEXT NOT NULL,
+    subject_id  TEXT NOT NULL,
+    flag_type   TEXT NOT NULL,
+    verdict     TEXT NOT NULL,            -- 'dismissed' | 'confirmed'
+    note        TEXT,
+    reviewer    TEXT,
+    created_at  TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (doc_id, subject_id, flag_type)
+);
+
+CREATE INDEX IF NOT EXISTS claim_reviews_doc_idx ON claim_reviews (doc_id);
+
+-- App uses the anon/publishable key; grant it table privileges (RLS stays disabled).
+GRANT SELECT, INSERT, UPDATE, DELETE ON claim_reviews TO anon, authenticated;

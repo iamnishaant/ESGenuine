@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ShieldCheck, AlertTriangle, Scale, Send, Loader2, Satellite, FileText, Database,
   TrendingDown, TrendingUp, CheckCircle2, XCircle, HelpCircle, Lightbulb, Sparkles,
+  UserCheck, Check, X, Undo2, ArrowRight,
 } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,15 +14,19 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import {
   getIntegrityReport, getFactCheck, getScorecard, askAudit, getSuggestedQuestions,
-  verificationMethod, VERIFICATION_LABEL, type AskAnswer,
+  getReviewQueue, postReview, getPortfolioIntegrity,
+  verificationMethod, VERIFICATION_LABEL, type AskAnswer, type ReviewItem,
 } from '@/lib/api';
 import { metricLabel } from '@/lib/metricLabels';
 
-const DOCS = [
-  { id: 'tata_power_2024', label: 'Tata Power 2024', company: 'tata_power' },
-  { id: 'shell_2022', label: 'Shell 2022', company: 'shell' },
-  { id: 'shell_2023', label: 'Shell 2023', company: 'shell' },
-];
+type Doc = { id: string; label: string; company: string };
+
+// Flag types a reviewer can act on, grouped for a small visual cue in the queue.
+const REVIEW_SEV: Record<string, string> = {
+  CONTRADICTION: 'Critical', DISCLOSURE_GAP: 'High', VAGUE: 'High',
+  UNSUBSTANTIATED_TARGET: 'High', NON_GROUNDABLE: 'High',
+  MISSING_BASELINE: 'Medium', SELECTIVE_SCOPE: 'Medium', ASPIRATIONAL_HEAVY: 'Medium',
+};
 
 const SEV_COLOR: Record<string, string> = {
   Critical: 'bg-destructive/20 text-destructive border-destructive/40',
@@ -50,22 +55,52 @@ const METHOD_PROFILE: Array<{ key: 'imagery' | 'data_crosscheck' | 'document_rev
 ];
 
 const IntegrityAudit = () => {
-  const [doc, setDoc] = useState(DOCS[0]);
+  const qc = useQueryClient();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [question, setQuestion] = useState('');
   const [chat, setChat] = useState<AskAnswer[]>([]);
   const [asking, setAsking] = useState(false);
+  const [notes, setNotes] = useState<Record<string, string>>({});
 
-  const report = useQuery({ queryKey: ['integrity', doc.id], queryFn: () => getIntegrityReport(doc.id) });
-  const factcheck = useQuery({ queryKey: ['factcheck', doc.id], queryFn: () => getFactCheck(doc.id, 40) });
-  const scorecard = useQuery({ queryKey: ['scorecard', doc.company], queryFn: () => getScorecard(doc.company) });
-  const suggestions = useQuery({ queryKey: ['suggested', doc.id], queryFn: () => getSuggestedQuestions(doc.id) });
+  // Doc list is derived from the portfolio so EVERY ingested company is reviewable
+  // (was a hardcoded 3 — Microsoft/Infosys never appeared).
+  const portfolio = useQuery({ queryKey: ['portfolio'], queryFn: getPortfolioIntegrity });
+  const docs: Doc[] = useMemo(
+    () => (portfolio.data?.companies ?? [])
+      .filter((c) => c.doc_id)
+      .map((c) => ({ id: c.doc_id as string, company: c.company_id,
+                     label: `${c.company_name} ${c.report_year ?? ''}`.trim() })),
+    [portfolio.data],
+  );
+  const doc = docs.find((d) => d.id === selectedId) ?? docs[0];
+  const docId = doc?.id;
+
+  const report = useQuery({ queryKey: ['integrity', docId], queryFn: () => getIntegrityReport(docId!), enabled: !!docId });
+  const factcheck = useQuery({ queryKey: ['factcheck', docId], queryFn: () => getFactCheck(docId!, 40), enabled: !!docId });
+  const scorecard = useQuery({ queryKey: ['scorecard', doc?.company], queryFn: () => getScorecard(doc!.company), enabled: !!doc });
+  const suggestions = useQuery({ queryKey: ['suggested', docId], queryFn: () => getSuggestedQuestions(docId!), enabled: !!docId });
+  const reviewQueue = useQuery({ queryKey: ['reviewQueue', docId], queryFn: () => getReviewQueue(docId!), enabled: !!docId });
+
+  // Saving a verdict refreshes the score (adjusted), the queue, and the portfolio grade.
+  const reviewMut = useMutation({
+    mutationFn: (v: { item: ReviewItem; verdict: 'dismissed' | 'confirmed' }) =>
+      postReview(docId!, {
+        subject_id: v.item.subject_id, flag_type: v.item.flag_type, verdict: v.verdict,
+        note: notes[v.item.subject_id + v.item.flag_type] || undefined,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['integrity', docId] });
+      qc.invalidateQueries({ queryKey: ['reviewQueue', docId] });
+      qc.invalidateQueries({ queryKey: ['portfolio'] });
+    },
+  });
 
   const ask = async (preset?: string) => {
     const q = (preset ?? question).trim();
-    if (!q || asking) return;
+    if (!q || asking || !docId) return;
     setAsking(true);
     try {
-      const a = await askAudit(q, doc.id);
+      const a = await askAudit(q, docId);
       setChat((c) => [a, ...c]);
       setQuestion('');
     } catch (e: any) {
@@ -86,9 +121,10 @@ const IntegrityAudit = () => {
             </h1>
             <p className="text-sm text-muted-foreground">Greenwashing flags · external fact-check · peer benchmark · AI audit</p>
           </div>
-          <div className="flex gap-2">
-            {DOCS.map((d) => (
-              <Button key={d.id} variant={d.id === doc.id ? 'default' : 'outline'} size="sm" onClick={() => setDoc(d)}>
+          <div className="flex gap-2 flex-wrap">
+            {portfolio.isLoading && <Loader2 className="animate-spin w-4 h-4" />}
+            {docs.map((d) => (
+              <Button key={d.id} variant={d.id === doc?.id ? 'default' : 'outline'} size="sm" onClick={() => setSelectedId(d.id)}>
                 {d.label}
               </Button>
             ))}
@@ -105,10 +141,26 @@ const IntegrityAudit = () => {
               ) : (
                 <div>
                   <div className="flex items-end gap-3">
+                    {(report.data?.reviews_applied ?? 0) > 0 && report.data?.integrity_score_raw != null && (
+                      <span className="text-2xl font-semibold text-muted-foreground/70 line-through mb-1">
+                        {report.data.integrity_score_raw}
+                      </span>
+                    )}
+                    {(report.data?.reviews_applied ?? 0) > 0 && (
+                      <ArrowRight className="w-5 h-5 text-muted-foreground mb-3" />
+                    )}
                     <span className="text-5xl font-bold">{report.data?.integrity_score ?? '—'}</span>
                     <span className={cn('text-3xl font-bold', gradeColor(report.data?.grade))}>{report.data?.grade}</span>
                     <Badge variant="outline" className="mb-2">{report.data?.greenwashing_risk} risk</Badge>
                   </div>
+                  {(report.data?.reviews_applied ?? 0) > 0 && (
+                    <p className="text-[11px] text-primary mt-1 flex items-center gap-1">
+                      <UserCheck className="w-3 h-3" /> {report.data?.reviews_applied} reviewer override
+                      {(report.data?.reviews_applied ?? 0) === 1 ? '' : 's'} applied
+                      {report.data?.grade_raw && report.data.grade_raw !== report.data.grade
+                        ? ` · grade ${report.data.grade_raw} → ${report.data.grade}` : ''}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-2">{report.data?.summary}</p>
                 </div>
               )}
@@ -239,6 +291,76 @@ const IntegrityAudit = () => {
           </CardContent>
         </Card>
 
+        {/* Human-in-the-loop flag review */}
+        <Card className="glass-panel">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-primary" /> Human Review
+              {reviewQueue.data && (
+                <span className="text-xs font-normal text-muted-foreground">
+                  — {reviewQueue.data.reviewed}/{reviewQueue.data.total} reviewed · dismiss a false positive to raise the score
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {reviewQueue.isLoading ? <Loader2 className="animate-spin" /> :
+              reviewQueue.isError ? <p className="text-sm text-destructive">Review queue unavailable — start the backend / run the claim_reviews migration.</p> :
+              (reviewQueue.data?.items?.length ?? 0) === 0 ? <p className="text-sm text-muted-foreground">No flagged items to review.</p> : (
+              (reviewQueue.data?.items ?? []).slice(0, 40).map((it) => {
+                const key = it.subject_id + it.flag_type;
+                const sev = REVIEW_SEV[it.flag_type] ?? 'Low';
+                return (
+                  <div key={key} className={cn('border rounded-lg p-3 space-y-2',
+                    it.verdict === 'dismissed' ? 'border-success/40 bg-success/5'
+                      : it.verdict === 'confirmed' ? 'border-border/40 opacity-70' : 'border-border/40')}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className={cn('border text-[10px]', SEV_COLOR[sev])}>{it.flag_type}</Badge>
+                      <span className="text-sm font-medium">{it.title}</span>
+                      {it.page_number != null && <span className="text-[11px] text-muted-foreground">p{it.page_number}</span>}
+                      {it.verdict && (
+                        <Badge variant="outline" className={cn('text-[10px] ml-auto',
+                          it.verdict === 'dismissed' ? 'text-success border-success/40' : 'text-muted-foreground')}>
+                          {it.verdict === 'dismissed' ? 'dismissed (false positive)' : 'confirmed valid'}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{it.reason}</p>
+                    {it.source_sentence && <p className="text-[11px] text-muted-foreground/80 italic">"{it.source_sentence}"</p>}
+                    <div className="flex items-center gap-2">
+                      <Input className="h-7 text-xs" placeholder="note (optional)"
+                        value={notes[key] ?? ''} onChange={(e) => setNotes((n) => ({ ...n, [key]: e.target.value }))} />
+                      {it.verdict ? (
+                        <Button size="sm" variant="ghost" className="h-7 text-xs gap-1"
+                          disabled={reviewMut.isPending}
+                          onClick={() => reviewMut.mutate({ item: it, verdict: it.verdict === 'dismissed' ? 'confirmed' : 'dismissed' })}>
+                          <Undo2 className="w-3 h-3" /> change
+                        </Button>
+                      ) : (
+                        <>
+                          <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-success border-success/40"
+                            disabled={reviewMut.isPending}
+                            onClick={() => reviewMut.mutate({ item: it, verdict: 'dismissed' })}>
+                            <Check className="w-3 h-3" /> Dismiss
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-7 text-xs gap-1"
+                            disabled={reviewMut.isPending}
+                            onClick={() => reviewMut.mutate({ item: it, verdict: 'confirmed' })}>
+                            <X className="w-3 h-3" /> Valid
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+            {(reviewQueue.data?.items?.length ?? 0) > 40 && (
+              <p className="text-[11px] text-muted-foreground">Showing first 40 of {reviewQueue.data?.total}.</p>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Fact-check detail with verification-method routing */}
         <Card className="glass-panel">
           <CardHeader className="pb-2"><CardTitle className="text-sm">Claim Verdicts &amp; Verification Method</CardTitle></CardHeader>
@@ -265,7 +387,7 @@ const IntegrityAudit = () => {
 
         {/* Benchmark scorecard */}
         <Card className="glass-panel">
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Peer Benchmark — {doc.company}</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Peer Benchmark — {doc?.company}</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {(scorecard.data?.metrics ?? []).slice(0, 10).map((m) => (
               <div key={m.metric_key} className="flex items-center gap-3 text-xs">
