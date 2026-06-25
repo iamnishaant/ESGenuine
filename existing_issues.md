@@ -6,6 +6,30 @@
 
 ---
 
+## Batch 2026-06-25c — live-data run: contradiction over-fire + score saturation
+
+**What ran:** ran the full reasoning pipeline against the **live Supabase corpus** (1435 claims; docs `tata_power_2024`/`shell_2022`/`shell_2023`) and `verify_search_claims_index.sql` against the live DB. Two new defects + one schema fix.
+
+### 18 🟠 — "Internally inconsistent figures" is massively over-counted by normal time series
+- **Test:** `_numeric_contradictions(shell_2022 claims)` → **956 conflicts** → fed straight into the `CONTRADICTION` greenwashing flag as `count=956`, severity **Critical** (−25 pts).
+- **Breakdown:** `{Temporal: 569, Metric: 350, Scope: 32, Hard: 5}`.
+- **Root cause:** the **Temporal rule** ([nli_engine.py:160-169](backend/src/reasoning/nli_engine.py)) returns a contradiction for *any* two same-`metric_key`/same-scope claims whose values differ >5% across **different real years**. But a multi-year disclosure of one KPI is a **time series, not an inconsistency** — e.g. `social.health_safety.ltifr.rate shifted 0.4->1.7 between 2022 and 2021` is just the year-over-year trend. ~60% of the count (the 569 Temporal pairs) are this false-positive class. The genuinely-contradictory **same-year** mismatches are already the separate `Metric` type (`Value mismatch: 0.4 vs 0.7 ... in 2022/global`) and are kept.
+- **Impact:** inflates the Critical contradiction flag, which **saturates the integrity score to grade F for every report in the corpus** (tata 28, shell_2022 13, shell_2023 6) — the score has **no discriminating power**. This is issue #7's noise re-emerging at the *report* level: the per-pair engine was de-noised, but treating a cross-year series as pairwise contradictions was not.
+- **Proposed fix (score-shifting — not yet applied):** a bare cross-year value difference should not be a standalone contradiction. Either drop the Temporal value-shift type, or restrict it to cases where a stated `metric_direction`/trend is contradicted by the observed change. Deferred to a deliberate decision because it changes contradiction counts → integrity scores (and updates `test_nli_engine.py`'s intentional Temporal cases).
+
+### 19 🟠 — metric_key granularity conflates unrelated quantities (extends #14/#15/#16)
+- **Test:** within `shell_2022`, one `metric_key` groups physically different things:
+  - `social.health_safety.ltifr.count` (21 claims): units = `{employees, fatalities, hours, incidents, events, assessments, people, …}` — comparing a fatality count to an employee headcount.
+  - `emissions.scope1.co2e` (49 claims): units mix an **intensity** (`gCO2e/MJ`) with absolutes (`Mt CO2e`, `million tonnes CO2e`, `tCO2e`).
+- **Root cause:** upstream — the 8B extractor + the `.count`/`.co2e` dimension being a catch-all (the #14/#15/#16 family). The canonicalizer correctly keeps incomparable units apart at compare time, so these mostly don't *numerically* conflict, but they share a key and pollute grouping/benchmarking.
+- **Impact:** feeds spurious pairs into #18 and muddies per-metric benchmarks. Tracked as the existing operational remainder (needs 70B extraction + tighter metric_key derivation), not a new engine defect.
+
+### ✅ Schema fix — `claims_default` partition had no HNSW index
+- **Test:** `verify_search_claims_index.sql` on the live DB → only 4 of 5 claims partitions had an embedding index; `claims_default` (the catch-all holding `emissions.scope1`, currently the **largest** partition at 746 rows) had none.
+- **Fixed + applied to live DB:** `CREATE INDEX … claims_default_embedding_idx … hnsw (embedding vector_cosine_ops)` — folded into [schema.sql](backend/database/schema.sql), shipped as migration `2026-06-25_claims_default_hnsw.sql`, verified (5 HNSW indexes now). Note: at current scale all 5 are **dormant** — a literal-vector seq scan (8.9 ms) beats a forced HNSW scan (194 ms), so the planner correctly skips them; the index is insurance that activates as partitions grow.
+
+---
+
 ## Batch 2026-06-25b — Tier-1: ingest dedup + idempotent writes
 
 **What ran:** `POST /v1/reports/ingest` re-ingesting the same PDF (same `company_name`+`report_year` → same `report_id`) inserted a *fresh* set of `claims` rows each time (each row gets a new `uuid4()` `claim_id`, so nothing ever collided). Re-uploading a report silently doubled its claim count and corrupted every downstream count/score.
