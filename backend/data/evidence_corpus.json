@@ -1,6 +1,12 @@
 {
   "_meta": {
     "note": "Pluggable external evidence corpus. Replace these illustrative reference figures with verified values from CDP, official filings, or audited prior reports. Records are matched to claims by (company_id, metric_key, year).",
+    "quality_values": {
+      "verified": "Sourced from a verified third-party filing/dataset (CDP, audited report). Counts as production-grade ground truth.",
+      "self_reported": "From the company's own other filings (assigned automatically to cross-report evidence, not stored here).",
+      "illustrative": "Placeholder value for demos — NOT a real figure. Must not be presented as verified.",
+      "unverified": "Default when a record omits quality."
+    },
     "record_schema": {
       "company_id": "string",
       "metric_key": "string (canonical, e.g. emissions.scope1.co2e)",
@@ -9,7 +15,8 @@
       "unit": "string (canonical unit)",
       "statement": "string",
       "source": "string (provenance)",
-      "url": "string"
+      "url": "string",
+      "quality": "string (verified | illustrative | unverified) — machine-readable trust tier"
     }
   },
   "records": [
@@ -21,7 +28,8 @@
       "unit": "tCO2e",
       "statement": "Shell Group operated Scope 1 emissions, 2022.",
       "source": "Reference figure (illustrative sample — replace with CDP/official filing)",
-      "url": ""
+      "url": "",
+      "quality": "illustrative"
     },
     {
       "company_id": "shell",
@@ -31,7 +39,8 @@
       "unit": "tCO2e",
       "statement": "Shell Group operated Scope 1 emissions, 2023.",
       "source": "Reference figure (illustrative sample — replace with CDP/official filing)",
-      "url": ""
+      "url": "",
+      "quality": "illustrative"
     },
     {
       "company_id": "tata_power",
@@ -41,7 +50,8 @@
       "unit": "tCO2e",
       "statement": "Tata Power Scope 1 emissions, FY2024.",
       "source": "Reference figure (illustrative sample — replace with BRSR/CDP)",
-      "url": ""
+      "url": "",
+      "quality": "illustrative"
     }
   ]
 }

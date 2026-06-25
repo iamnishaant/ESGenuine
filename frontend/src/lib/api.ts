@@ -26,25 +26,46 @@ export interface GreenwashFlag {
   regulations: string[]; recommendation: string;
   evidence: Array<Record<string, unknown>>; count: number;
 }
+export interface VerificationProfile { imagery: number; data_crosscheck: number; document_review: number; }
+export interface PenaltyBreakdownItem {
+  type: string; title: string; severity: string; count: number; points_deducted: number;
+}
+export interface IntegrityStatistics {
+  by_type?: Record<string, number>;
+  with_metric?: number; with_metric_pct?: number;
+  avg_groundability?: number | null; contradictions?: number;
+  verification_profile?: VerificationProfile;
+}
 export interface IntegrityReport {
   status: string;
   meta?: { company_name?: string; report_year?: number; doc_id?: string; total_claims?: number };
   integrity_score?: number; grade?: string; greenwashing_risk?: string; summary?: string;
-  statistics?: Record<string, unknown>;
+  statistics?: IntegrityStatistics;
   flag_summary?: { total: number; by_severity: Record<string, number> };
+  penalty_breakdown?: PenaltyBreakdownItem[];
   flags: GreenwashFlag[];
   recommendations: Array<{ severity: string; action: string; for: string }>;
+  computed_at?: string; report_version?: string;
 }
 export interface FactCheckResult {
   claim_id: string; claim_text: string; metric_key: string; reference_year: string;
   claim_value: number | null; claim_unit: string | null;
-  observability_type?: string | null;
+  observability_type?: string | null; materiality?: number;
+  evidence_quality?: 'verified' | 'self_reported' | 'illustrative' | 'unverified' | null;
   verdict: 'SUPPORTED' | 'CONTRADICTED' | 'UNVERIFIED'; confidence: number;
   reasoning: string; evidence: Array<Record<string, unknown>>;
 }
+export interface CorpusQuality {
+  total: number;
+  by_quality: { verified: number; self_reported: number; illustrative: number; unverified: number };
+  illustrative_only: boolean;
+}
 export interface FactCheckReport {
-  checked: number; verdict_counts: Record<string, number>;
-  credibility: number | null; results: FactCheckResult[];
+  checked: number; checkable?: number; coverage?: number | null;
+  verdict_counts: Record<string, number>;
+  credibility: number | null; weighted_credibility?: number | null;
+  corpus_quality?: CorpusQuality;
+  llm_assisted?: number; results: FactCheckResult[];
 }
 export interface ScorecardMetric {
   metric_key: string; polarity: string; unit: string | null; value: number;
@@ -59,6 +80,7 @@ export interface PortfolioIntegrity {
 export interface AskAnswer {
   question: string; answer: string; engine: string;
   citations: Array<{ n: number; company: string; year: number; page: number; doc_id: string; text: string; similarity: number }>;
+  top_similarity?: number; low_relevance?: boolean; unsupported_citations?: number[];
 }
 
 // ── endpoint wrappers ────────────────────────────────────────────────────────
@@ -79,6 +101,9 @@ export const getTrajectory = (companyId: string, metricKey: string, targetValue?
 };
 export const askAudit = (question: string, docId?: string) => post<AskAnswer>('/audit/ask', { question, doc_id: docId ?? null });
 export const getAuditSummary = (docId: string) => get<Record<string, unknown>>(`/audit/${docId}/summary`);
+// Starter questions derived from the report's flags + stats (no LLM, pure backend).
+export const getSuggestedQuestions = (docId: string) =>
+  get<{ doc_id: string; questions: string[] }>(`/audit/${docId}/suggested-questions`);
 
 // ── verification-method router ───────────────────────────────────────────────
 // IMPORTANT (per design): NOT every claim is verified the same way. Only optically

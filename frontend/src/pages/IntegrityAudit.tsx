@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import {
   ShieldCheck, AlertTriangle, Scale, Send, Loader2, Satellite, FileText, Database,
-  TrendingDown, TrendingUp, CheckCircle2, XCircle, HelpCircle,
+  TrendingDown, TrendingUp, CheckCircle2, XCircle, HelpCircle, Lightbulb, Sparkles,
 } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import {
-  getIntegrityReport, getFactCheck, getScorecard, askAudit,
+  getIntegrityReport, getFactCheck, getScorecard, askAudit, getSuggestedQuestions,
   verificationMethod, VERIFICATION_LABEL, type AskAnswer,
 } from '@/lib/api';
 import { metricLabel } from '@/lib/metricLabels';
@@ -40,6 +40,15 @@ const gradeColor = (g?: string) =>
   g === 'A' ? 'text-success' : g === 'B' ? 'text-emerald-400'
   : g === 'C' ? 'text-yellow-400' : g === 'D' ? 'text-orange-400' : 'text-destructive';
 
+// 0–1 fraction → "84%" (or em-dash when null/undefined).
+const pct = (v?: number | null) => (v != null ? `${Math.round(v * 100)}%` : '—');
+
+const METHOD_PROFILE: Array<{ key: 'imagery' | 'data_crosscheck' | 'document_review'; label: string; cls: string }> = [
+  { key: 'imagery', label: 'Imagery', cls: 'text-success' },
+  { key: 'data_crosscheck', label: 'Data cross-check', cls: 'text-primary' },
+  { key: 'document_review', label: 'Document review', cls: 'text-muted-foreground' },
+];
+
 const IntegrityAudit = () => {
   const [doc, setDoc] = useState(DOCS[0]);
   const [question, setQuestion] = useState('');
@@ -49,10 +58,11 @@ const IntegrityAudit = () => {
   const report = useQuery({ queryKey: ['integrity', doc.id], queryFn: () => getIntegrityReport(doc.id) });
   const factcheck = useQuery({ queryKey: ['factcheck', doc.id], queryFn: () => getFactCheck(doc.id, 40) });
   const scorecard = useQuery({ queryKey: ['scorecard', doc.company], queryFn: () => getScorecard(doc.company) });
+  const suggestions = useQuery({ queryKey: ['suggested', doc.id], queryFn: () => getSuggestedQuestions(doc.id) });
 
-  const ask = async () => {
-    const q = question.trim();
-    if (!q) return;
+  const ask = async (preset?: string) => {
+    const q = (preset ?? question).trim();
+    if (!q || asking) return;
     setAsking(true);
     try {
       const a = await askAudit(q, doc.id);
@@ -111,22 +121,102 @@ const IntegrityAudit = () => {
               {factcheck.isLoading ? <Loader2 className="animate-spin" /> : factcheck.isError ? (
                 <p className="text-sm text-destructive">API offline</p>
               ) : (
-                <div className="flex gap-6 items-center">
+                <div className="flex gap-6 items-center flex-wrap">
                   {Object.entries(factcheck.data?.verdict_counts ?? {}).map(([k, v]) => (
                     <div key={k} className="flex items-center gap-2">
                       {VERDICT_ICON[k]}<span className="text-2xl font-bold">{v}</span>
                       <span className="text-xs text-muted-foreground">{k.toLowerCase()}</span>
                     </div>
                   ))}
-                  <div className="ml-auto text-right">
-                    <div className="text-xs text-muted-foreground">credibility</div>
-                    <div className="text-2xl font-bold">{factcheck.data?.credibility != null ? `${Math.round(factcheck.data.credibility * 100)}%` : '—'}</div>
+                  <div className="ml-auto flex gap-6 text-right">
+                    <div title="SUPPORTED ÷ checked (materiality-weighted variant shown below)">
+                      <div className="text-xs text-muted-foreground">credibility</div>
+                      <div className="text-2xl font-bold">{pct(factcheck.data?.credibility)}</div>
+                      {factcheck.data?.weighted_credibility != null && (
+                        <div className="text-[10px] text-muted-foreground">{pct(factcheck.data.weighted_credibility)} weighted</div>
+                      )}
+                    </div>
+                    <div title="checked ÷ checkable — how much of the verifiable surface we had evidence for">
+                      <div className="text-xs text-muted-foreground">coverage</div>
+                      <div className="text-2xl font-bold">{pct(factcheck.data?.coverage)}</div>
+                      {factcheck.data?.checkable != null && (
+                        <div className="text-[10px] text-muted-foreground">{factcheck.data.checked}/{factcheck.data.checkable} checkable</div>
+                      )}
+                    </div>
                   </div>
                 </div>
+                {(factcheck.data?.llm_assisted ?? 0) > 0 && (
+                  <p className="text-[11px] text-muted-foreground mt-2 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> {factcheck.data?.llm_assisted} verdict(s) used the guarded LLM fallback (numeric checks stay authoritative)
+                  </p>
+                )}
+                {factcheck.data?.corpus_quality?.illustrative_only && (
+                  <p className="text-[11px] text-yellow-400 mt-2 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" /> Reference corpus is illustrative (no verified figures) — treat credibility as a demo signal, not production ground truth.
+                  </p>
+                )}
               )}
             </CardContent>
           </Card>
         </div>
+
+        {/* Score breakdown + verification profile */}
+        {report.data?.status === 'ok' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <Card className="glass-panel lg:col-span-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Scale className="w-4 h-4 text-primary" /> Score Breakdown
+                  <span className="text-xs font-normal text-muted-foreground">— where the 100 points went</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {(report.data.penalty_breakdown ?? []).length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No penalties — full 100/100.</p>
+                ) : (
+                  <>
+                    {(report.data.penalty_breakdown ?? []).map((p, i) => (
+                      <div key={i} className="flex items-center gap-3 text-xs">
+                        <Badge className={cn('border w-16 justify-center text-[10px]', SEV_COLOR[p.severity])}>{p.severity}</Badge>
+                        <span className="flex-1 truncate" title={`${p.type} ×${p.count}`}>{p.title}</span>
+                        <div className="w-28 h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-destructive/70" style={{ width: `${Math.min(100, p.points_deducted * 4)}%` }} />
+                        </div>
+                        <span className="text-destructive font-medium w-12 text-right">−{p.points_deducted}</span>
+                      </div>
+                    ))}
+                    <p className="text-[11px] text-muted-foreground pt-1">
+                      Flat per-flag penalty (one deduction per distinct flag type), not count-weighted.
+                      {report.data.computed_at && ` · computed ${report.data.computed_at.replace('T', ' ').replace('+00:00', 'Z')}`}
+                      {report.data.report_version && ` · v${report.data.report_version}`}
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="glass-panel">
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Verification Profile</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                <p className="text-[11px] text-muted-foreground -mt-1">How this report's claims can be checked.</p>
+                {METHOD_PROFILE.map(({ key, label, cls }) => {
+                  const vp = report.data?.statistics?.verification_profile;
+                  const count = vp?.[key] ?? 0;
+                  const total = vp ? vp.imagery + vp.data_crosscheck + vp.document_review : 0;
+                  return (
+                    <div key={key} className="flex items-center gap-3 text-xs">
+                      <span className={cn('flex-1', cls)}>{label}</span>
+                      <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary/60" style={{ width: total ? `${(count / total) * 100}%` : '0%' }} />
+                      </div>
+                      <span className="text-muted-foreground w-8 text-right">{count}</span>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Greenwashing flags */}
         <Card className="glass-panel">
@@ -199,12 +289,31 @@ const IntegrityAudit = () => {
             <div className="flex gap-2">
               <Input placeholder="e.g. What emissions targets has the company set?" value={question}
                 onChange={(e) => setQuestion(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && ask()} />
-              <Button onClick={ask} disabled={asking}>{asking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}</Button>
+              <Button onClick={() => ask()} disabled={asking}>{asking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}</Button>
             </div>
+            {(suggestions.data?.questions?.length ?? 0) > 0 && (
+              <div className="flex flex-wrap gap-2">
+                <span className="text-[11px] text-muted-foreground flex items-center gap-1"><Lightbulb className="w-3 h-3" /> Suggested:</span>
+                {suggestions.data?.questions.map((q, i) => (
+                  <button key={i} onClick={() => ask(q)} disabled={asking}
+                    className="text-[11px] px-2 py-1 rounded-full border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors disabled:opacity-50">
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
             {chat.map((c, i) => (
               <div key={i} className="border border-border/40 rounded-lg p-3 space-y-1">
                 <p className="text-xs font-medium text-primary">Q: {c.question}</p>
+                {c.low_relevance && (
+                  <p className="text-[11px] text-yellow-400 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" /> Low relevance — the corpus has no strong match for this question; answer may be off-topic.
+                  </p>
+                )}
                 <p className="text-sm">{c.answer}</p>
+                {(c.unsupported_citations?.length ?? 0) > 0 && (
+                  <p className="text-[11px] text-destructive">⚠ Cited evidence {c.unsupported_citations?.join(', ')} not found in retrieved claims.</p>
+                )}
                 {c.citations?.length > 0 && (
                   <div className="text-[11px] text-muted-foreground space-y-0.5 pt-1">
                     {c.citations.slice(0, 4).map((ct) => (

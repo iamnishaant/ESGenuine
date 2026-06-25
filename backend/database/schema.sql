@@ -80,6 +80,13 @@ ON claims_governance USING hnsw (embedding vector_cosine_ops);
 CREATE INDEX IF NOT EXISTS claims_uncategorized_embedding_idx
 ON claims_uncategorized USING hnsw (embedding vector_cosine_ops);
 
+-- The DEFAULT partition was missing its embedding index — yet it is the catch-all for
+-- families like emissions.scope1 (the most material) and is currently the LARGEST
+-- partition. Without this, semantic search seq-scans claims_default at scale while the
+-- other partitions use ANN. (Confirmed via verify_search_claims_index.sql on the live DB.)
+CREATE INDEX IF NOT EXISTS claims_default_embedding_idx
+ON claims_default USING hnsw (embedding vector_cosine_ops);
+
 -- 4. Create the high-speed Signature Index for Bucket blocking
 CREATE INDEX IF NOT EXISTS claims_signature_idx 
 ON claims (claim_signature);

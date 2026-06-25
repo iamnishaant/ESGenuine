@@ -78,11 +78,48 @@ def test_missing_or_malformed_file_is_safe():
         fc._CORPUS_PATH = original
 
 
+def test_quality_normalized_on_load():
+    # Explicit tier kept; missing/garbage tier defaults to "unverified".
+    recs = _load_from({"records": [
+        {"company_id": "a", "metric_key": "m", "year": 1, "value": 1, "unit": "u", "quality": "VERIFIED"},
+        {"company_id": "b", "metric_key": "m", "year": 1, "value": 1, "unit": "u"},
+        {"company_id": "c", "metric_key": "m", "year": 1, "value": 1, "unit": "u", "quality": "bogus"},
+    ]})
+    q = {r["company_id"]: r["quality"] for r in recs}
+    assert q == {"a": "verified", "b": "unverified", "c": "unverified"}
+
+
+def test_corpus_quality_illustrative_only():
+    # No verified records → illustrative_only True; one verified flips it False.
+    illus = [{"company_id": "x", "quality": "illustrative"}, {"company_id": "y", "quality": "illustrative"}]
+    summ = fc.corpus_quality(illus)
+    assert summ["total"] == 2 and summ["by_quality"]["illustrative"] == 2 and summ["illustrative_only"] is True
+    mixed = fc.corpus_quality(illus + [{"company_id": "z", "quality": "verified"}])
+    assert mixed["by_quality"]["verified"] == 1 and mixed["illustrative_only"] is False
+    assert fc.corpus_quality([])["illustrative_only"] is False  # empty corpus is not "illustrative-only"
+
+
+def test_evidence_quality_on_verdict():
+    # A SUPPORTED verdict reports the best trust tier among compared sources.
+    claim = {"claim_id": "1", "metric_key": "emissions.scope1.co2e", "time_bucket": "2022",
+             "metric_value": 100.0, "metric_unit": "tCO2e", "company_id": "x"}
+    ev = [{"company_id": "x", "metric_key": "emissions.scope1.co2e", "year": "2022",
+           "value": 100.0, "unit": "tCO2e", "kind": "external", "quality": "illustrative"},
+          {"company_id": "x", "metric_key": "emissions.scope1.co2e", "year": "2022",
+           "value": 101.0, "unit": "tCO2e", "kind": "cross_report", "quality": "self_reported"}]
+    v = fc.check_claim(claim, ev)
+    assert v["verdict"] == "SUPPORTED"
+    assert v["evidence_quality"] == "self_reported"  # self_reported > illustrative
+
+
 _ALL_TESTS = [
     test_current_shape_real_file,
     test_new_shape_extracts_records_only,
     test_legacy_list_shape_filters_schema_row,
     test_missing_or_malformed_file_is_safe,
+    test_quality_normalized_on_load,
+    test_corpus_quality_illustrative_only,
+    test_evidence_quality_on_verdict,
 ]
 
 

@@ -42,6 +42,21 @@ def _materiality(metric_key) -> float:
     return 1.0
 
 
+# Evidence trust tiers, highest first. A verdict's evidence_quality is the best tier among
+# the sources it actually compared, so the UI can flag verdicts resting on illustrative data.
+_QUALITY_RANK = {"verified": 3, "self_reported": 2, "illustrative": 1, "unverified": 0}
+
+
+def _norm_quality(q) -> str:
+    q = str(q or "").strip().lower()
+    return q if q in _QUALITY_RANK else "unverified"
+
+
+def _best_quality(qualities) -> Optional[str]:
+    qs = [_norm_quality(q) for q in qualities if q]
+    return max(qs, key=lambda x: _QUALITY_RANK[x]) if qs else None
+
+
 # ── evidence sourcing ────────────────────────────────────────────────────────────
 def load_external_corpus() -> List[Dict[str, Any]]:
     """Load evidence records from the corpus file.
@@ -60,7 +75,24 @@ def load_external_corpus() -> List[Dict[str, Any]]:
         records = data.get("records", [])
     else:  # legacy: bare list with an inline "_schema" pseudo-record
         records = [e for e in data if isinstance(e, dict) and e.get("company_id") != "_schema"]
-    return [r for r in records if isinstance(r, dict) and r.get("company_id")]
+    # Normalize the trust tier so downstream code never has to guess (missing => unverified).
+    return [{**r, "quality": _norm_quality(r.get("quality"))}
+            for r in records if isinstance(r, dict) and r.get("company_id")]
+
+
+def corpus_quality(external: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Trust-tier summary of the external corpus so the UI can warn when fact-checking
+    rests on illustrative (placeholder) reference data rather than verified figures."""
+    by = {"verified": 0, "self_reported": 0, "illustrative": 0, "unverified": 0}
+    for r in external:
+        by[_norm_quality(r.get("quality"))] += 1
+    return {
+        "total": len(external),
+        "by_quality": by,
+        # True when the corpus has zero verified records — credibility is then only as
+        # trustworthy as the placeholders, and must be presented with that caveat.
+        "illustrative_only": by["verified"] == 0 and len(external) > 0,
+    }
 
 
 def _real_year(tb) -> Optional[str]:
@@ -80,7 +112,7 @@ def find_evidence(claim: Dict[str, Any], peer_claims: List[Dict[str, Any]],
     out: List[Dict[str, Any]] = []
     for e in external:
         if e.get("metric_key") == mk and str(e.get("year")) == yr and e.get("company_id") == comp:
-            out.append({**e, "kind": "external"})
+            out.append({**e, "kind": "external", "quality": _norm_quality(e.get("quality"))})
     for c in peer_claims:
         if c.get("report_id") == claim.get("report_id") or c.get("company_id") != comp:
             continue
@@ -89,7 +121,9 @@ def find_evidence(claim: Dict[str, Any], peer_claims: List[Dict[str, Any]],
                 "company_id": comp, "metric_key": mk, "year": yr,
                 "value": c.get("metric_value"), "unit": c.get("metric_unit"),
                 "statement": (c.get("source_sentence") or "")[:200],
-                "source": f"self-reported ({c.get('report_id')})", "url": "", "kind": "cross_report",
+                # Cross-report evidence is the company's own filing — real, self-reported.
+                "source": f"self-reported ({c.get('report_id')})", "url": "",
+                "kind": "cross_report", "quality": "self_reported",
             })
     return out
 
@@ -106,7 +140,7 @@ def check_claim(claim: Dict[str, Any], evidence: List[Dict[str, Any]]) -> Dict[s
         base = max(abs(cv), abs(ev_v))
         rel = abs(cv - ev_v) / base if base > 1e-9 else 0.0
         compared.append({
-            "source": e.get("source"), "kind": e.get("kind"),
+            "source": e.get("source"), "kind": e.get("kind"), "quality": _norm_quality(e.get("quality")),
             "evidence_value": ev_v, "unit": ev_u, "rel_diff": round(rel, 3),
             "agree": rel <= _TOL, "statement": e.get("statement"), "url": e.get("url"),
         })
@@ -133,14 +167,15 @@ def check_claim(claim: Dict[str, Any], evidence: List[Dict[str, Any]]) -> Dict[s
                       f"Add a CDP/official-filing figure or a prior-year report value in the same unit.")
         return {**base_out, "verdict": "UNVERIFIED", "confidence": 0.3, "evidence": [],
                 "reasoning": reason}
+    best_q = _best_quality(c.get("quality") for c in compared)
     agree = [c for c in compared if c["agree"]]
     if agree:
-        return {**base_out, "verdict": "SUPPORTED",
+        return {**base_out, "verdict": "SUPPORTED", "evidence_quality": best_q,
                 "confidence": round(min(0.6 + 0.1 * len(agree), 0.95), 2),
                 "evidence": compared[:5],
                 "reasoning": f"Matches {len(agree)} independent source(s) within {int(_TOL*100)}%."}
     closest = min(compared, key=lambda c: c["rel_diff"])
-    return {**base_out, "verdict": "CONTRADICTED",
+    return {**base_out, "verdict": "CONTRADICTED", "evidence_quality": best_q,
             "confidence": round(min(0.55 + closest["rel_diff"], 0.97), 2),
             "evidence": compared[:5],
             "reasoning": f"Diverges from {len(compared)} source(s); closest differs by "
@@ -198,6 +233,10 @@ def fact_check_document(doc_claims: List[Dict[str, Any]], peer_claims: List[Dict
         "verdict_counts": counts,
         "credibility": round(counts["SUPPORTED"] / checked, 2) if checked else None,
         "weighted_credibility": round(wsup / wsum, 2) if wsum else None,
+        # Trust tier of the external corpus behind these verdicts. When illustrative_only is
+        # true the credibility % is backed by placeholders, not verified figures — the UI
+        # must caveat it rather than present it as production ground truth.
+        "corpus_quality": corpus_quality(external),
         "llm_assisted": llm_assisted,
         "results": sorted(results, key=lambda r: {"CONTRADICTED": 0, "UNVERIFIED": 1, "SUPPORTED": 2}[r["verdict"]]),
     }
