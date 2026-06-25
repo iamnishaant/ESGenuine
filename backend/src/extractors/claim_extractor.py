@@ -669,7 +669,10 @@ class ClaimExtractor:
                     all_claims.extend(fut.result())
                     done += 1
                     filled = int(24 * done / total)
-                    bar = "█" * filled + "·" * (24 - filled)
+                    # ASCII bar when stdout is redirected (a Windows cp1252 log file
+                    # can't encode the block glyph and would crash the whole ingest).
+                    fill_ch, empty_ch = ("█", "·") if is_tty else ("#", "-")
+                    bar = fill_ch * filled + empty_ch * (24 - filled)
                     rate = done / max(time.time() - t0, 1e-6)
                     eta = (total - done) / rate if rate else 0
                     msg = f"  [extract] |{bar}| {done}/{total} windows · {len(all_claims)} claims · ETA {eta:4.0f}s"
