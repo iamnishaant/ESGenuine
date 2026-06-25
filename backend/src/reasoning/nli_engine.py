@@ -80,14 +80,9 @@ class ContradictionEngine:
     # Metric keys that carry no comparable numeric semantics.
     _VAGUE_KEYS = ("", "uncategorized")
 
-    # Absolute-quantity dimensions (vs. ratios like percent/rate). A huge year-over-year
-    # swing in these is implausible as a real change and signals a unit/extraction error.
-    _ABS_SUFFIXES = (".co2e", ".mass", ".energy", ".volume", ".area", ".count")
-    _MAX_YOY_RATIO = 100.0
-
-    @classmethod
-    def _is_absolute(cls, metric_key) -> bool:
-        return any(str(metric_key).endswith(s) for s in cls._ABS_SUFFIXES)
+    # (The absolute-quantity / extreme-YoY guard was removed with #18: cross-year value
+    #  differences are no longer treated as contradictions at all, so there is nothing left
+    #  to guard against an implausible year-over-year ratio.)
 
     @staticmethod
     def _real_bucket(t) -> bool:
@@ -157,18 +152,16 @@ class ContradictionEngine:
                     mk = claim_a.get("metric_key")
                     if time_a == time_b and same_scope:
                         return {"type": "Metric", "reason": f"Value mismatch: {val_a} vs {val_b} for {mk} in {time_a}/{scope_a}"}
-                    elif time_a != time_b and same_scope:
-                        # (#16) An extreme YoY ratio on an absolute quantity (e.g.
-                        # "scope1 10 -> 100000") is almost always a unit/extraction
-                        # error, not a real annual change — don't report it as a
-                        # confident contradiction.
-                        lo = min(abs(val_a), abs(val_b))
-                        ratio = (base / lo) if lo > 1e-9 else float("inf")
-                        if self._is_absolute(mk) and ratio > self._MAX_YOY_RATIO:
-                            return None
-                        return {"type": "Temporal", "reason": f"{mk} shifted {val_a}->{val_b} between {time_a} and {time_b}"}
                     elif not same_scope and time_a == time_b and scope_a and scope_b:
                         return {"type": "Scope", "reason": f"Value {val_a} vs {val_b} across scopes {scope_a}/{scope_b} in {time_a}"}
+                    # NOTE (#18): a value difference across DIFFERENT real years is NOT a
+                    # contradiction — it's a normal year-over-year time series (e.g. LTIFR
+                    # 0.4 in 2022 vs 1.7 in 2021). Flagging every cross-year pair as a
+                    # "Temporal shift" inflated the contradiction count ~3x (569/956 on
+                    # shell_2022) and saturated every integrity score to grade F. A genuine
+                    # same-year double-reporting is caught by the Metric rule above. A
+                    # trend that contradicts a *stated* direction is the Hard rule below.
+                    # So cross-year (time_a != time_b, same scope) falls through to None.
 
         # 2. Hard: logical impossibility — same metric, same real time, same scope.
         dir_a, dir_b = claim_a.get("metric_direction"), claim_b.get("metric_direction")
@@ -230,7 +223,7 @@ if __name__ == "__main__":
     c1 = {**base, "metric_direction": "increase", "metric_value": 40, "time_bucket": "2023", "location_scope": "global", "source_sentence": "We increased emissions by 40% globally in 2023."}
     c2 = {**base, "metric_direction": "decrease", "metric_value": 40, "time_bucket": "2023", "location_scope": "global", "source_sentence": "We decreased emissions by 40% globally in 2023."}
 
-    # Test 2: Temporal Shift (same metric/scope, different real years)
+    # Test 2: Cross-year shift (same metric/scope, different real years) — NOT a contradiction (#18)
     c3 = {**base, "metric_direction": "decrease", "metric_value": 40, "time_bucket": "2023", "location_scope": "global", "source_sentence": "We achieved a 40% reduction in emissions globally."}
     c4 = {**base, "metric_direction": "decrease", "metric_value": 15, "time_bucket": "2024", "location_scope": "global", "source_sentence": "Total emissions reductions reached 15% globally."}
 
@@ -245,7 +238,7 @@ if __name__ == "__main__":
     print("\n[Test 1] Hard Conflict (expect Critical/Hard):")
     print(engine._numeric_conflict(c1, c2))
 
-    print("\n[Test 2] Temporal Shift (expect Temporal):")
+    print("\n[Test 2] Cross-year shift (expect None — time series, not a contradiction):")
     print(engine._numeric_conflict(c3, c4))
 
     print("\n[Test 3] Different metric_key (expect None):")

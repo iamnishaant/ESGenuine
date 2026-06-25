@@ -52,12 +52,14 @@ def test_metric_value_mismatch_same_year():
     assert r and r["type"] == "Metric"
 
 
-def test_temporal_shift_across_years():
+def test_cross_year_shift_is_not_a_contradiction():
+    # (#18) A value differing across DIFFERENT real years is a normal time series, not an
+    # internal inconsistency — must NOT be flagged. (Same-year double-reporting is the
+    # Metric rule; a stated-direction contradiction is the Hard rule.)
     e = ContradictionEngine()
     a = _c(metric_value=40, time_bucket="2023", metric_unit="%")
     b = _c(metric_value=30, time_bucket="2024", metric_unit="%")
-    r = e._numeric_conflict(a, b)
-    assert r and r["type"] == "Temporal"
+    assert e._numeric_conflict(a, b) is None
 
 
 def test_scope_conflict_same_year_diff_scope():
@@ -91,8 +93,10 @@ def test_zero_baseline_is_not_a_conflict():
     assert e._numeric_conflict(a, b) is None
 
 
-def test_extreme_yoy_ratio_on_absolute_is_suppressed():
-    # 10 -> 100000 tCO2e across years is a unit/extraction error, not a real annual change.
+def test_extreme_cross_year_absolute_is_not_a_conflict():
+    # 10 -> 100000 tCO2e across years: previously suppressed by an extreme-YoY guard, now
+    # subsumed by the broader #18 rule (any cross-year difference is a time series, not a
+    # contradiction). Either way → None.
     e = ContradictionEngine()
     a = _c(metric_value=10, metric_unit="tCO2e", time_bucket="2023")
     b = _c(metric_value=100000, metric_unit="tCO2e", time_bucket="2024")
@@ -152,12 +156,12 @@ _ALL_TESTS = [
     test_construction_does_not_load_model,
     test_hard_direction_conflict,
     test_metric_value_mismatch_same_year,
-    test_temporal_shift_across_years,
+    test_cross_year_shift_is_not_a_contradiction,
     test_scope_conflict_same_year_diff_scope,
     test_canonical_units_prevent_false_conflict,
     test_incomparable_units_are_gated_out,
     test_zero_baseline_is_not_a_conflict,
-    test_extreme_yoy_ratio_on_absolute_is_suppressed,
+    test_extreme_cross_year_absolute_is_not_a_conflict,
     test_different_metric_keys_not_compared,
     test_mislabeled_value_is_gated_by_plausibility,
     test_evaluate_pair_short_circuits_nli_on_numeric_hit,
