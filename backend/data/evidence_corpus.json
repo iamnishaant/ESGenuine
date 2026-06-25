@@ -1,0 +1,43 @@
+[
+  {
+    "_note": "Pluggable external evidence corpus. Replace these illustrative reference figures with verified values from CDP, official filings, or audited prior reports. Matched to claims by (company_id, metric_key, year).",
+    "company_id": "_schema",
+    "metric_key": "emissions.scope1.co2e",
+    "year": 0,
+    "value": 0,
+    "unit": "tCO2e",
+    "statement": "schema example",
+    "source": "",
+    "url": ""
+  },
+  {
+    "company_id": "shell",
+    "metric_key": "emissions.scope1.co2e",
+    "year": 2022,
+    "value": 58000000,
+    "unit": "tCO2e",
+    "statement": "Shell Group operated Scope 1 emissions, 2022.",
+    "source": "Reference figure (illustrative sample — replace with CDP/official filing)",
+    "url": ""
+  },
+  {
+    "company_id": "shell",
+    "metric_key": "emissions.scope1.co2e",
+    "year": 2023,
+    "value": 55000000,
+    "unit": "tCO2e",
+    "statement": "Shell Group operated Scope 1 emissions, 2023.",
+    "source": "Reference figure (illustrative sample — replace with CDP/official filing)",
+    "url": ""
+  },
+  {
+    "company_id": "tata_power",
+    "metric_key": "emissions.scope1.co2e",
+    "year": 2024,
+    "value": 30000000,
+    "unit": "tCO2e",
+    "statement": "Tata Power Scope 1 emissions, FY2024.",
+    "source": "Reference figure (illustrative sample — replace with BRSR/CDP)",
+    "url": ""
+  }
+]

@@ -119,7 +119,15 @@ class ClaimAnalyzer:
         if not has_location:
             score += 0.2
 
-        return round(score, 2)
+        # FIX (#17): forward-looking / aspirational language is inherently vaguer than
+        # delivered performance, even when a number is attached.
+        ctype = (getattr(claim, "claim_type", "") or "").lower()
+        if ctype == "narrative":
+            score += 0.2
+        elif ctype == "target":
+            score += 0.1
+
+        return round(min(score, 1.0), 2)
 
 # ══════════════════════════════════════════════
 # METRIC SIGNATURE GENERATOR (STANFORD BUCKETING)
@@ -246,3 +254,122 @@ class SignatureGenerator:
     def generate_signature(cls, metric_key: str, time_bucket: str, scope: str) -> str:
         """Returns the final bucket hash: metric_key|time_bucket|location_scope"""
         return f"{metric_key}|{time_bucket}|{scope}"
+
+
+# ══════════════════════════════════════════════
+# UNIT CANONICALIZER  (#16 cross-year drift / #15 value sanity)
+# ══════════════════════════════════════════════
+
+class UnitCanonicalizer:
+    """
+    Convert (value, unit) to a canonical base unit per physical dimension so that
+    cross-year / cross-report comparisons are valid (#16) — e.g. 1.2 ktCO2e and
+    1200 tCO2e become the same number on the same scale. Also sanity-checks a value
+    against the shape its metric_key implies, to catch extraction mislabels (#15)
+    such as a workforce ".count" carrying 74.445.
+
+    Unit spellings are the canonical forms emitted by UnitNormalizer.UNIT_MAP plus a
+    few raw variants, mapped to (base_unit, multiplicative_factor).
+    """
+
+    _CONV: Dict[str, Tuple[str, float]] = {
+        # emissions
+        "tco2e": ("tCO2e", 1.0), "ktco2e": ("tCO2e", 1e3), "mtco2e": ("tCO2e", 1e6),
+        # mass
+        "tonnes": ("tonnes", 1.0), "tonne": ("tonnes", 1.0), "ton": ("tonnes", 1.0),
+        "kg": ("tonnes", 1e-3), "kilograms": ("tonnes", 1e-3),
+        "kt": ("tonnes", 1e3), "mt": ("tonnes", 1.0),  # 'mt' read as metric tonne
+        # energy
+        "kwh": ("MWh", 1e-3), "mwh": ("MWh", 1.0), "gwh": ("MWh", 1e3), "twh": ("MWh", 1e6),
+        "gj": ("MWh", 0.2777778), "tj": ("MWh", 277.7778),
+        # volume
+        "litres": ("m3", 1e-3), "litre": ("m3", 1e-3), "liters": ("m3", 1e-3),
+        "m3": ("m3", 1.0), "m³": ("m3", 1.0), "kl": ("m3", 1.0),
+        "kilolitres": ("m3", 1.0), "ml": ("m3", 1e3), "megalitres": ("m3", 1e3),
+        # area
+        "hectares": ("hectares", 1.0), "hectare": ("hectares", 1.0), "ha": ("hectares", 1.0),
+        "acres": ("hectares", 0.404686), "acre": ("hectares", 0.404686),
+        "km2": ("hectares", 100.0), "km²": ("hectares", 100.0),
+        # dimensionless / passthrough
+        "%": ("%", 1.0), "percent": ("%", 1.0),
+    }
+
+    # Magnitude words that scale a base unit (e.g. "million tonnes").
+    _MAGNITUDE = [("billion", 1e9), ("bn", 1e9), ("million", 1e6), ("thousand", 1e3)]
+
+    @classmethod
+    def to_canonical(cls, value, unit) -> Tuple:
+        """Return (canonical_value, canonical_unit). Unknown units pass through unchanged."""
+        if value is None:
+            return value, (unit or None)
+        u = (unit or "").strip().lower()
+        if not u:
+            return value, None
+        # 1) exact canonical map (fast path)
+        if u in cls._CONV:
+            base, factor = cls._CONV[u]
+            try:
+                return value * factor, base
+            except TypeError:
+                return value, (unit or None)
+        # 2) intensity / ratio units ("X per Y", "tonnes/tonne of steel") are NOT a base
+        #    quantity — keep them distinct so they're never compared with absolutes.
+        if "/" in u or " per " in u:
+            return value, (unit or None)
+        # 3) substring heuristic for verbose / compound units (Mt CO2e, million tonnes…)
+        mag = 1.0
+        for w, m in cls._MAGNITUDE:
+            if w in u:
+                mag = m
+                break
+        try:
+            if "co2" in u or "ghg" in u:
+                f = mag
+                if "ktco2" in u or "kt co2" in u or "kilotonne" in u:
+                    f = max(f, 1e3)
+                elif "mtco2" in u or "mt co2" in u or "megatonne" in u:
+                    f = max(f, 1e6)
+                return value * f, "tCO2e"
+            if "tonne" in u or "tons" in u or u == "ton":
+                f = mag
+                if "ktonne" in u or "kilotonne" in u:
+                    f = max(f, 1e3)
+                elif "megatonne" in u:
+                    f = max(f, 1e6)
+                return value * f, "tonnes"
+            if "wh" in u:  # energy: kWh / MWh / GWh / TWh
+                if "twh" in u:
+                    f = 1e6
+                elif "gwh" in u:
+                    f = 1e3
+                elif "kwh" in u:
+                    f = 1e-3
+                else:  # mwh / wh default
+                    f = 1.0
+                return value * f * mag, "MWh"
+        except TypeError:
+            return value, (unit or None)
+        return value, (unit or None)
+
+    @classmethod
+    def is_value_plausible(cls, metric_key, value) -> bool:
+        """
+        Cheap shape check against the dimension encoded in the metric_key suffix
+        (generate_metric_key appends the canonical dimension). Catches obvious
+        extraction mislabels (#15) without rejecting legitimate data.
+        """
+        if value is None or metric_key is None:
+            return True
+        try:
+            v = float(value)
+        except (TypeError, ValueError):
+            return True
+        k = str(metric_key)
+        if k.endswith(".percent"):
+            return -100.0 <= v <= 1000.0
+        if k.endswith(".count"):
+            # counts are non-negative (near-)integers; 74.445 employees is a mislabel
+            return v >= 0 and abs(v - round(v)) < 0.01
+        if k.endswith(".rate"):
+            return 0 <= v <= 10000
+        return True

@@ -653,6 +653,8 @@ class Step5_TableExtractor:
     ) -> List[TableRow]:
         rows: List[TableRow] = []
         table_counter = 0
+        skipped_tables = 0
+        skipped_rows = 0
 
         with pdfplumber.open(pdf_path) as pdf:
             for page_idx, page in enumerate(pdf.pages):
@@ -665,25 +667,53 @@ class Step5_TableExtractor:
                     if not table or len(table) < 2:
                         continue
 
+                    raw_headers = [str(h or "").strip() for h in table[0]]
+                    # (#5) Only keep columns that have a real header. A table whose
+                    # header row is mostly empty is a layout fragment / page furniture,
+                    # not a data table — skip it (previously these became "tables" with
+                    # empty-string keys like {"": "7"}).
+                    header_cols = [(i, h) for i, h in enumerate(raw_headers) if h]
+                    if len(header_cols) < 2:
+                        skipped_tables += 1
+                        continue
+
+                    # De-duplicate colliding header names so columns don't silently
+                    # overwrite each other in the cells dict.
+                    seen: Dict[str, int] = {}
+                    col_names: Dict[int, str] = {}
+                    for i, h in header_cols:
+                        if h in seen:
+                            seen[h] += 1
+                            col_names[i] = f"{h} ({seen[h]})"
+                        else:
+                            seen[h] = 0
+                            col_names[i] = h
+
                     table_counter += 1
                     table_id = f"tbl_{table_counter:03d}"
-                    headers = [str(h or "").strip() for h in table[0]]
 
                     for row_idx, row in enumerate(table[1:]):
                         cells = {}
-                        for col_idx, cell in enumerate(row):
-                            if col_idx < len(headers):
-                                cells[headers[col_idx]] = str(cell or "").strip()
+                        for col_idx, name in col_names.items():
+                            if col_idx < len(row):
+                                val = str(row[col_idx] or "").strip()
+                                if val:
+                                    cells[name] = val
 
-                        if any(cells.values()):
+                        # (#5) Drop near-empty rows: require real content under real
+                        # headers (>2 chars total), not page-furniture scraps.
+                        if cells and sum(len(v) for v in cells.values()) > 2:
                             rows.append(TableRow(
                                 table_id=table_id,
                                 page_number=page_idx + 1,
                                 row_index=row_idx,
                                 cells=cells,
                             ))
+                        else:
+                            skipped_rows += 1
 
-        print(f"  [Step 5] Extracted {len(rows)} table rows from {table_counter} tables.")
+        print(f"  [Step 5] Extracted {len(rows)} table rows from {table_counter} tables "
+              f"(skipped {skipped_tables} fragment-tables, {skipped_rows} noise-rows).")
         return rows
 
 

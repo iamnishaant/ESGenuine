@@ -7,6 +7,7 @@ import {
   ClipboardList,
   Building2,
   ShieldCheck,
+  Gavel,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -40,11 +41,17 @@ const navItems = [
     icon: ClipboardList,
     description: 'Decision logs & exports'
   },
-  { 
-    path: '/portfolio', 
-    label: 'Portfolio Overview', 
+  {
+    path: '/portfolio',
+    label: 'Portfolio Overview',
     icon: Building2,
     description: 'Company-level summary'
+  },
+  {
+    path: '/integrity-audit',
+    label: 'Integrity Audit',
+    icon: Gavel,
+    description: 'Flags · fact-check · benchmark · AI'
   },
   { 
     path: '/transparency', 

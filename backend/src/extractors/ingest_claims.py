@@ -148,6 +148,13 @@ def ingest_claims(report_metadata: dict = None):
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
     claims = load_claims()
+
+    # FIX (#3): doc_id must be a stable DOCUMENT id, not a per-chunk id. Prefer the
+    # report_id from metadata; fall back to the claims filename stem. Previously this
+    # was prob["chunk_id"][:12], which scattered one document across many "doc_ids"
+    # and made document-level reasoning impossible.
+    doc_id = (report_metadata or {}).get("report_id") or CLAIMS_FILE.stem.replace("_claims", "")
+
     batch = []
     inserted_count = 0
     rejected_count = 0
@@ -173,7 +180,7 @@ def ingest_claims(report_metadata: dict = None):
 
         row = {
             "claim_id": str(uuid.uuid4()),
-            "doc_id": prob.get("chunk_id", "doc")[:12], # simplified doc_id
+            "doc_id": doc_id,  # FIX (#3): real document id, not per-chunk id
             "page_number": prob.get("page_number", 0),
             "chunk_id": prob.get("chunk_id", ""),
             "source_sentence": src_sentence,
@@ -191,7 +198,7 @@ def ingest_claims(report_metadata: dict = None):
             "time_end": clean_date(time.get("end_date")),
             "time_bucket": claim.get("time_bucket"),
 
-            "location_text": loc.get("raw_text") if loc else None,
+            "location_text": (lambda s: None if s is None or str(s).strip().lower() in ("", "null", "none", "nan", "n/a") else str(s).strip())(loc.get("raw_text") if loc else None),  # FIX (#9): no junk strings
             "location_scope": claim.get("location_scope") or 'Global',
 
             "claim_type": claim.get("claim_type"),

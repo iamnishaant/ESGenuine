@@ -6,6 +6,44 @@
 
 ---
 
+## Batch 2026-06-25 — Full issue sweep: reasoning spine + data quality + state (Tiers 1–3)
+
+**What ran:** re-audited the 2026-06-23/24 batches against current code (the codebase had drifted ahead of the log) and fixed the reasoning chain end-to-end. Verified against the live DB.
+
+**Already fixed by earlier Phase 1/2 work (confirmed in code, now closed):**
+- ✅ **#4** Mojibake — `pdf_parser.py` uses `ftfy.fix_text` + a repair step (line ~291). Clean source sentences.
+- ✅ **#10** `/sections` now returns `total` ([server.py:127](backend/src/api/server.py)).
+- ✅ **#11** `/health` returns `app.version` (4.0.0), no longer hardcoded ([server.py:306](backend/src/api/server.py)).
+- ✅ **#14** `metric_key` now built from a canonical unit **dimension**, not a raw-unit slug; implausible (aspect, dimension) pairs collapse to `.unspecified` ([ontology.py `generate_metric_key`](backend/src/extractors/ontology.py)).
+- 🟠→🟡 **#15** Aspect/unit mis-assignment **mitigated** by the plausibility filter (`is_plausible_metric`), but the 8B extractor can still emit wrong values for a key (see residual below).
+
+**Fixed this batch:**
+- ✅ **#3** `doc_id` = real document id across **all three** ingest paths: `supabase_ingest.py` (already correct), [ingest_claims.py](backend/src/extractors/ingest_claims.py) (was `chunk_id[:12]`), [run_integration_test.py:265](backend/tests/run_integration_test.py). Old DB rows still hold chunk-ids (historical; new ingests are correct).
+- ✅ **#1** `match_claims` RPC **applied to live DB** (was never applied → PGRST202). Rewrote it to also return `metric_key, metric_value, metric_unit, metric_direction, time_bucket, location_scope` — the previous return set starved the engine. Verified via PostgREST (anon key) with a real embedding: returns matches with all fields. SQL: [match_claims_rpc.sql](backend/database/match_claims_rpc.sql).
+- ✅ **#7** Contradiction engine rewritten ([nli_engine.py `_numeric_conflict`](backend/src/reasoning/nli_engine.py)): now (a) only compares claims with the **same meaningful `metric_key` + same unit** (family-level blocking was too coarse), (b) ignores placeholder time buckets (`unknown_time`/null), (c) guards **zero baselines** (`0.0 -> 2.8` no longer flags), (d) restricts Hard direction-conflict to same metric/time/scope. Unit-tested all gates.
+- ✅ **#2** Reasoning endpoints verified live: chain was dead only because of #1. Corpus scan now yields **47 typed conflicts (34 Temporal, 13 Scope)**, all same-`metric_key`, no zero/unknown-time noise (vs the old 20 cross-metric false positives). `/reports/{chunk}/contradictions` returns 0 for 6-claim chunk docs — correct (no same-metric pairs); real grouping arrives once reports are ingested via the fixed `doc_id` path.
+
+**New residual found (extends #15/#16):** the engine correctly flags `social.workforce.total.count shifted 20255 -> 74.445` — but `74.445` is a ratio mislabeled as a *count* at extraction time. The numeric reasoning is now sound; the remaining noise is **upstream value/unit mis-assignment** (needs 70B extraction + a unit normalizer, per #16). Tracked, not an engine defect.
+
+**Tier 2/3 — data quality, state, contract (also fixed this batch):**
+- ✅ **#6** Company mislabel. The production path (`POST /v1/reports/ingest`) already takes an explicit `company_name` (no fragile filename inference). Corrected the live data: all **181** claims relabeled `Business` → **Tata Power** (`company_id=tata_power`, `report_id=tata_power_2024`), and their `doc_id` consolidated from per-chunk ids to `tata_power_2024` (this also completes #3 for the existing rows, so the `/reports/{doc}/contradictions` endpoint now groups them as one document). Affected rows backed up to scratchpad first.
+- ✅ **#13** `reports` table refreshed: `business_2024` → `tata_power_2024`/Tata Power, `claim_count` recomputed from actual claims (214 → 181; the 3 empty shells stay at 0), all dead `F:\` `file_path`s set NULL.
+- ✅ **#5** Table extractor ([pdf_parser.py `Step5_TableExtractor`](backend/src/parsers/pdf_parser.py)) now (a) skips fragment-tables whose header row has <2 non-empty headers, (b) drops cells under empty headers, (c) de-dupes colliding header names, (d) rejects near-empty rows (≤2 chars). Validated against the audit's own 163-row artifact: removes exactly the documented noise (74 empty-header + 42 short → 99 dropped, 64 clean rows kept). Note: single-column datasheets that pdfplumber mis-extracts without row labels (e.g. bp datasheet) now correctly yield 0 — those were always label-less noise.
+- ✅ **#9** `location_text` junk: 10 live rows holding the literal `"null"`/`"none"` set to NULL; write paths now guard via `_clean_str` ([supabase_ingest.py](backend/src/extractors/supabase_ingest.py)) + inline guard in [ingest_claims.py](backend/src/extractors/ingest_claims.py). The 51 NULL `time_start` rows are inherent (no date to fabricate) and are now safely handled by #7's unknown-time gating.
+- ✅ **#12** Document filename persisted across restart: startup now reads `filename`/`statistics`/`sections` back from each `*_full.json` ([server.py startup](backend/src/api/server.py)) instead of the `"Discovered: {id}"` placeholder.
+- ✅ **#8** Empty disk claims artifact: `GET /v1/claims/{doc_id}` now falls back to the canonical **Supabase** store (keyed by `doc_id` or `report_id`) when the disk artifact is empty/missing — so async-ingested reports surface their claims (verified: `tata_power_2024` → 181). Legacy pre-migration file-hash ids (e.g. `08dbf8224013`) honestly 404 instead of returning a misleading `total: 0`.
+
+**Tier 4 — extraction trust (#15/#16 closed in code):**
+- ✅ **#16** Cross-year drift. New [`UnitCanonicalizer`](backend/src/extractors/ontology.py) converts (value, unit) to a canonical base per dimension (ktCO2e→tCO2e, GWh→MWh, ML→m³, acres→hectares, …). The engine now compares **canonical** values, so unit-scale differences no longer read as contradictions (1.2 ktCO2e == 1200 tCO2e). Added a **magnitude-outlier guard**: an extreme YoY ratio (>100×) on an absolute quantity (count/mass/energy/volume/area/co2e) is treated as a unit/extraction error, not a real change — directly kills the "`scope1 10 → 100000`" class. Same-year large mismatches (real contradictions like 12.3M vs 453K) are preserved. Corpus contradictions 47 → **39** (8 untrustworthy drift pairs removed).
+- ✅ **#15** Value mislabels. `UnitCanonicalizer.is_value_plausible` rejects values that contradict the shape their `metric_key` implies (a `.count` of 74.445, a negative `.percent`); the engine drops such pairs before reasoning.
+- ⚙️ **Operational remainder:** raw value/unit *accuracy* at the source still benefits from 70B extraction (`NVIDIA_MODEL=meta/llama-3.3-70b-instruct`) — the code is now robust to the noise, but cleaner extraction is the upstream win. Persisting canonical_value/_unit to the DB (vs. computing at compare time) is a future optimization.
+
+- ✅ **#17** Scorer recalibrated ([models.py `GroundabilityClassifier`](backend/src/extractors/models.py) + [ontology.py `compute_vagueness`](backend/src/extractors/ontology.py)): groundability now respects `claim_type` (performance ×1.0, target ×0.6, narrative ×0.5; optical aspects floored at 0.7) and de-weights noisy "global" locations; vagueness adds a forward-looking/narrative penalty. Re-scored all **1435** live rows (no-LLM): groundability avg 0.706→0.480, "groundable (≥0.75)" 879→368 (fixes the 57%-high-yet-64%-narrative mismatch), vagueness now flags 430 claims so the taxonomy `VAGUE`/`NON_GROUNDABLE` flags fire correctly.
+
+**Status: all 17 original issues resolved or mitigated.** Live data consistent + re-scored; reasoning surface alive and trustworthy. Remaining work is operational (70B ingestion for cleaner extraction values) + future optimizations (persist canonical values), not defects.
+
+---
+
 ## Batch 2026-06-24 — Phase 1 SOTA extraction run (Shell 2022/2023)
 
 **What ran:** section-level extraction (NVIDIA `llama-3.1-8b-instruct`, 4-way concurrent, `skip_tables`) on real Shell reports. 2022: 65 calls→527 claims · 2023: 83 calls→779 claims · **0 timeouts** · mojibake fixed (clean source sentences). Headline defensive signal is solid: **~64% narrative/aspirational, ~38% no metric → lack of disclosed evidence.** New defects found:

@@ -309,8 +309,8 @@ class GroundabilityClassifier:
                 points += 0.75
             elif specificity == "country":
                 points += 0.5
-            else:  # global — vague but present
-                points += 0.25
+            else:  # global — vague/noisy, often an NLP false positive
+                points += 0.15
 
         # ── Aspect observability ──
         aspect_lower = (claim.aspect or "").lower()
@@ -332,6 +332,17 @@ class GroundabilityClassifier:
                 obs_type = "not_observable"
 
         # Denominator represents a standard highly groundable claim (metric + time + location bonus)
-        score = round(min(points / 2.5, 1.0), 2)
+        score = min(points / 2.5, 1.0)
+
+        # FIX (#17): groundability must respect claim_type. A delivered "performance"
+        # figure is verifiable; a forward-looking "target" or an aspirational
+        # "narrative" is not directly groundable even if it cites a number. Previously
+        # narrative claims with a metric scored "groundable" (57% high yet 64%
+        # narrative). Observable (optical) aspects stay checkable via imagery.
+        ctype = (getattr(claim, "claim_type", "") or "").lower()
+        mult = {"performance": 1.0, "target": 0.6}.get(ctype, 0.5)
+        if obs_type == "optical_possible":
+            mult = max(mult, 0.7)
+        score = round(score * mult, 2)
         return score, obs_type
 

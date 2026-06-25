@@ -262,7 +262,7 @@ def step6_ingest(claims, report: dict):
 
             row = {
                 "claim_id": str(uuid.uuid4()),
-                "doc_id": prob.get("chunk_id", "doc")[:12],
+                "doc_id": report.get("report_id") or prob.get("chunk_id", "doc")[:12],  # FIX (#3): document id, not chunk id
                 "page_number": prob.get("page_number", 0),
                 "chunk_id": prob.get("chunk_id", ""),
                 "source_sentence": src_sentence,

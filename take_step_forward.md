@@ -9,6 +9,29 @@
 
 ---
 
+## ⚡ UPDATE 2026-06-25 — Production wiring + next-gen capabilities shipped
+
+Much of Tier 1/2 below is now **done** (see [existing_issues.md](existing_issues.md) for the defect-level log). Summary of what changed:
+
+**Production spine fixed:** async ingest path (`POST /v1/reports/ingest` → parse→extract→embed→Supabase); `match_claims` RPC applied + extended; contradiction engine rebuilt (metric_key+canonical-unit gating, zero-baseline & magnitude-outlier guards); `doc_id`/company data consistency; mojibake, table-noise, location-junk cleaned. 16/17 audited defects closed.
+
+**Live data now multi-company:** Tata Power (181), Shell 2022 (527), Shell 2023 (727) — canonical metric_keys, real peers + a 2-year trajectory.
+
+**Next-gen analysis layer (new modules under `backend/src/reasoning/`):**
+| Capability | Module | Endpoint(s) |
+|---|---|---|
+| Greenwashing taxonomy (typed flags + EU/ESRS/SEC/BRSR mapping) | `greenwash_taxonomy.py` | `GET /reports/{id}/greenwashing-flags` |
+| ESG Integrity Report (score/grade + flags + recs) | `integrity_report.py` | `GET /reports/{id}/integrity-report` |
+| Peer benchmarking + target trajectory (canonical-unit, polarity-aware) | `benchmark.py` | `GET /benchmark/metric/{key}`, `/benchmark/company/{id}`, `/benchmark/trajectory/{id}/{key}` |
+| External fact-checking (corpus + cross-report, cited verdicts) | `fact_check.py` + `data/evidence_corpus.json` | `GET /reports/{id}/fact-check` |
+| Agentic auditor + conversational audit (cited RAG Q&A + exec summary) | `agent.py` + `search_claims` RPC | `POST /audit/ask`, `GET /audit/{id}/summary` |
+
+**Frontend wired:** new `lib/api.ts` client + `Integrity Audit` page (`/integrity-audit`) showing integrity score/grade, greenwashing flags, external fact-check verdicts, peer benchmark scorecard, and a conversational audit box. Includes a **verification-method router** (`verificationMethod`) — only optically-observable aspects (reforestation/solar/land) are flagged satellite-verifiable; emissions/social/governance/financial claims route to data/document cross-check, never imagery.
+
+**Still open / next:** 70B re-ingestion for cleaner extraction values; persisting canonical/observability fields to DB; a real external evidence corpus (replace illustrative `evidence_corpus.json`); auth/CI/containers/observability (Tier 3 below unchanged). #17 scorer calibration is **done** (re-scored live data).
+
+---
+
 ## 0. How to read this report
 
 Every recommendation carries reasoning, expected impact, tradeoffs, difficulty, and a realistic time estimate (for *one competent research/engineering student* working focused days — not a team). Sections 1–8 diagnose; Section 9 prioritizes (Tier 1/2/3) with the mandatory estimate tables; Section 10 is the roadmap; Section 11 is self-critique.

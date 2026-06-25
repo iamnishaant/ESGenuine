@@ -11,6 +11,7 @@ import PortfolioOverview from "./pages/PortfolioOverview";
 import SystemTransparency from "./pages/SystemTransparency";
 import Settings from "./pages/Settings";
 import SubmitReport from "./pages/SubmitReport";
+import IntegrityAudit from "./pages/IntegrityAudit";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/audit-trail" element={<AuditTrail />} />
           <Route path="/audit-trail/:claimId" element={<AuditTrail />} />
           <Route path="/portfolio" element={<PortfolioOverview />} />
+          <Route path="/integrity-audit" element={<IntegrityAudit />} />
           <Route path="/transparency" element={<SystemTransparency />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/submit-report" element={<SubmitReport />} />

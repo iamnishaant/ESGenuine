@@ -6,19 +6,23 @@ Serves:
   Week 3: Claim extraction (text + table dual pipeline)
 """
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pathlib import Path
 import json
+import os
+import re
 import shutil
+import uuid
 import uvicorn
 
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from parsers.pdf_parser import DocumentParsingPipeline, PDFValidationError
 from extractors.pipeline import ExtractionPipeline
-from reasoning.api_reasoning import router as reasoning_router
+from extractors.supabase_ingest import ingest_claims_to_db, _get_sb
+from reasoning.api_reasoning import router as reasoning_router, bench_router, audit_router
 
 app = FastAPI(
     title="ESGenuine API",
@@ -27,6 +31,8 @@ app = FastAPI(
 )
 
 app.include_router(reasoning_router)
+app.include_router(bench_router)
+app.include_router(audit_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,14 +50,25 @@ PARSED_DIR.mkdir(exist_ok=True)
 document_registry: dict = {}
 for path in PARSED_DIR.glob("*_full.json"):
     doc_id = path.name.replace("_full.json", "")
-    # Minimal info since we only have the JSONs
-    document_registry[doc_id] = {
-        "filename": f"Discovered: {doc_id}",
-        "status": "ready"
-    }
+    # FIX (#12): the parse artifact already persists the real filename + stats — read
+    # them back instead of showing a "Discovered: {id}" placeholder after restart.
+    info = {"filename": f"Discovered: {doc_id}", "status": "ready"}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            full = json.load(f)
+        if full.get("filename"):
+            info["filename"] = full["filename"]
+        if full.get("statistics"):
+            info["statistics"] = full["statistics"]
+        if full.get("sections"):
+            info["sections_detected"] = [s.get("title") for s in full["sections"]]
+    except Exception as e:
+        print(f"  [Startup] Could not read {path.name}: {e}")
+    document_registry[doc_id] = info
 print(f"  [Startup] Discovered {len(document_registry)} documents on disk.")
 
 claims_registry: dict = {}
+ingest_jobs: dict = {}   # job_id -> {status, stage, counts, error}
 
 
 # ──────────────────────────────────────────────
@@ -208,17 +225,127 @@ async def extract_claims(req: ExtractRequest):
         "claims": claims_data,
     }
 
+_SB_CLAIM_COLS = (
+    "claim_id,doc_id,report_id,company_name,page_number,chunk_id,source_sentence,"
+    "aspect,normalized_aspect,metric_family,metric_key,metric_value,metric_unit,"
+    "metric_direction,time_start,time_end,time_bucket,location_text,location_scope,"
+    "claim_type,vagueness_score,groundability_score,claim_signature"
+)
+
+
+def _fetch_claims_from_supabase(doc_id: str):
+    """FIX (#8): the async ingest path writes claims only to Supabase, and some legacy
+    disk artifacts are empty. Fall back to Supabase (the canonical store) keyed by
+    doc_id or report_id. Returns [] if unavailable/none."""
+    try:
+        sb = _get_sb()
+        res = (
+            sb.table("claims")
+            .select(_SB_CLAIM_COLS)
+            .or_(f"doc_id.eq.{doc_id},report_id.eq.{doc_id}")
+            .execute()
+        )
+        return res.data or []
+    except Exception as e:
+        print(f"  [claims] Supabase fallback failed for {doc_id}: {e}")
+        return []
+
+
 @app.get("/v1/claims/{doc_id}")
 async def get_claims(doc_id: str):
-    """Get all extracted claims for a document."""
-    if doc_id in claims_registry:
-        claims = claims_registry[doc_id]
-    else:
-        try:
-            claims = _load_json(doc_id, "claims")
-        except HTTPException:
-            raise HTTPException(status_code=404, detail=f"No claims found for {doc_id}.")
-    return {"document_id": doc_id, "total": len(claims), "claims": claims}
+    """Get all extracted claims for a document (memory → disk → Supabase fallback)."""
+    if doc_id in claims_registry and claims_registry[doc_id]:
+        return {"document_id": doc_id, "total": len(claims_registry[doc_id]),
+                "claims": claims_registry[doc_id], "source": "memory"}
+
+    try:
+        disk = _load_json(doc_id, "claims")
+    except HTTPException:
+        disk = None
+    if disk:  # non-empty disk artifact
+        return {"document_id": doc_id, "total": len(disk), "claims": disk, "source": "disk"}
+
+    # FIX (#8): disk artifact empty/missing → fall back to the canonical Supabase store.
+    sb_claims = _fetch_claims_from_supabase(doc_id)
+    if sb_claims:
+        return {"document_id": doc_id, "total": len(sb_claims), "claims": sb_claims, "source": "supabase"}
+
+    raise HTTPException(status_code=404, detail=f"No claims found for {doc_id}.")
+
+
+# ──────────────────────────────────────────────
+# Production ingest: parse → extract → embed → Supabase (the write path the UI needs)
+# ──────────────────────────────────────────────
+
+def _slug(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", (s or "").lower()).strip("_") or "company"
+
+
+def _run_ingest(job_id: str, pdf_path: str, meta: dict, use_tables: bool):
+    job = ingest_jobs[job_id]
+    try:
+        if use_tables:
+            os.environ["USE_VLM_TABLES"] = "1"
+        job.update(status="parsing")
+        res = DocumentParsingPipeline(pdf_path).run(skip_tables=True)
+        job.update(status="extracting", pages=res["triage"]["page_count"], sentences=len(res["sentences"]))
+        pipe = ExtractionPipeline()
+        claims = pipe.run(
+            sentences=res["sentences"],
+            pdf_path=pdf_path if use_tables else "",
+            document_id=meta["report_id"],
+            report_metadata=meta,
+        )
+        job.update(status="ingesting", extracted=len(claims))
+        out = ingest_claims_to_db(claims, meta)
+        job.update(status="done", inserted=out["inserted"], total=out["total"], doc_id=out["doc_id"])
+    except PDFValidationError as e:
+        job.update(status="error", error=f"Invalid PDF: {e}")
+    except Exception as e:
+        job.update(status="error", error=str(e))
+
+
+@app.post("/v1/reports/ingest")
+async def ingest_report(
+    background: BackgroundTasks,
+    file: UploadFile = File(...),
+    company_name: str = Form(...),
+    report_year: int = Form(...),
+    use_vlm_tables: bool = Form(False),
+):
+    """
+    Upload an ESG PDF → parse → extract → embed → write to Supabase (async).
+    Returns a job_id; poll GET /v1/jobs/{job_id} for progress. This is the path
+    that actually populates the dashboard.
+    """
+    if not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are accepted.")
+    save_path = UPLOAD_DIR / file.filename
+    with open(save_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    company_id = _slug(company_name)
+    meta = {
+        "report_id": f"{company_id}_{report_year}",
+        "company_id": company_id,
+        "company_name": company_name,
+        "report_year": int(report_year),
+    }
+    job_id = str(uuid.uuid4())[:8]
+    ingest_jobs[job_id] = {
+        "job_id": job_id, "status": "queued",
+        "report_id": meta["report_id"], "company_name": company_name, "report_year": int(report_year),
+    }
+    background.add_task(_run_ingest, job_id, str(save_path), meta, bool(use_vlm_tables))
+    return {"job_id": job_id, "status": "queued", "report_id": meta["report_id"]}
+
+
+@app.get("/v1/jobs/{job_id}")
+async def get_job(job_id: str):
+    job = ingest_jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found.")
+    return job
 
 
 @app.get("/health")
