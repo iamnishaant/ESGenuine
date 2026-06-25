@@ -6,18 +6,32 @@ numeric comparison rules to detect contradictions between
 two closely related ESG claims.
 """
 
-from transformers import pipeline
-
 try:  # canonical unit conversion + value sanity (#15/#16); robust to import path
     from extractors.ontology import UnitCanonicalizer
 except ImportError:  # pragma: no cover
     from src.extractors.ontology import UnitCanonicalizer
 
+_NLI_MODEL_NAME = "typeform/distilbert-base-uncased-mnli"
+
+
 class ContradictionEngine:
     def __init__(self):
-        print("Loading DistilBERT-MNLI model for rapid textual reasoning...")
-        # Swapped to a lightweight, fast NLI model to avoid massive RAM hangs on local CPU
-        self.nli_model = pipeline("text-classification", model="typeform/distilbert-base-uncased-mnli")
+        # Lazy load (NLI Improvement Opportunity #2): the DistilBERT-MNLI weights are
+        # ~250–350 MB resident and the torch/transformers import dominates cold start.
+        # The numeric path decides most pairs and never needs the model, so we defer
+        # loading (and even the `transformers` import) until the first *textual*
+        # comparison. This also keeps the module import-safe — constructible without
+        # torch installed — so the numeric reasoning is unit-testable in isolation.
+        self._nli_model = None
+
+    @property
+    def nli_model(self):
+        """The HF text-classification pipeline, loaded on first access."""
+        if self._nli_model is None:
+            print("Loading DistilBERT-MNLI model for rapid textual reasoning...")
+            from transformers import pipeline  # deferred: only paid for textual NLI
+            self._nli_model = pipeline("text-classification", model=_NLI_MODEL_NAME)
+        return self._nli_model
 
     @staticmethod
     def _normalize_label(raw) -> str:

@@ -123,6 +123,8 @@ def cross_company(claims: List[Dict[str, Any]], metric_key: str,
         "median": round(med, 4), "best": entries[0], "worst": entries[-1],
         "unit": entries[0]["unit"], "entries": entries,
         "incomparable_dropped": len(dropped),
+        # <3 peers → percentile/rank are statistically thin; UI should caveat.
+        "confidence": "low" if len(entries) < 3 else "ok",
     }
 
 
@@ -154,9 +156,11 @@ def company_scorecard(all_claims: List[Dict[str, Any]], company_id: str,
             "metric_key": mk, "polarity": dist["polarity"], "unit": dist["unit"],
             "value": mine["value"], "rank": mine["rank"], "of": dist["n"],
             "percentile": mine["percentile"], "peer_median": dist["median"], "verdict": verdict,
+            "low_confidence": dist["n"] < 3,   # thin peer set → caveat this row
         })
     metrics.sort(key=lambda m: m["percentile"])  # worst first (actionable)
-    return {"company": company_id, "metrics_compared": len(metrics), "metrics": metrics}
+    return {"company": company_id, "metrics_compared": len(metrics), "metrics": metrics,
+            "low_confidence_metrics": sum(1 for m in metrics if m["low_confidence"])}
 
 
 def trajectory(all_claims: List[Dict[str, Any]], company_id: str, metric_key: str,
@@ -182,21 +186,30 @@ def trajectory(all_claims: List[Dict[str, Any]], company_id: str, metric_key: st
         span = last["year"] - first["year"]
         out["change"] = round(last["value"] - first["value"], 4)
         out["change_pct"] = round((last["value"] - first["value"]) * 100 / abs(first["value"]), 1) if first["value"] else None
-        out["cagr_per_year"] = round((last["value"] - first["value"]) / span, 4) if span else None
+        # Linear average change per year (absolute units/yr). This — NOT a compound rate —
+        # is the basis for the gap-to-target check below, because required_per_year is also
+        # a linear absolute rate; comparing a compound fraction against it would be a
+        # dimension error. (Was misleadingly named `cagr_per_year`; see self_improvement.md.)
+        out["avg_change_per_year"] = round((last["value"] - first["value"]) / span, 4) if span else None
+        # True compound annual growth rate (fraction/yr), for display only. Defined only when
+        # both endpoints are positive: a CAGR across a zero baseline or a sign change is
+        # mathematically meaningless, so report None rather than a misleading number.
+        out["cagr"] = (round((last["value"] / first["value"]) ** (1 / span) - 1, 4)
+                       if span and first["value"] > 0 and last["value"] > 0 else None)
         out["trend"] = ("up" if last["value"] > first["value"] else
                         "down" if last["value"] < first["value"] else "flat")
-        if target_value is not None and target_year is not None and out.get("cagr_per_year") is not None:
+        if target_value is not None and target_year is not None and out.get("avg_change_per_year") is not None:
             needed = target_value - last["value"]
             years_left = target_year - last["year"]
             req_rate = needed / years_left if years_left else None
             pol = polarity(metric_key)
             on_track = None
             if req_rate is not None:
-                # are we moving the right direction fast enough?
+                # moving the right direction fast enough? (linear rate vs linear required rate)
                 if pol == "lower_better":
-                    on_track = out["cagr_per_year"] <= req_rate
+                    on_track = out["avg_change_per_year"] <= req_rate
                 elif pol == "higher_better":
-                    on_track = out["cagr_per_year"] >= req_rate
+                    on_track = out["avg_change_per_year"] >= req_rate
             out["target"] = {"value": target_value, "year": target_year,
                              "gap": round(needed, 4), "required_per_year": round(req_rate, 4) if req_rate is not None else None,
                              "on_track": on_track}

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Claim } from './useClaims';
+import { metricLabel } from '@/lib/metricLabels';
 
 export interface MetricPoint {
   year: string;
@@ -85,7 +86,7 @@ export function useMetricTimeline(claims: Claim[]): MetricSeries[] {
       if (sortedData.length > 0) {
         series.push({
           id: key,
-          label: key.split('.').pop() || key,
+          label: metricLabel(key),
           unit: groupClaims[0].metricUnit || 'units',
           color: COLORS[colorIndex % COLORS.length],
           category: getCategory(key),

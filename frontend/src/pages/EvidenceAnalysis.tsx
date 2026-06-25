@@ -19,6 +19,7 @@ import { AppLayout } from '@/components/AppLayout';
 import { cn } from '@/lib/utils';
 import { RegulatoryDisclaimer } from '@/components/RegulatoryDisclaimer';
 import { useClaims } from '@/hooks/useClaims';
+import { metricLabel } from '@/lib/metricLabels';
 
 const statusConfig = {
   verified: { label: 'Verified', icon: CheckCircle2, class: 'status-verified' },
@@ -238,7 +239,7 @@ const EvidenceAnalysis = () => {
                 </div>
                 <div>
                   <span className="text-muted-foreground block text-xs mb-1">ESG Aspect</span>
-                  <span className="text-foreground font-mono text-xs">{currentClaim.normalizedAspect || currentClaim.metricKey || '—'}</span>
+                  <span className="text-foreground text-xs" title={currentClaim.metricKey || currentClaim.normalizedAspect || ''}>{currentClaim.metricKey || currentClaim.normalizedAspect ? metricLabel(currentClaim.metricKey || currentClaim.normalizedAspect) : '—'}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground block text-xs mb-1">Location</span>

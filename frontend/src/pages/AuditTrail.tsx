@@ -22,6 +22,7 @@ import { AppLayout } from '@/components/AppLayout';
 import { cn } from '@/lib/utils';
 import { RegulatoryDisclaimer } from '@/components/RegulatoryDisclaimer';
 import { useClaims } from '@/hooks/useClaims';
+import { metricLabel } from '@/lib/metricLabels';
 
 interface AuditStep {
   id: string;
@@ -79,7 +80,7 @@ const AuditTrail = () => {
         details: [
           'Model: Groq llama-3.1-8b-instant',
           `Source sentence: "${currentClaim.claim}"`,
-          `ESG aspect: ${currentClaim.normalizedAspect || currentClaim.metricKey || currentClaim.sector}`,
+          `ESG aspect: ${currentClaim.metricKey || currentClaim.normalizedAspect ? metricLabel(currentClaim.metricKey || currentClaim.normalizedAspect) : currentClaim.sector}`,
           `Extracted metric: ${metricStr}`,
           `Claim type: ${currentClaim.verifiabilityClass}`,
         ],

@@ -11,6 +11,7 @@ import {
 import { AppLayout } from '@/components/AppLayout';
 import { cn } from '@/lib/utils';
 import { useClaims } from '@/hooks/useClaims';
+import { metricLabel } from '@/lib/metricLabels';
 
 // Honest description of the real pipeline (no satellite/NDVI claims).
 const pipelineStages = [
@@ -159,7 +160,7 @@ const SystemTransparency = () => {
               <div className="space-y-2">
                 {stats.aspects.map(a => (
                   <div key={a.key} className="flex items-center gap-3">
-                    <span className="text-xs font-mono text-muted-foreground w-48 truncate">{a.key}</span>
+                    <span className="text-xs text-muted-foreground w-48 truncate" title={a.key}>{metricLabel(a.key)}</span>
                     <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                       <motion.div className="h-full rounded-full bg-primary/70" initial={{ width: 0 }} animate={{ width: `${(a.count / maxAspect) * 100}%` }} transition={{ duration: 0.6 }} />
                     </div>

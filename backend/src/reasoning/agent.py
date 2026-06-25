@@ -25,6 +25,8 @@ try:
 except ImportError:  # pragma: no cover
     from src.extractors.claim_extractor import LLMClient
 
+from .json_utils import loads_lenient
+
 load_dotenv()
 EMBED_MODEL = "BAAI/bge-base-en-v1.5"
 
@@ -58,6 +60,79 @@ def _has_llm() -> bool:
     return bool(_get_llm().endpoints) or _get_llm().provider in ("openai", "anthropic")
 
 
+# ── pure helpers (no I/O / no LLM) ───────────────────────────────────────────────
+def suggest_questions(report: Dict[str, Any], limit: int = 5) -> List[str]:
+    """Concrete starter questions derived from a report's flags/stats — no LLM."""
+    company = (report.get("meta") or {}).get("company_name") or "this company"
+    qs: List[str] = []
+    for f in (report.get("flags") or []):
+        t = (f.get("type") or "").lower()
+        title = f.get("title") or f.get("type") or "this issue"
+        if "vague" in t:
+            qs.append("Which environmental claims lack measurable metrics?")
+        elif "contradic" in t:
+            qs.append("Where does this report contradict itself on emissions or targets?")
+        elif "aspiration" in t or "narrative" in t:
+            qs.append("Which targets have no baseline, deadline, or interim milestones?")
+        else:
+            qs.append(f"What evidence supports the '{title}' flag?")
+    stats = report.get("statistics") or {}
+    if stats.get("with_metric_pct") is not None and stats["with_metric_pct"] < 50:
+        qs.append(f"Why are most of {company}'s claims qualitative rather than quantified?")
+    if (stats.get("contradictions") or 0) > 0:
+        qs.append("Summarise every numeric contradiction found in this report.")
+    if not qs:
+        qs = [f"What emissions targets has {company} set?",
+              "Which claims are externally verifiable?",
+              "Are there any contradictions in the social data?"]
+    seen, out = set(), []
+    for q in qs:
+        if q not in seen:
+            seen.add(q)
+            out.append(q)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _key_findings(report: Dict[str, Any], factcheck: Dict[str, Any],
+                  scorecard: Dict[str, Any]) -> List[str]:
+    """Top structured findings as bullet strings — the richer non-LLM executive summary."""
+    bullets: List[str] = []
+    score = report.get("integrity_score")
+    if score is not None:
+        bullets.append(f"Integrity score {round(score)}/100 (grade {report.get('grade')}, "
+                       f"{str(report.get('greenwashing_risk')).lower()} greenwashing risk).")
+    flags = report.get("flags") or []
+    if flags:
+        top = flags[0]
+        bullets.append(f"Top flag: {top.get('title') or top.get('type')} "
+                       f"({top.get('count')} claim(s), {top.get('severity')}).")
+    cred = factcheck.get("credibility")
+    if cred is not None:
+        cov = factcheck.get("coverage") or 0
+        bullets.append(f"External fact-check: {int(cred * 100)}% of checked claims supported "
+                       f"(coverage {int(cov * 100)}%).")
+    lagging = [m for m in (scorecard.get("metrics") or []) if m.get("verdict") == "lagging"]
+    if lagging:
+        bullets.append(f"Lagging vs peers on {len(lagging)} metric(s), incl. {lagging[0].get('metric_key')}.")
+    return bullets[:4] or ["No findings available for this report."]
+
+
+def _unsupported_citations(used, valid_ns) -> List[int]:
+    """Citation indices the LLM referenced that don't exist in the evidence set (hallucinated)."""
+    valid = set(valid_ns)
+    out = []
+    for u in (used or []):
+        try:
+            n = int(u)
+        except (TypeError, ValueError):
+            continue
+        if n not in valid:
+            out.append(n)
+    return out
+
+
 def retrieve(question: str, doc_id: Optional[str] = None, k: int = 8) -> List[Dict[str, Any]]:
     """Semantic search over claims for the question (optionally scoped to one document)."""
     emb = _get_model().encode(question).tolist()
@@ -84,10 +159,15 @@ def ask(question: str, doc_id: Optional[str] = None, k: int = 8) -> Dict[str, An
         return {"question": question, "answer": "No relevant claims were found in the corpus.",
                 "citations": [], "engine": "retrieval"}
 
+    # Scope signal: if even the best match is weak, the question may be outside the corpus.
+    top_similarity = round(max((c["similarity"] for c in citations), default=0.0), 3)
+    low_relevance = top_similarity < 0.25
+
     if not _has_llm():
         return {"question": question,
                 "answer": "LLM not configured — returning the most relevant claims as evidence.",
-                "citations": citations, "engine": "retrieval"}
+                "citations": citations, "engine": "retrieval",
+                "top_similarity": top_similarity, "low_relevance": low_relevance}
 
     context = "\n".join(
         f"[{c['n']}] ({c['company']} {c['year']}, p{c['page']}) {c['text']}" for c in citations
@@ -100,12 +180,18 @@ def ask(question: str, doc_id: Optional[str] = None, k: int = 8) -> Dict[str, An
         f"QUESTION: {question}\n\nEVIDENCE:\n{context}\n"
     )
     try:
-        data = json.loads(_get_llm().extract(prompt))
+        data = loads_lenient(_get_llm().extract(prompt))
+        used = data.get("used", [])
         return {"question": question, "answer": data.get("answer", ""),
-                "used": data.get("used", []), "citations": citations, "engine": "llm"}
+                "used": used,
+                # Hallucinated [n] references — citations not in the evidence set.
+                "unsupported_citations": _unsupported_citations(used, {c["n"] for c in citations}),
+                "citations": citations, "engine": "llm",
+                "top_similarity": top_similarity, "low_relevance": low_relevance}
     except Exception as e:
         return {"question": question, "answer": f"(LLM error: {e}) Top evidence returned instead.",
-                "citations": citations, "engine": "retrieval"}
+                "citations": citations, "engine": "retrieval",
+                "top_similarity": top_similarity, "low_relevance": low_relevance}
 
 
 def synthesize_audit(report: Dict[str, Any], factcheck: Dict[str, Any],
@@ -121,9 +207,12 @@ def synthesize_audit(report: Dict[str, Any], factcheck: Dict[str, Any],
         "credibility": factcheck.get("credibility"),
         "benchmark_lagging": [m for m in scorecard.get("metrics", []) if m.get("verdict") == "lagging"][:5],
     }
-    out = {"findings": findings}
+    key_findings = _key_findings(report, factcheck, scorecard)
+    findings["key_findings"] = key_findings
+    out = {"findings": findings, "key_findings": key_findings}  # always present
     if not _has_llm():
-        out["executive_summary"] = report.get("summary", "")
+        # Richer fallback than a single template line: a structured top-findings list.
+        out["executive_summary"] = " ".join(key_findings)
         out["engine"] = "structured"
         return out
     prompt = (
@@ -134,12 +223,12 @@ def synthesize_audit(report: Dict[str, Any], factcheck: Dict[str, Any],
         f"FINDINGS: {json.dumps(findings, default=str)}\n"
     )
     try:
-        data = json.loads(_get_llm().extract(prompt))
+        data = loads_lenient(_get_llm().extract(prompt))
         out["executive_summary"] = data.get("executive_summary", report.get("summary", ""))
         out["verdict"] = data.get("verdict")
         out["engine"] = "llm"
     except Exception as e:
-        out["executive_summary"] = report.get("summary", "")
+        out["executive_summary"] = " ".join(key_findings)
         out["engine"] = "structured"
         out["note"] = f"LLM summary unavailable: {e}"
     return out

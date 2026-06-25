@@ -14,11 +14,21 @@ import collections
 # In a full production setup these would be imported from the DB layer
 from src.reasoning.retrieval import find_candidate_pairs, get_supabase
 from src.reasoning.nli_engine import ContradictionEngine
+from src.reasoning.contradiction_scan import scan_contradictions
 from src.reasoning.greenwash_taxonomy import GreenwashTaxonomy
 from src.reasoning.integrity_report import build_report
 from src.reasoning.benchmark import cross_company, company_scorecard, trajectory
 from src.reasoning.fact_check import fact_check_document, load_external_corpus
-from src.reasoning.agent import ask as agent_ask, synthesize_audit
+from src.reasoning.agent import ask as agent_ask, synthesize_audit, suggest_questions, _get_llm, _has_llm
+
+
+def _optional_llm():
+    """The configured LLMClient, or None — so fact-check stays deterministic when no LLM
+    is available and only uses the (guarded) LLM fallback when one is."""
+    try:
+        return _get_llm() if _has_llm() else None
+    except Exception:
+        return None
 
 router = APIRouter(prefix="/reports", tags=["Reasoning"])
 bench_router = APIRouter(prefix="/benchmark", tags=["Benchmark"])
@@ -28,7 +38,11 @@ _SEV_FROM_TYPE = {"Hard": "Critical", "Metric": "High", "Temporal": "Medium", "S
 
 
 def _numeric_contradictions(claims, cap: int = 3000):
-    """Fast numeric-only contradiction pass (no NLI) for the audit summary."""
+    """Fast numeric-only contradiction pass (no NLI) for the audit summary.
+
+    Returns (contradictions, truncated). `truncated` is True when the pairwise scan hit
+    `cap` and stopped early, so callers can report an incomplete set instead of silently
+    under-counting contradictions on a large single report (#3)."""
     by = collections.defaultdict(list)
     for c in claims:
         mk = c.get("metric_key")
@@ -39,12 +53,12 @@ def _numeric_contradictions(claims, cap: int = 3000):
         for a, b in itertools.combinations(group, 2):
             n += 1
             if n > cap:
-                return out
+                return out, True
             r = engine._numeric_conflict(a, b)
             if r:
                 out.append({"severity": _SEV_FROM_TYPE.get(r["type"], "Medium"),
                             "reasoning": r["reason"], "conflict_type": r["type"]})
-    return out
+    return out, False
 
 
 class AskRequest(BaseModel):
@@ -81,40 +95,14 @@ async def get_contradictions(doc_id: str):
     if not doc_claims:
         raise HTTPException(status_code=404, detail="No claims found for this document.")
 
-    conflicts = []
-    severity_counts = {"Critical": 0, "High": 0, "Medium": 0, "Low": 0}
-    
-    # 2. For each claim, find historical/peer contradictions
-    for claim in doc_claims:
-        # Signature Bucketing + Vector Retrieval
-        candidates = find_candidate_pairs(claim, similarity_threshold=0.85)
-        
-        for candidate in candidates:
-            # Numeric & NLI Reasoning
-            eval_result = engine.evaluate_pair(claim, candidate)
-            
-            if eval_result.get("has_contradiction"):
-                severity = eval_result["severity"]
-                severity_counts[severity] += 1
-                
-                conflicts.append({
-                    "claim_a_id": claim.get("claim_id"),
-                    "claim_a_text": claim.get("source_sentence"),
-                    "claim_a_page": claim.get("page_number"),
-                    
-                    "claim_b_id": candidate.get("claim_id"),
-                    "claim_b_text": candidate.get("source_sentence"),
-                    "claim_b_doc": candidate.get("doc_id"), # Might be Cross-Report!
-                    
-                    "severity": severity,
-                    "conflict_type": eval_result["conflict_type"],
-                    "reasoning": eval_result["reasoning"],
-                    # Numeric contradictions are deterministic (confidence 1.0); only the
-                    # "Textual" path carries a model confidence. (Previously every numeric
-                    # conflict reported the NLI model's meaningless score.)
-                    "confidence": eval_result["nli_data"]["confidence"]
-                    if eval_result.get("conflict_type") == "Textual" else 1.0
-                })
+    # 2. For each claim, find historical/peer contradictions. The loop + unordered-pair
+    #    dedup (NLI #4) live in the pure `scan_contradictions` so they are testable without
+    #    Supabase / the NLI model; here we just inject the retrieval and engine.
+    conflicts, severity_counts = scan_contradictions(
+        doc_claims,
+        lambda c: find_candidate_pairs(c, similarity_threshold=0.85),
+        engine,
+    )
 
     return {
         "total_conflicts": len(conflicts),
@@ -247,7 +235,7 @@ async def portfolio_integrity():
         years = [c.get("report_year") for c in claims if c.get("report_year") is not None]
         latest = max(years) if years else None
         scored = [c for c in claims if c.get("report_year") == latest] if latest is not None else claims
-        report = build_report(scored, _numeric_contradictions(scored))
+        report = build_report(scored, _numeric_contradictions(scored)[0])
         out.append({
             "company_id": cid,
             "company_name": (scored[0].get("company_name") if scored else None) or cid,
@@ -271,7 +259,7 @@ async def get_fact_check(doc_id: str, limit: int = 50):
         raise HTTPException(status_code=404, detail="No claims found for this document.")
     company_id = doc_claims[0].get("company_id")
     peers = _fetch_company_claims(company_id) if company_id else []
-    return fact_check_document(doc_claims, peers, load_external_corpus(), limit=limit)
+    return fact_check_document(doc_claims, peers, load_external_corpus(), limit=limit, llm=_optional_llm())
 
 
 @bench_router.get("/metric/{metric_key:path}")
@@ -300,6 +288,16 @@ async def audit_ask(req: AskRequest):
     return agent_ask(req.question, req.doc_id, req.k)
 
 
+@audit_router.get("/{doc_id}/suggested-questions")
+async def audit_suggested_questions(doc_id: str):
+    """Starter questions derived from this document's integrity report (no LLM)."""
+    claims = _fetch_doc_claims(doc_id)
+    if not claims:
+        raise HTTPException(status_code=404, detail="No claims found for this document.")
+    report = build_report(claims, _numeric_contradictions(claims)[0])
+    return {"doc_id": doc_id, "questions": suggest_questions(report)}
+
+
 @audit_router.get("/{doc_id}/summary")
 async def audit_summary(doc_id: str):
     """Agentic full audit: runs integrity + fact-check + benchmark, returns an LLM
@@ -307,10 +305,14 @@ async def audit_summary(doc_id: str):
     claims = _fetch_doc_claims(doc_id)
     if not claims:
         raise HTTPException(status_code=404, detail="No claims found for this document.")
-    contradictions = _numeric_contradictions(claims)
+    contradictions, contradictions_truncated = _numeric_contradictions(claims)
     report = build_report(claims, contradictions)
     company_id = claims[0].get("company_id")
     factcheck = fact_check_document(claims, _fetch_company_claims(company_id) if company_id else [],
-                                    load_external_corpus(), limit=50)
+                                    load_external_corpus(), limit=50, llm=_optional_llm())
     scorecard = company_scorecard(_fetch_all_claims(), company_id) if company_id else {"metrics": []}
-    return synthesize_audit(report, factcheck, scorecard)
+    audit = synthesize_audit(report, factcheck, scorecard)
+    # Surface that the numeric contradiction scan was capped, so the summary's
+    # contradiction findings are not silently treated as exhaustive (#3).
+    audit["contradictions_truncated"] = contradictions_truncated
+    return audit

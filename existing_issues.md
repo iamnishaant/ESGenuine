@@ -6,6 +6,20 @@
 
 ---
 
+## Batch 2026-06-25b — Tier-1: ingest dedup + idempotent writes
+
+**What ran:** `POST /v1/reports/ingest` re-ingesting the same PDF (same `company_name`+`report_year` → same `report_id`) inserted a *fresh* set of `claims` rows each time (each row gets a new `uuid4()` `claim_id`, so nothing ever collided). Re-uploading a report silently doubled its claim count and corrupted every downstream count/score.
+
+**Fixed this batch:**
+- ✅ **Content-hash dedup.** The endpoint now hashes the uploaded PDF (full-file SHA-256, the same digest Step0 triage already computes) and, before spawning a job, looks it up in `reports.file_hash`. An exact-content re-upload returns `{"status": "duplicate", "report_id": …}` with no new job — no duplicate work, no duplicate claims. `find_report_by_file_hash` / `sha256_file` in [supabase_ingest.py](backend/src/extractors/supabase_ingest.py); short-circuit in [server.py `/v1/reports/ingest`](backend/src/api/server.py).
+- ✅ **Idempotent claim writes (delete-then-insert).** `ingest_claims_to_db` now clears a report's existing claims (`DELETE … WHERE report_id=… OR doc_id=…`) before writing the new set, so a re-ingest of *changed* content (same identity, new bytes) **replaces** rather than appends. Empty extractions skip the delete (won't wipe a prior good ingest). Returns `replaced` in the result.
+- ✅ **`reports` row now written by the ingest path.** Previously only the collector populated `reports`; the live ingest never did. `ingest_claims_to_db` upserts the report row (keyed by `report_id`, carrying `file_hash` + `claim_count`) — but only when `inserted > 0`, so a fully-failed insert stays retryable instead of being dedup-blocked.
+- ✅ **Migration applied to live DB.** `backend/database/2026-06-25_reports_file_hash.sql` (`reports.file_hash` + `reports_file_hash_idx`) and the earlier `2026-06-25_observability_type.sql` both applied + verified against Supabase (columns + index present). Both are also folded into `schema.sql` for fresh setups.
+- ✅ **RLS delete caveat resolved (verified live).** RLS is **disabled** on `claims`, all partitions, and `reports` (no policies); `has_table_privilege('anon','public.claims','DELETE')=True`. A live no-op delete via the publishable key was allowed, and a full **delete-then-insert round-trip on a sentinel report kept the claim count at 3 (not 6)** with a single upserted `reports` row carrying `file_hash` — i.e. idempotent re-ingest is proven against the real DB, not just in code.
+- ⏭️ **Out of scope (next Tier-1 item):** persisting in-memory `ingest_jobs` to DB.
+
+---
+
 ## Batch 2026-06-25 — Full issue sweep: reasoning spine + data quality + state (Tiers 1–3)
 
 **What ran:** re-audited the 2026-06-23/24 batches against current code (the codebase had drifted ahead of the log) and fixed the reasoning chain end-to-end. Verified against the live DB.

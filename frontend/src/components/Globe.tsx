@@ -1,35 +1,23 @@
-import React, { useRef, useEffect, Suspense, useState, useMemo } from 'react';
+import React, { useRef, Suspense, useState, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 import { useClaims } from '@/hooks/useClaims';
+import { resolveHeadquarters } from '@/lib/companyHeadquarters';
 
-interface ClaimMarker {
-  id: string;
+// One marker per company, placed at its real headquarters. Clicking a marker
+// surfaces that company's claims (handled by the parent).
+interface CompanyMarker {
+  name: string;
+  city: string;
+  country: string;
   lat: number;
   lng: number;
-  label: string;
-  status: 'verified' | 'review' | 'gap';
+  claimsCount: number;
+  riskLevel: 'low' | 'medium' | 'high';
+  integrityScore: number;
 }
-
-// Best-effort geocoding from the claim's location text. Returns null when the
-// location is unknown — we do NOT fabricate coordinates for unmapped places.
-const getLatLong = (locationText: string): { lat: number, lng: number } | null => {
-  const loc = locationText.toLowerCase();
-  if (loc.includes('singapore')) return { lat: 1.3521, lng: 103.8198 };
-  if (loc.includes('são paulo') || loc.includes('brazil')) return { lat: -23.5505, lng: -46.6333 };
-  if (loc.includes('berlin') || loc.includes('germany') || loc.includes('europe')) return { lat: 52.52, lng: 13.405 };
-  if (loc.includes('tokyo') || loc.includes('japan')) return { lat: 35.6762, lng: 139.6503 };
-  if (loc.includes('sydney') || loc.includes('australia')) return { lat: -33.8688, lng: 151.2093 };
-  if (loc.includes('mumbai') || loc.includes('india') || loc.includes('jamshedpur') || loc.includes('tata')) return { lat: 19.0760, lng: 72.8777 };
-  if (loc.includes('houston') || loc.includes('usa') || loc.includes('united states') || loc.includes('america')) return { lat: 29.7604, lng: -95.3698 };
-  if (loc.includes('dubai') || loc.includes('uae')) return { lat: 25.2048, lng: 55.2708 };
-  if (loc.includes('oslo')) return { lat: 59.9139, lng: 10.7522 };
-  if (loc.includes('johannesburg') || loc.includes('africa')) return { lat: -26.2041, lng: 28.0473 };
-
-  return null;
-};
 
 function latLngToVector3(lat: number, lng: number, radius: number): THREE.Vector3 {
   const phi = (90 - lat) * (Math.PI / 180);
@@ -40,47 +28,46 @@ function latLngToVector3(lat: number, lng: number, radius: number): THREE.Vector
   return new THREE.Vector3(x, y, z);
 }
 
-const getStatusColor = (status: ClaimMarker['status']) => {
-  switch (status) {
-    case 'verified': return '#22c55e';
-    case 'review': return '#f59e0b';
-    case 'gap': return '#ef4444';
-  }
+const RISK_COLOR: Record<CompanyMarker['riskLevel'], string> = {
+  low: '#22c55e',
+  medium: '#f59e0b',
+  high: '#ef4444',
 };
 
-function ClaimPoint({ marker, onClick, isSelected }: { marker: ClaimMarker; onClick: () => void; isSelected: boolean }) {
+// Marker scale grows (gently, log) with the number of claims so heavier
+// reporters read as bigger pins without dwarfing the smaller ones.
+const sizeFactor = (claimsCount: number) =>
+  Math.min(0.85 + Math.log2(claimsCount + 1) * 0.13, 2.2);
+
+function CompanyPin({ marker, onClick, isSelected }: { marker: CompanyMarker; onClick: () => void; isSelected: boolean }) {
   const position = latLngToVector3(marker.lat, marker.lng, 2.02);
-  const color = getStatusColor(marker.status);
-  const meshRef = useRef<THREE.Mesh>(null);
+  const color = RISK_COLOR[marker.riskLevel];
+  const base = sizeFactor(marker.claimsCount);
+  const groupRef = useRef<THREE.Group>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   const outerRingRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
-  
+
   useFrame((state) => {
-    if (meshRef.current) {
-      const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.2;
-      meshRef.current.scale.setScalar(isSelected ? scale * 1.5 : hovered ? scale * 1.3 : scale);
+    if (groupRef.current) {
+      const pulse = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.18;
+      const emphasis = isSelected ? 1.5 : hovered ? 1.25 : 1;
+      groupRef.current.scale.setScalar(base * pulse * emphasis);
     }
-    // Make rings face camera
-    if (ringRef.current) {
-      ringRef.current.lookAt(state.camera.position);
-    }
-    if (outerRingRef.current) {
-      outerRingRef.current.lookAt(state.camera.position);
-    }
+    // Rings always face the camera.
+    if (ringRef.current) ringRef.current.lookAt(state.camera.position);
+    if (outerRingRef.current) outerRingRef.current.lookAt(state.camera.position);
   });
 
   const handleClick = (e: any) => {
     e.stopPropagation();
     onClick();
   };
-
   const handlePointerOver = (e: any) => {
     e.stopPropagation();
     setHovered(true);
     document.body.style.cursor = 'pointer';
   };
-
   const handlePointerOut = () => {
     setHovered(false);
     document.body.style.cursor = 'auto';
@@ -88,34 +75,36 @@ function ClaimPoint({ marker, onClick, isSelected }: { marker: ClaimMarker; onCl
 
   return (
     <group position={position}>
-      {/* Invisible larger click target for better hit detection */}
-      <mesh 
-        onClick={handleClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
-      >
-        <sphereGeometry args={[0.08, 16, 16]} />
+      {/* Invisible larger hit target for reliable clicking */}
+      <mesh onClick={handleClick} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
+        <sphereGeometry args={[0.1, 16, 16]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
-      {/* Visible marker */}
-      <mesh ref={meshRef}>
-        <sphereGeometry args={[0.03, 16, 16]} />
-        <meshBasicMaterial color={color} />
-      </mesh>
-      {/* Glow ring */}
-      <mesh ref={ringRef}>
-        <ringGeometry args={[0.05, 0.07, 32]} />
-        <meshBasicMaterial color={color} transparent opacity={0.6} side={THREE.DoubleSide} />
-      </mesh>
-      {/* Outer pulse ring */}
-      <mesh ref={outerRingRef}>
-        <ringGeometry args={[0.08, 0.09, 32]} />
-        <meshBasicMaterial color={color} transparent opacity={0.3} side={THREE.DoubleSide} />
-      </mesh>
+
+      {/* Animated visible marker (scaled by claim volume + state) */}
+      <group ref={groupRef}>
+        <mesh>
+          <sphereGeometry args={[0.03, 16, 16]} />
+          <meshBasicMaterial color={color} />
+        </mesh>
+        <mesh ref={ringRef}>
+          <ringGeometry args={[0.05, 0.07, 32]} />
+          <meshBasicMaterial color={color} transparent opacity={0.6} side={THREE.DoubleSide} />
+        </mesh>
+        <mesh ref={outerRingRef}>
+          <ringGeometry args={[0.08, 0.09, 32]} />
+          <meshBasicMaterial color={color} transparent opacity={0.3} side={THREE.DoubleSide} />
+        </mesh>
+      </group>
+
       {(isSelected || hovered) && (
-        <Html distanceFactor={8} position={[0, 0.12, 0]} style={{ pointerEvents: 'none' }}>
-          <div className="glass-panel px-3 py-1.5 text-xs whitespace-nowrap">
-            <span className="text-foreground font-medium">{marker.label}</span>
+        <Html distanceFactor={8} position={[0, 0.14 * base, 0]} style={{ pointerEvents: 'none' }}>
+          <div className="glass-panel px-3 py-2 text-xs whitespace-nowrap text-center">
+            <div className="text-foreground font-semibold">{marker.name}</div>
+            <div className="text-muted-foreground text-[11px]">{marker.city}, {marker.country}</div>
+            <div className="text-[11px] mt-0.5" style={{ color }}>
+              {marker.claimsCount} claim{marker.claimsCount === 1 ? '' : 's'} · {marker.riskLevel} risk
+            </div>
           </div>
         </Html>
       )}
@@ -123,100 +112,90 @@ function ClaimPoint({ marker, onClick, isSelected }: { marker: ClaimMarker; onCl
   );
 }
 
-function Earth({ selectedClaim, onClaimSelect }: { selectedClaim: string | null; onClaimSelect: (id: string) => void }) {
+// Smallest signed delta between two angles (radians), for shortest-path lerp.
+function shortestAngle(from: number, to: number): number {
+  let d = (to - from) % (Math.PI * 2);
+  if (d > Math.PI) d -= Math.PI * 2;
+  if (d < -Math.PI) d += Math.PI * 2;
+  return d;
+}
+
+function Earth({ markers, selectedCompany, onCompanySelect }: {
+  markers: CompanyMarker[];
+  selectedCompany: string | null;
+  onCompanySelect: (name: string) => void;
+}) {
   const earthGroupRef = useRef<THREE.Group>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
   const atmosphereRef = useRef<THREE.Mesh>(null);
-  
-  const { claims } = useClaims();
-  
-  const claimMarkers = useMemo(() => {
-    return claims
-      .map(claim => {
-        const coords = getLatLong(claim.location);
-        if (!coords) return null; // Skip claims without a geocodable location
-        return {
-          id: claim.id,
-          lat: coords.lat,
-          lng: coords.lng,
-          label: `${claim.company}: ${claim.location}`,
-          status: claim.status,
-        } as ClaimMarker;
-      })
-      .filter((m): m is ClaimMarker => m !== null)
-      .slice(0, 50); // Performance limit to 50 pins
-  }, [claims]);
 
-  // Load actual Earth textures
+  // Real Earth textures.
   const dayTexture = useLoader(THREE.TextureLoader, '/textures/earth-daymap.jpg');
   const nightTexture = useLoader(THREE.TextureLoader, '/textures/earth-nightmap.jpg');
   const cloudTexture = useLoader(THREE.TextureLoader, '/textures/earth-clouds.jpg');
-  
+
   useEffect(() => {
-    // Configure textures for better quality
-    [dayTexture, nightTexture, cloudTexture].forEach(texture => {
+    [dayTexture, nightTexture, cloudTexture].forEach((texture) => {
       texture.anisotropy = 16;
       texture.minFilter = THREE.LinearMipmapLinearFilter;
       texture.magFilter = THREE.LinearFilter;
     });
   }, [dayTexture, nightTexture, cloudTexture]);
 
+  // Yaw that brings the selected company's HQ to the front (facing the camera).
+  const focusYaw = useMemo(() => {
+    if (!selectedCompany) return null;
+    const m = markers.find((x) => x.name === selectedCompany);
+    if (!m) return null;
+    const local = latLngToVector3(m.lat, m.lng, 1);
+    const alpha = Math.atan2(local.z, local.x);
+    return Math.PI / 2 - alpha;
+  }, [selectedCompany, markers]);
+
   useFrame(() => {
-    // Rotate the entire earth group (including markers) together
-    if (earthGroupRef.current && !selectedClaim) {
+    if (!earthGroupRef.current) return;
+    if (focusYaw === null) {
+      // Idle: gentle auto-rotation.
       earthGroupRef.current.rotation.y += 0.0008;
+    } else {
+      // Selected: ease the HQ toward the camera, then hold.
+      const delta = shortestAngle(earthGroupRef.current.rotation.y, focusYaw);
+      earthGroupRef.current.rotation.y += delta * 0.08;
     }
-    // Clouds rotate slightly faster for parallax effect
-    if (cloudsRef.current) {
-      cloudsRef.current.rotation.y += 0.0004; // Relative to earth group
-    }
-    if (atmosphereRef.current) {
-      atmosphereRef.current.rotation.y -= 0.0004; // Slight counter rotation
-    }
+    if (cloudsRef.current) cloudsRef.current.rotation.y += 0.0004;
+    if (atmosphereRef.current) atmosphereRef.current.rotation.y -= 0.0004;
   });
 
   return (
     <group>
-      {/* Outer atmosphere glow - static */}
+      {/* Outer atmosphere glow */}
       <mesh>
         <sphereGeometry args={[2.3, 64, 64]} />
-        <meshBasicMaterial 
-          color="#88ccff" 
-          transparent 
-          opacity={0.04} 
-          side={THREE.BackSide}
-        />
+        <meshBasicMaterial color="#88ccff" transparent opacity={0.04} side={THREE.BackSide} />
       </mesh>
-      
-      {/* Inner atmosphere - subtle blue rim */}
+
+      {/* Inner atmosphere rim */}
       <mesh ref={atmosphereRef}>
         <sphereGeometry args={[2.08, 64, 64]} />
-        <meshBasicMaterial 
-          color="#4aa3ff" 
-          transparent 
-          opacity={0.08} 
-          side={THREE.BackSide}
-        />
+        <meshBasicMaterial color="#4aa3ff" transparent opacity={0.08} side={THREE.BackSide} />
       </mesh>
-      
-      {/* Rotating group: Earth + Markers rotate together */}
+
+      {/* Earth + HQ markers rotate together */}
       <group ref={earthGroupRef}>
-        {/* Cloud layer */}
         <mesh ref={cloudsRef}>
           <sphereGeometry args={[2.02, 64, 64]} />
-          <meshStandardMaterial 
+          <meshStandardMaterial
             map={cloudTexture}
-            transparent 
+            transparent
             opacity={0.35}
             depthWrite={false}
             blending={THREE.AdditiveBlending}
           />
         </mesh>
-        
-        {/* Earth with realistic texture */}
+
         <mesh>
           <sphereGeometry args={[2, 64, 64]} />
-          <meshStandardMaterial 
+          <meshStandardMaterial
             map={dayTexture}
             roughness={0.8}
             metalness={0.1}
@@ -225,14 +204,13 @@ function Earth({ selectedClaim, onClaimSelect }: { selectedClaim: string | null;
             emissiveIntensity={0.4}
           />
         </mesh>
-        
-        {/* Claim markers - now inside rotating group */}
-        {claimMarkers.map((marker) => (
-          <ClaimPoint
-            key={marker.id}
+
+        {markers.map((marker) => (
+          <CompanyPin
+            key={marker.name}
             marker={marker}
-            onClick={() => onClaimSelect(marker.id)}
-            isSelected={selectedClaim === marker.id}
+            onClick={() => onCompanySelect(marker.name)}
+            isSelected={selectedCompany === marker.name}
           />
         ))}
       </group>
@@ -240,16 +218,11 @@ function Earth({ selectedClaim, onClaimSelect }: { selectedClaim: string | null;
   );
 }
 
-// Loading fallback component
 function EarthLoading() {
   const meshRef = useRef<THREE.Mesh>(null);
-  
   useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += 0.01;
-    }
+    if (meshRef.current) meshRef.current.rotation.y += 0.01;
   });
-  
   return (
     <mesh ref={meshRef}>
       <sphereGeometry args={[2, 32, 32]} />
@@ -258,9 +231,35 @@ function EarthLoading() {
   );
 }
 
-export const Globe = ({ onClaimSelect, selectedClaim }: { onClaimSelect: (id: string) => void; selectedClaim: string | null }) => {
+export const Globe = ({ onCompanySelect, selectedCompany }: {
+  onCompanySelect: (name: string) => void;
+  selectedCompany: string | null;
+}) => {
+  const { companies } = useClaims();
+
+  // One marker per company whose HQ we can resolve. Unknown HQs are skipped
+  // rather than fabricated.
+  const markers = useMemo<CompanyMarker[]>(() => {
+    return companies
+      .map((c) => {
+        const hq = resolveHeadquarters(c.name);
+        if (!hq) return null;
+        return {
+          name: c.name,
+          city: hq.city,
+          country: hq.country,
+          lat: hq.lat,
+          lng: hq.lng,
+          claimsCount: c.claimsCount,
+          riskLevel: c.riskLevel as CompanyMarker['riskLevel'],
+          integrityScore: c.integrityScore,
+        } as CompanyMarker;
+      })
+      .filter((m): m is CompanyMarker => m !== null);
+  }, [companies]);
+
   return (
-    <motion.div 
+    <motion.div
       className="w-full h-full"
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -271,17 +270,17 @@ export const Globe = ({ onClaimSelect, selectedClaim }: { onClaimSelect: (id: st
         <directionalLight position={[5, 3, 5]} intensity={1.5} color="#ffffff" />
         <directionalLight position={[-5, -3, -5]} intensity={0.3} color="#4488ff" />
         <pointLight position={[10, 0, 10]} intensity={0.8} color="#ffffff" />
-        
+
         <Suspense fallback={<EarthLoading />}>
-          <Earth selectedClaim={selectedClaim} onClaimSelect={onClaimSelect} />
+          <Earth markers={markers} selectedCompany={selectedCompany} onCompanySelect={onCompanySelect} />
         </Suspense>
-        
-        <OrbitControls 
+
+        <OrbitControls
           enableZoom={true}
           enablePan={false}
           minDistance={3}
           maxDistance={8}
-          autoRotate={!selectedClaim}
+          autoRotate={!selectedCompany}
           autoRotateSpeed={0.4}
           enableDamping
           dampingFactor={0.05}
@@ -291,4 +290,4 @@ export const Globe = ({ onClaimSelect, selectedClaim }: { onClaimSelect: (id: st
   );
 };
 
-export type { ClaimMarker };
+export type { CompanyMarker };

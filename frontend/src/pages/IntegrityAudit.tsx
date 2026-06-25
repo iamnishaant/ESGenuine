@@ -15,6 +15,7 @@ import {
   getIntegrityReport, getFactCheck, getScorecard, askAudit,
   verificationMethod, VERIFICATION_LABEL, type AskAnswer,
 } from '@/lib/api';
+import { metricLabel } from '@/lib/metricLabels';
 
 const DOCS = [
   { id: 'tata_power_2024', label: 'Tata Power 2024', company: 'tata_power' },
@@ -160,7 +161,7 @@ const IntegrityAudit = () => {
                   {VERDICT_ICON[r.verdict]}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs truncate">{r.claim_text}</p>
-                    <p className="text-[11px] text-muted-foreground">{r.metric_key} @{r.reference_year} — {r.reasoning}</p>
+                    <p className="text-[11px] text-muted-foreground">{metricLabel(r.metric_key)} @{r.reference_year} — {r.reasoning}</p>
                   </div>
                   <Badge variant="outline" className="text-[10px] whitespace-nowrap flex items-center gap-1">
                     <MIcon className="w-3 h-3" /> {VERIFICATION_LABEL[method]}
@@ -179,7 +180,7 @@ const IntegrityAudit = () => {
             {(scorecard.data?.metrics ?? []).slice(0, 10).map((m) => (
               <div key={m.metric_key} className="flex items-center gap-3 text-xs">
                 {m.verdict === 'leading' ? <TrendingUp className="w-4 h-4 text-success" /> : m.verdict === 'lagging' ? <TrendingDown className="w-4 h-4 text-destructive" /> : <Scale className="w-4 h-4 text-muted-foreground" />}
-                <span className="flex-1 truncate">{m.metric_key}</span>
+                <span className="flex-1 truncate" title={m.metric_key}>{metricLabel(m.metric_key)}</span>
                 <span className="text-muted-foreground">{m.value}{m.unit ? ` ${m.unit}` : ''}</span>
                 <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
                   <div className={cn('h-full', m.percentile >= 66 ? 'bg-success' : m.percentile <= 33 ? 'bg-destructive' : 'bg-yellow-400')} style={{ width: `${m.percentile}%` }} />

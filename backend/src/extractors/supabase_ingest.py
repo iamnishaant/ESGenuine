@@ -7,8 +7,9 @@ frontend dashboard reads. Fixes existing_issues #3: doc_id is a real document id
 """
 import os
 import uuid
-from datetime import datetime
-from typing import List, Dict, Any
+import hashlib
+from datetime import datetime, timezone
+from typing import List, Dict, Any, Optional
 
 from dotenv import load_dotenv
 from supabase import create_client, Client
@@ -37,6 +38,73 @@ def _get_sb() -> Client:
             raise ValueError("Missing Supabase credentials (VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY).")
         _sb = create_client(url, key)
     return _sb
+
+
+def sha256_file(path: str) -> str:
+    """Full-file SHA-256 — the stable content-hash dedup key. Matches the digest
+    Step0_IngestTriage computes, so the same PDF hashes identically on either path."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def find_report_by_file_hash(file_hash: str) -> Optional[Dict[str, Any]]:
+    """Return the existing reports row for this exact file content, or None.
+    Used by the ingest endpoint to short-circuit a re-upload of an already-ingested
+    PDF instead of spawning a job that would duplicate its claims."""
+    if not file_hash:
+        return None
+    try:
+        sb = _get_sb()
+        res = (
+            sb.table("reports")
+            .select("report_id,company_name,report_year,file_hash,claim_count,ingested_at")
+            .eq("file_hash", file_hash)
+            .limit(1)
+            .execute()
+        )
+        return res.data[0] if res.data else None
+    except Exception as e:
+        # A dedup-lookup failure must not block ingest — fall through to a normal run.
+        print(f"[ingest] dedup lookup failed (proceeding without it): {e}")
+        return None
+
+
+def _delete_existing_claims(sb: Client, report_id: str, doc_id: str) -> bool:
+    """Idempotent re-ingest: remove this report's prior claims before writing the
+    fresh set, so re-ingesting the same report never accumulates duplicate rows.
+    Returns True if the delete call succeeded (it may have deleted zero rows)."""
+    try:
+        sb.table("claims").delete().or_(
+            f"report_id.eq.{report_id},doc_id.eq.{doc_id}"
+        ).execute()
+        return True
+    except Exception as e:
+        # If this fails (e.g. RLS forbids delete), inserts below would duplicate.
+        # Surface it loudly rather than silently double-writing.
+        print(f"[ingest] WARNING: could not clear existing claims for {report_id} "
+              f"(re-ingest may duplicate): {e}")
+        return False
+
+
+def _upsert_report(sb: Client, meta: Dict[str, Any], claim_count: int) -> None:
+    """Persist/refresh the reports row (keyed by report_id) so future ingests can
+    dedup by content hash and the dashboard has accurate per-report metadata."""
+    row = {
+        "report_id": meta.get("report_id"),
+        "company_id": meta.get("company_id"),
+        "company_name": meta.get("company_name"),
+        "report_year": meta.get("report_year"),
+        "file_hash": meta.get("file_hash"),
+        "claim_count": claim_count,
+        "ingested_at": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        sb.table("reports").upsert(row, on_conflict="report_id").execute()
+    except Exception as e:
+        print(f"[ingest] reports upsert failed for {meta.get('report_id')}: {e}")
 
 
 def _clean_str(v):
@@ -109,16 +177,26 @@ def _insert(sb: Client, rows: list) -> int:
 
 def ingest_claims_to_db(claims: List, report_meta: Dict[str, Any], batch_size: int = 50) -> Dict[str, Any]:
     """
-    Embed + write claims to Supabase.
-    report_meta: {report_id, company_id, company_name, report_year}.
-    Returns {inserted, total, doc_id}.
+    Embed + write claims to Supabase, idempotently.
+
+    report_meta: {report_id, company_id, company_name, report_year, file_hash}.
+
+    Re-ingesting the same report replaces its claims (delete-then-insert keyed by
+    report_id) rather than appending, so repeated runs never accumulate duplicates.
+    Also upserts the matching reports row (carrying file_hash for content-hash dedup).
+    Returns {inserted, total, doc_id, replaced}.
     """
     if not claims:
-        return {"inserted": 0, "total": 0, "doc_id": report_meta.get("report_id")}
+        # Empty extraction: do NOT wipe a prior good ingest for this report.
+        return {"inserted": 0, "total": 0, "doc_id": report_meta.get("report_id"), "replaced": False}
 
     sb = _get_sb()
     model = _get_model()
     doc_id = report_meta.get("report_id") or report_meta.get("document_id") or "doc"
+    report_id = report_meta.get("report_id") or doc_id
+
+    # Idempotent replace: clear this report's existing claims before writing the new set.
+    replaced = _delete_existing_claims(sb, report_id, doc_id)
 
     texts = [(c.provenance.source_sentence or "") for c in claims]
     embs = model.encode(texts, batch_size=32, show_progress_bar=False).tolist()
@@ -132,5 +210,11 @@ def ingest_claims_to_db(claims: List, report_meta: Dict[str, Any], batch_size: i
     if batch:
         inserted += _insert(sb, batch)
 
-    print(f"[ingest] {inserted}/{len(claims)} claims -> Supabase (doc_id={doc_id})")
-    return {"inserted": inserted, "total": len(claims), "doc_id": doc_id}
+    # Record/refresh report metadata (file_hash powers future content-hash dedup).
+    # Only when something was actually written — otherwise a totally failed insert
+    # would leave a reports row that dedup-blocks the retry of an empty report.
+    if inserted > 0:
+        _upsert_report(sb, report_meta, inserted)
+
+    print(f"[ingest] {inserted}/{len(claims)} claims -> Supabase (doc_id={doc_id}, replaced={replaced})")
+    return {"inserted": inserted, "total": len(claims), "doc_id": doc_id, "replaced": replaced}

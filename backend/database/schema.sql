@@ -113,9 +113,14 @@ CREATE TABLE IF NOT EXISTS reports (
     report_type       TEXT DEFAULT 'esg',   -- 'esg' | 'annual' | 'integrated'
     source_url        TEXT,
     file_path         TEXT,
+    file_hash         TEXT,                 -- full-file SHA-256; content-hash dedup key for the ingest path
     ingested_at       TIMESTAMPTZ DEFAULT NOW(),
     claim_count       INT  DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS reports_company_year_idx
 ON reports (company_id, report_year);
+
+-- Fast "have I already ingested this exact PDF?" probe (content-hash dedup).
+CREATE INDEX IF NOT EXISTS reports_file_hash_idx
+ON reports (file_hash);

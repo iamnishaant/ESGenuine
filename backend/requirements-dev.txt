@@ -1,0 +1,6 @@
+# ESGenuine Backend — Development & Test Dependencies
+# Install with:  pip install -r requirements.txt -r requirements-dev.txt
+
+# Test runner. The suites under backend/tests/ are written pytest-compatibly
+# (bare `assert`, `test_*` functions) and also run standalone via `python tests/<file>.py`.
+pytest>=8.0

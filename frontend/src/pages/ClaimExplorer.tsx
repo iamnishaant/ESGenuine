@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Claim, Conflict, mapDbToClaim } from '@/hooks/useClaims';
+import { metricLabel } from '@/lib/metricLabels';
 
 import ClaimGraph from '@/components/reasoning/ClaimGraph';
 import ContradictionExplorer from '@/components/reasoning/ContradictionExplorer';
@@ -110,7 +111,7 @@ const ClaimExplorer = () => {
       val: 15 + (c.confidence / 10),
       details: {
         page: c.page,
-        metric: c.metricKey,
+        metric: c.metricKey ? metricLabel(c.metricKey) : undefined,
         value: c.metricValue,
         year: c.dateKnown ? c.date.substring(0, 4) : c.reportYear ? String(c.reportYear) : undefined,
         text: c.claim,

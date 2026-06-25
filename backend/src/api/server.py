@@ -21,7 +21,9 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from parsers.pdf_parser import DocumentParsingPipeline, PDFValidationError
 from extractors.pipeline import ExtractionPipeline
-from extractors.supabase_ingest import ingest_claims_to_db, _get_sb
+from extractors.supabase_ingest import (
+    ingest_claims_to_db, _get_sb, sha256_file, find_report_by_file_hash,
+)
 from reasoning.api_reasoning import router as reasoning_router, bench_router, audit_router
 
 app = FastAPI(
@@ -324,17 +326,33 @@ async def ingest_report(
     with open(save_path, "wb") as f:
         shutil.copyfileobj(file.file, f)
 
+    # Content-hash dedup: if this exact PDF was already ingested, return the existing
+    # report instead of spawning a job that would duplicate its claims (#2, idempotency).
+    file_hash = sha256_file(str(save_path))
+    existing = find_report_by_file_hash(file_hash)
+    if existing:
+        return {
+            "status": "duplicate",
+            "report_id": existing["report_id"],
+            "file_hash": file_hash,
+            "claim_count": existing.get("claim_count"),
+            "ingested_at": existing.get("ingested_at"),
+            "message": "This exact PDF was already ingested; returning the existing report.",
+        }
+
     company_id = _slug(company_name)
     meta = {
         "report_id": f"{company_id}_{report_year}",
         "company_id": company_id,
         "company_name": company_name,
         "report_year": int(report_year),
+        "file_hash": file_hash,
     }
     job_id = str(uuid.uuid4())[:8]
     ingest_jobs[job_id] = {
         "job_id": job_id, "status": "queued",
         "report_id": meta["report_id"], "company_name": company_name, "report_year": int(report_year),
+        "file_hash": file_hash,
     }
     background.add_task(_run_ingest, job_id, str(save_path), meta, bool(use_vlm_tables))
     return {"job_id": job_id, "status": "queued", "report_id": meta["report_id"]}

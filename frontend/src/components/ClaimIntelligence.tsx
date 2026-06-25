@@ -1,11 +1,15 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Eye, MapPin, BarChart3, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Eye, MapPin, BarChart3, Minus, ArrowLeft } from 'lucide-react';
 import { ClaimVerifiabilityPanel } from './ClaimVerifiabilityPanel';
 import { HumanEscalationPanel } from './HumanEscalationPanel';
 import { useClaims, Claim } from '@/hooks/useClaims';
+import { metricLabel } from '@/lib/metricLabels';
 
 interface ClaimIntelligenceProps {
   selectedClaim: string | null;
+  // When provided and a claim is shown, renders a back affordance (used to return
+  // to the company's claim list after drilling in from a globe marker).
+  onBack?: () => void;
 }
 
 const RadialGauge = ({ value, max, color, label }: { value: number; max: number; color: string; label: string }) => {
@@ -109,13 +113,13 @@ const MetricDetailCard = ({ claim }: { claim: Claim }) => {
         )}
       </div>
       <div className="text-xs text-muted-foreground">
-        Aspect: <span className="font-mono text-foreground/80">{claim.normalizedAspect || claim.metricKey || '—'}</span>
+        Aspect: <span className="text-foreground/80" title={claim.metricKey || claim.normalizedAspect || ''}>{claim.metricKey || claim.normalizedAspect ? metricLabel(claim.metricKey || claim.normalizedAspect) : '—'}</span>
       </div>
     </div>
   );
 };
 
-export const ClaimIntelligence = ({ selectedClaim }: ClaimIntelligenceProps) => {
+export const ClaimIntelligence = ({ selectedClaim, onBack }: ClaimIntelligenceProps) => {
   const { claims } = useClaims();
   const claim = selectedClaim ? claims.find(c => c.id === selectedClaim) : null;
   
@@ -178,6 +182,16 @@ export const ClaimIntelligence = ({ selectedClaim }: ClaimIntelligenceProps) => 
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
+              {onBack && (
+                <button
+                  onClick={onBack}
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors -mt-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Back to company claims
+                </button>
+              )}
+
               {/* Claim text */}
               <div className="glass-panel p-4 gradient-border">
                 <p className="text-sm text-foreground leading-relaxed">{claim.claim}</p>

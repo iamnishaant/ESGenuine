@@ -282,20 +282,32 @@ class UnitCanonicalizer:
         "kg": ("tonnes", 1e-3), "kilograms": ("tonnes", 1e-3), "kilogram": ("tonnes", 1e-3),
         "g": ("tonnes", 1e-6), "gram": ("tonnes", 1e-6), "grams": ("tonnes", 1e-6),
         "kt": ("tonnes", 1e3), "mt": ("tonnes", 1.0),  # 'mt' read as metric tonne
-        # energy
+        # energy  (1 MWh = 3600 MJ; verbose joule spellings added alongside the abbreviations)
         "kwh": ("MWh", 1e-3), "mwh": ("MWh", 1.0), "gwh": ("MWh", 1e3), "twh": ("MWh", 1e6),
         "mj": ("MWh", 2.777778e-4), "gj": ("MWh", 0.2777778), "tj": ("MWh", 277.7778),
         "pj": ("MWh", 277777.8),
-        # volume
+        "joule": ("MWh", 2.777778e-10), "joules": ("MWh", 2.777778e-10),
+        "megajoule": ("MWh", 2.777778e-4), "megajoules": ("MWh", 2.777778e-4),
+        "gigajoule": ("MWh", 0.2777778), "gigajoules": ("MWh", 0.2777778),
+        "terajoule": ("MWh", 277.7778), "terajoules": ("MWh", 277.7778),
+        "petajoule": ("MWh", 277777.8), "petajoules": ("MWh", 277777.8),
+        # volume  (oil barrel = 0.158987 m3; US gallon = 3.78541e-3 m3)
         "litres": ("m3", 1e-3), "litre": ("m3", 1e-3), "liters": ("m3", 1e-3), "liter": ("m3", 1e-3),
         "l": ("m3", 1e-3),
         "m3": ("m3", 1.0), "m³": ("m3", 1.0), "kl": ("m3", 1.0),
+        "cubic metre": ("m3", 1.0), "cubic metres": ("m3", 1.0),
+        "cubic meter": ("m3", 1.0), "cubic meters": ("m3", 1.0),
         "kilolitres": ("m3", 1.0), "kilolitre": ("m3", 1.0), "ml": ("m3", 1e3),
         "megalitres": ("m3", 1e3), "megalitre": ("m3", 1e3),
-        # area
+        "gallon": ("m3", 3.78541e-3), "gallons": ("m3", 3.78541e-3),
+        "barrel": ("m3", 0.158987), "barrels": ("m3", 0.158987), "bbl": ("m3", 0.158987),
+        # area  (1 m2 = 1e-4 hectares)
         "hectares": ("hectares", 1.0), "hectare": ("hectares", 1.0), "ha": ("hectares", 1.0),
         "acres": ("hectares", 0.404686), "acre": ("hectares", 0.404686),
         "km2": ("hectares", 100.0), "km²": ("hectares", 100.0), "sqkm": ("hectares", 100.0),
+        "m2": ("hectares", 1e-4), "m²": ("hectares", 1e-4),
+        "square metre": ("hectares", 1e-4), "square metres": ("hectares", 1e-4),
+        "square meter": ("hectares", 1e-4), "square meters": ("hectares", 1e-4),
         # dimensionless / passthrough
         "%": ("%", 1.0), "percent": ("%", 1.0),
     }
@@ -372,11 +384,31 @@ class UnitCanonicalizer:
                 else:  # mwh / wh default
                     f = 1.0
                 return value * f * mag, "MWh"
+            if "joule" in u:  # energy: verbose joules (1 MWh = 3600 MJ)
+                if "peta" in u:
+                    f = 277777.8
+                elif "tera" in u:
+                    f = 277.7778
+                elif "giga" in u:
+                    f = 0.2777778
+                elif "mega" in u:
+                    f = 2.777778e-4
+                else:  # plain joules
+                    f = 2.777778e-10
+                return value * f * mag, "MWh"
             if "hectare" in u or "acre" in u:
                 f = mag * (0.404686 if "acre" in u else 1.0)
                 return value * f, "hectares"
             if "km2" in u or "km²" in u or "sq km" in u or "square kilomet" in u:
                 return value * mag * 100.0, "hectares"
+            if "square met" in u:  # verbose m2 -> hectares (kilometres handled above)
+                return value * mag * 1e-4, "hectares"
+            if "barrel" in u or "bbl" in u:  # oil & gas volume
+                return value * mag * 0.158987, "m3"
+            if "gallon" in u:
+                return value * mag * 3.78541e-3, "m3"
+            if "cubic met" in u:  # verbose m3
+                return value * mag, "m3"
             if "litre" in u or "liter" in u:  # verbose volume (megalitre handled in _CONV)
                 return value * mag * 1e-3, "m3"
         except TypeError:

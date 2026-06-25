@@ -45,9 +45,9 @@ Synthesize claim statistics, greenwashing flags, and contradiction findings into
 ### Improvement Opportunities
 
 1. **Introduce count-weighted penalties.** Instead of a flat penalty per flag, `penalty = base * min(log2(count + 1), cap)`. This makes magnitude matter without letting a single flag type dominate.
-2. **Score decomposition in the response.** Return `penalty_breakdown: [{flag_type, severity, count, points_deducted}]`. The frontend can render a stacked bar showing where points were lost.
+2. **Score decomposition in the response.** Return `penalty_breakdown: [{flag_type, severity, count, points_deducted}]`. The frontend can render a stacked bar showing where points were lost. ✅ **Done (this session)** — `build_report` returns `penalty_breakdown` (`type/title/severity/count/points_deducted`, sorted most-impactful first). Score formula unchanged; field is additive. Test asserts `score == 100 − Σ(points)`.
 3. **Sector-normalized scoring.** Use the benchmark data to show "your score relative to the median of companies in this sector/peer-group." Even a simple percentile rank transforms the score from abstract to actionable.
-4. **Add `computed_at`, `extraction_version`, `model_version` fields** to the report payload. This is trivial to add and critical for auditability.
+4. **Add `computed_at`, `extraction_version`, `model_version` fields** to the report payload. This is trivial to add and critical for auditability. ✅ **Partly done (this session)** — added `computed_at` (UTC ISO) + `report_version` (`"1.0"`, bump on formula change). `extraction_version`/`model_version` not yet wired (the extractor doesn't surface them to `build_report` — needs threading through ingest first).
 5. **Score sensitivity analysis.** Run the scorer across all 3 current reports and document the distribution. If all three cluster in the same narrow band, the formula needs recalibration.
 
 ### UX Improvements
@@ -57,7 +57,7 @@ Synthesize claim statistics, greenwashing flags, and contradiction findings into
 
 ### AI Enhancements (if applicable)
 
-- **LLM-generated executive summary is already wired** via `synthesize_audit()`. However, the non-LLM fallback just returns the template string from `build_report`. The fallback should be richer — a structured bullet list of the top 3 findings, not a single sentence.
+- **LLM-generated executive summary is already wired** via `synthesize_audit()`. However, the non-LLM fallback just returns the template string from `build_report`. The fallback should be richer — a structured bullet list of the top 3 findings, not a single sentence. ✅ **Done (this session)** — `_key_findings(report, factcheck, scorecard)` builds a structured bullet list (score/grade/risk, top flag, fact-check credibility+coverage, peer-lagging); `synthesize_audit` returns it as `key_findings` always and uses it as the structured-fallback `executive_summary`.
 
 ### Differentiation Opportunities
 
@@ -128,19 +128,21 @@ Move verification beyond "report vs itself" to "claim vs ground truth." Each met
 
 ### Missing Considerations
 
-- **Evidence freshness / staleness.** The corpus has no `last_updated` field. A reference figure from 2019 used to check a 2024 claim is technically a match but practically stale.
+- **Evidence freshness / staleness.** The corpus has no `last_updated` field. A reference figure from 2019 used to check a 2024 claim is technically a match but practically stale. ⚠️ **Investigated, N/A as stated (this session)** — started adding a `stale` flag, but a smoke test showed `find_evidence` matches on **exact year** (`str(e.year) == claim_year`), so evidence year *always* equals the claim year — no staleness gap can arise and the flag would be dead code (always False). Reverted it. Becomes real only if matching is loosened to a year window; deferred until then.
 - **Evidence sourcing automation.** The corpus is manually maintained. There's no pipeline to pull CDP, GRI, or public filings into it. This is the bottleneck that will determine whether the feature is real or decorative.
 
 ### Improvement Opportunities
 
-1. **Weighted credibility.** `credibility = Σ(weight_i × supported_i) / Σ(weight_i)` where weight is proportional to materiality (emissions > governance > social sentiment). Even a simple 3-tier weighting (critical/important/informational) would be a meaningful improvement.
-2. **Enriched UNVERIFIED explanations.** When a claim has no evidence, explain what *would* be needed: "No external reference for `water.consumption.volume` at year 2024 for tata_power. Add a CDP Water Security response or official annual report figure."
-3. **Coverage metric alongside credibility.** Report `checked / total_checkable` as a separate metric. A report with 80% credibility but only 5% coverage is not the same as one with 80% credibility and 60% coverage.
+1. **Weighted credibility.** `credibility = Σ(weight_i × supported_i) / Σ(weight_i)` where weight is proportional to materiality (emissions > governance > social sentiment). Even a simple 3-tier weighting (critical/important/informational) would be a meaningful improvement. ✅ **Done (this session, additive)** — `fact_check_document` adds `weighted_credibility` (emissions 3 / energy·water·waste·biodiversity 2 / governance 1.5 / else 1) and each verdict carries its `materiality`. Plain `credibility` is **unchanged** (both reported, so nothing silently shifts).
+2. **Enriched UNVERIFIED explanations.** When a claim has no evidence, explain what *would* be needed: "No external reference for `water.consumption.volume` at year 2024 for tata_power. Add a CDP Water Security response or official annual report figure." ✅ **Done (this session)** — `check_claim`'s UNVERIFIED branch now names the metric/year/company and the remedy ("Add a CDP/official-filing figure or a prior-year report value in the same unit"), and distinguishes the *incomparable-unit* case ("evidence exists but in an incomparable unit").
+3. **Coverage metric alongside credibility.** Report `checked / total_checkable` as a separate metric. A report with 80% credibility but only 5% coverage is not the same as one with 80% credibility and 60% coverage. ✅ **Done (this session)** — `fact_check_document` returns `checkable` + `coverage` (`checked/checkable`), independent of `credibility`. Test pins coverage 0.5 with credibility 1.0.
 4. **Automate corpus ingestion.** A script that fetches CDP responses, BRSR filings, or official sustainability data sheets and writes them into the corpus schema would transform this from a demo to a product.
 
 ### AI Enhancements (if applicable)
 
 - The `llm_verdict()` function exists but is **never called** in the fact-check pipeline. Wiring it for narrative claims (where numeric comparison doesn't apply) would increase coverage significantly. However, this needs careful prompting to avoid hallucinated verdicts.
+
+  > **✅ Resolved 2026-06-25 (this session) — wired with grounding guards.** `llm_verdict` now has three guards against fabricated verdicts: (1) **no evidence ⇒ no LLM call** (returns UNVERIFIED, `engine="guard"` — nothing to ground a judgement); (2) a **confident verdict with no rationale is downgraded** to UNVERIFIED (ungrounded); (3) confidence is **clamped to [0,1]**; the prompt also says "use ONLY the evidence" and "answer UNVERIFIED if the evidence doesn't address the claim." It is wired into `fact_check_document(..., llm=...)` as an **opt-in fallback** that fires *only* on claims the numeric pass left UNVERIFIED but which have evidence (e.g. incomparable units) — it **never overrides a deterministic numeric verdict**, and `llm=None` (the default) leaves behaviour unchanged. The API routes pass the LLM only when one is configured (`_optional_llm()`), and the response carries an `llm_assisted` count. Locked by `backend/tests/test_fact_check_llm.py` (8 tests, fake LLM — guards, clamp, malformed JSON, fallback fires/does-not-override). *Honest scope note: this recovers "evidenced-but-numerically-incomparable" metric claims; pure narrative claims still rarely get evidence because `find_evidence` keys on metric_key+year, so coverage gain is real but bounded by corpus shape, not by the LLM.*
 
 ### Differentiation Opportunities
 
@@ -203,6 +205,8 @@ Cross-company comparison on shared metrics (ranked, percentiled) and per-company
 ### User Pain Points
 
 - **The metric keys are raw and technical.** `social.workforce.total.count` is shown verbatim in the UI. Users want "Total Workforce" not a dot-separated internal key.
+
+> **✅ Resolved 2026-06-25 — human-readable metric labels.** New `frontend/src/lib/metricLabels.ts` maps a canonical key (`{aspect_node}.{dimension}`) to an analyst-facing label: it strips the trailing dimension, looks the node up in a curated table mirroring `ontology.py`'s taxonomy, falls back to a generic humanizer for unknown keys, and appends a dimension qualifier only where it disambiguates. Examples: `social.workforce.total.count` → "Total Workforce", `emissions.scope1.co2e` → "Scope 1 Emissions (CO₂e)", `social.diversity.gender.percent` → "Gender Diversity (%)". Applied at every render site that previously showed a raw key (raw key kept in a `title=` tooltip / JSON exports): IntegrityAudit scorecard + fact-check verdicts, ClaimIntelligence, EvidenceAnalysis, SystemTransparency aspect breakdown, AuditTrail, ClaimGraph tooltip (via ClaimExplorer), and the MetricTimeline series labels (which were previously showing just the dimension, e.g. "count").
 - **No visual trajectory chart.** The data is returned as a JSON array; the UI renders it as a flat list. A sparkline or line chart would transform understanding.
 
 ### Missing Considerations
@@ -214,7 +218,7 @@ Cross-company comparison on shared metrics (ranked, percentiled) and per-company
 
 1. **Human-readable metric labels.** Maintain a mapping `metric_key → {label, unit_label, description}`. `emissions.scope1.co2e` → "Scope 1 Emissions (CO₂e)". This is a small effort with outsized UX impact.
 2. **Fix the CAGR calculation** to be actual CAGR, not linear average. This affects gap-to-target accuracy.
-3. **Surface peer count + add a confidence signal.** *(Correction: per-metric peer count already exists in the API as the `of` field — `cross_company` sets it to `n`. The real gaps are (a) the **UI doesn't display** the denominator, and (b) there's no top-level `confidence`/`peer_count` summarising data depth.)* Let the UI gray out or caveat metrics with `of` < 3.
+3. **Surface peer count + add a confidence signal.** *(Correction: per-metric peer count already exists in the API as the `of` field — `cross_company` sets it to `n`. The real gaps are (a) the **UI doesn't display** the denominator, and (b) there's no top-level `confidence`/`peer_count` summarising data depth.)* Let the UI gray out or caveat metrics with `of` < 3. ✅ **Done (this session)** — `cross_company` returns `confidence: "low"|"ok"` (n<3), `company_scorecard` adds per-metric `low_confidence` + top-level `low_confidence_metrics`. UI display of `of`/gray-out is the remaining (frontend) piece.
 4. **Sector-filtered benchmarks.** Add a `sector` field and filter `cross_company()` to same-sector peers when available, falling back to all-company when the sector pool is too small.
 
 ### UX Improvements
@@ -296,8 +300,8 @@ Natural-language Q&A over the claim corpus with page-cited answers (RAG via `sea
 
 ### Improvement Opportunities
 
-1. **Suggested questions based on the selected report.** Analyze the report's flags and surface 3–5 relevant questions: "This report has 6 VAGUE flags — ask: 'Which environmental claims lack measurable metrics?'"
-2. **Structured output parsing with fallback.** Use a regex extractor to pull JSON from the LLM response even when it's wrapped in markdown fences or preamble. This is a common pattern that would eliminate ~80% of parse failures.
+1. **Suggested questions based on the selected report.** Analyze the report's flags and surface 3–5 relevant questions: "This report has 6 VAGUE flags — ask: 'Which environmental claims lack measurable metrics?'" ✅ **Done (this session)** — pure `agent.suggest_questions(report)` derives questions from flags + stats (vague/contradiction/aspirational/metric-pct), deduped & capped; exposed at `GET /audit/{doc_id}/suggested-questions` (no LLM).
+2. **Structured output parsing with fallback.** Use a regex extractor to pull JSON from the LLM response even when it's wrapped in markdown fences or preamble. This is a common pattern that would eliminate ~80% of parse failures. ✅ **Done (this session)** — new `json_utils.loads_lenient` (strip ```fences```, else extract outermost `{…}`; raises so callers keep their fallback). Wired into `agent.ask`, `agent.synthesize_audit`, and `fact_check.llm_verdict`. 5 tests.
 3. **Streaming answers.** For longer synthesis, stream the LLM response to the UI via SSE. The current fetch-and-wait pattern leaves the user staring at a spinner.
 4. **Conversation context.** Maintain the last 3–5 Q&A pairs in the prompt as context. This is simple to implement (prepend to the prompt) and would make follow-up questions work.
 
@@ -318,12 +322,12 @@ Natural-language Q&A over the claim corpus with page-cited answers (RAG via `sea
 
 ### Edge Cases
 
-- **Adversarial/off-topic questions.** "What is the weather today?" — the LLM will try to answer using ESG claims as context. Need a scope guard or graceful "I can only answer questions about ESG claims" response.
+- **Adversarial/off-topic questions.** "What is the weather today?" — the LLM will try to answer using ESG claims as context. Need a scope guard or graceful "I can only answer questions about ESG claims" response. ✅ **Soft signal added (this session)** — `ask` returns `top_similarity` + `low_relevance` (best match < 0.25) so the UI can caveat off-topic answers. Chose a soft flag over a hard refusal to avoid suppressing valid-but-low-similarity questions.
 - **Empty retrieval.** If `search_claims` returns nothing (no relevant claims), the answer is "No relevant claims found" — correct, but the user might be asking a valid question with slightly different terminology.
 
 ### Trust & Reliability Improvements
 
-- **Post-generation citation verification.** After the LLM generates an answer citing [1], [3], [5], verify that those citations exist and are semantically relevant. Flag hallucinated citations.
+- **Post-generation citation verification.** After the LLM generates an answer citing [1], [3], [5], verify that those citations exist and are semantically relevant. Flag hallucinated citations. ✅ **Done (existence check, this session)** — `ask` returns `unsupported_citations`: any `[n]` in the model's `used` list not present in the evidence set. (Semantic-relevance check still TODO.)
 
 ### Scalability Considerations
 
@@ -364,7 +368,7 @@ Correctly classify claims by *how* they can be verified: satellite imagery (opti
 ### Improvement Opportunities
 
 1. **Context-aware routing.** Instead of matching on the metric key alone, consider the full claim: aspect + metric_unit + claim_type. A "solar" claim with unit "USD" is financial, not optical.
-2. **Surface the verification method in the Integrity Report**, not just the Fact-Check detail. "12 of your claims are imagery-verifiable, 45 are data-checkable, 120 require document review" is a useful disclosure profile.
+2. **Surface the verification method in the Integrity Report**, not just the Fact-Check detail. "12 of your claims are imagery-verifiable, 45 are data-checkable, 120 require document review" is a useful disclosure profile. ✅ **Done (this session)** — `build_report` → `statistics.verification_profile` = `{imagery, data_crosscheck, document_review}` counts, using a backend `_verification_method` that **mirrors** the frontend `verificationMethod()` observability→method mapping (kept in sync).
 
 ### UX Improvements
 
@@ -448,6 +452,8 @@ Detect contradictions between ESG claims using (1) strict numeric rules (metric-
 3. **Short-circuit NLI when numeric conflict is found.** If the numeric rules already found a conflict, skip the expensive NLI inference.
 4. **Deduplicate.** Sort claim pairs by ID and only evaluate (min_id, max_id) pairs.
 
+> **✅ Resolved 2026-06-25 (across sessions): #1, #2, #3.** **#1 pairing** fixed in `bbc1a54` (real `{"text","text_pair"}` pair). **#3 short-circuit** also in `bbc1a54` — `evaluate_pair` skips NLI when a numeric rule fires. **#2 lazy-load** done this session: the DistilBERT pipeline (and even the `transformers` import) now load on first textual comparison via an `nli_model` property, not in `__init__` — verified `ContradictionEngine()` builds in ~0.02s with `_nli_model is None`, and the numeric path never triggers a load. This unblocked the **contradiction-path regression suite** (`backend/tests/test_nli_engine.py`, 13 tests: Hard/Metric/Temporal/Scope rules, canonical-unit no-false-positive, incomparable-unit + mislabel + zero-baseline + extreme-YoY gating, the evaluate_pair short-circuit, and the textual branch via an injected fake model — no torch needed). **#4 dedup** ✅ done this session: the `get_contradictions` endpoint previously iterated *directed* pairs with no dedup, so within one document both (A,B) and (B,A) were reported and severity-counted twice (the batch script `run_nli_batch.py` already deduped; the endpoint did not). The per-document loop was extracted into a pure, I/O-injected `contradiction_scan.scan_contradictions(doc_claims, retrieve_fn, engine_obj)` that dedups unordered claim-id pairs (`frozenset`), skips self-pairs, and leaves cross-report matches (which appear once anyway) intact. Locked by `backend/tests/test_contradiction_scan.py` (6 tests, fake engine + fake retrieval — symmetric-pair-once, self-pair-skip, cross-report, numeric-vs-textual confidence, missing-id, empty).
+
 ### Trust & Reliability Improvements
 
 - **Label NLI-sourced contradictions differently from numeric-sourced ones.** The numeric path is high-confidence; the textual path is low-confidence. Users should see this distinction.
@@ -525,6 +531,8 @@ Standardize terminology across the product. Create a glossary and enforce it.
 
 The Index page globe is visually stunning but functionally disconnected from the analysis layer. It implies geospatial verification ("click markers to inspect") but no geospatial verification exists. It's the most memorable element in the product and it's decorative. Either connect it to real data (plot company HQ locations from the claims data) or demote it to a subtle background element. As a centerpiece, it sets expectations the product cannot meet.
 
+> **✅ Resolved 2026-06-25 — globe is now company-HQ-centric.** The globe plots **one marker per ingested company at its real headquarters** (curated coordinate registry in `frontend/src/lib/companyHeadquarters.ts`; unknown HQs are skipped, never fabricated). Markers are colored by company risk (low/moderate/high) and sized by claim volume. Clicking a company's HQ surfaces **all of that company's claims** in the right-hand `CompanyPanel` (name, HQ city/country, integrity score, risk, verified/review/gap breakdown, full claim list); clicking a claim drills into `ClaimIntelligence` with a "Back to company claims" affordance. The misleading "click markers to inspect" copy and the "Claim Status" legend were replaced with "click a company HQ to view its claims" and a "Company Risk" legend. This removes the false geospatial-verification implication and makes the centerpiece functional. (Files: `Globe.tsx` rewrite, new `companyHeadquarters.ts` + `CompanyPanel.tsx`, `Index.tsx` wiring, `ClaimIntelligence.tsx` back affordance.)
+
 ---
 
 ## Open Questions
@@ -550,17 +558,20 @@ Each load-bearing claim above was checked against the source. Result: the review
 
 ## Verified accurate (kept as-is)
 - **NLI input format is wrong** (§"NLI Contradiction Engine" #1). Confirmed: `nli_engine.py:23` builds `f"{text_a} </s></body> {text_b}"` and runs it through a single-string `text-classification` pipeline — not premise/hypothesis. Also independently flagged in [take_step_forward.md §3.3](take_step_forward.md). The "Textual" path is genuinely unreliable. **Highest-priority correctness fix.**
+  > **✅ Resolved (commit `bbc1a54`).** `_textual_entailment` now passes `{"text": premise, "text_pair": hypothesis}` so the HF pipeline tokenizes a real NLI pair (premise `[SEP]` hypothesis), with robust label normalization and an empty-text guard. `evaluate_pair` short-circuits NLI when a numeric rule already fired, and numeric conflicts now report `confidence 1.0` instead of the model's meaningless score. Verified against current `nli_engine.py`.
 - **Integrity score is flat, not "diminishing"** (Integrity Report #1). Confirmed: `integrity_report.py` looped `score -= _PENALTY[...]` while the comment claimed "diminishing." ✅ **Fixed in this pass** — the comment now states it's a flat per-flag penalty and points here for the count-weighting plan. (Behaviour unchanged on purpose; changing the formula would silently shift demoed scores.)
 - **Evidence corpus = 3 real records, Scope-1 only** (Fact-Check #1). Confirmed (`evidence_corpus.json`, `_schema` row filtered out by `load_external_corpus`).
 - **`llm_verdict()` defined but never called** (Fact-Check AI). Confirmed.
 - **`credibility = SUPPORTED / checked`** and **cross-report requires `company_id` equality.** Confirmed.
 - **"CAGR" is linear** `(last-first)/span` and a legitimate `0.0` first value suppresses it (falsy guard). Confirmed.
+  > **✅ Resolved 2026-06-25 (this session).** The linear field is renamed `avg_change_per_year` (honest: absolute units/yr) and **remains** the basis for the gap-to-target `on_track` check — that comparison is against `required_per_year`, which is *also* a linear absolute rate, so substituting a compound fraction there would be a dimension error. A genuine compound **`cagr = (last/first)^(1/span) − 1`** is added for display, defined only when both endpoints are positive (else `None`: a CAGR across a zero baseline or a sign change is mathematically meaningless — which also resolves the "legitimate 0.0 suppressed" concern by reporting `None` honestly rather than a fabricated number). Smoke-tested (`benchmark.py:trajectory`); no frontend/backend consumer referenced the old `cagr_per_year` key.
 - **Engine loads on import** at module scope. Confirmed.
 - **In-memory `ingest_jobs`, no dedup/idempotency.** Confirmed.
 - **"Two products" score divergence.** Confirmed: `useClaims.ts` computes Portfolio's `integrityScore` as mean groundability×100, entirely independent of the backend `build_report()` score. They will not agree. This remains the single biggest product-integrity risk.
+  > **✅ Resolved (commit `bbc1a54`).** New `GET /reports/portfolio/integrity` computes per-company scores with the **same** `build_report()` the Integrity Audit page uses. `PortfolioOverview` overlays the backend score (tagging `scoreSource: 'backend'`) and falls back to the local groundability mean only when the backend is unreachable (`scoreSource: 'local'`); the misleading "weighted by materiality" tooltip was corrected to state the shared methodology. The `useClaims.ts` mean is now an explicit fallback, not the headline number — so the two pages agree whenever the backend is up.
 
 ## Corrected overstatements (changed inline)
-- "Extensively tested" → there is **no pytest suite**; gates are spot-checked only.
+- "Extensively tested" → there is **no pytest suite**; gates are spot-checked only. *(Update 2026-06-25: a first suite now exists — `backend/tests/test_unit_canonicalizer.py` — and `pytest` is pinned in `backend/requirements-dev.txt`; verified it collects and passes 7/7 under both pytest and the standalone runner. Coverage is still canonicalizer-only; the reasoning/benchmark modules remain spot-checked.)*
 - DistilBERT "~500 MB RAM" → ~250–350 MB resident; cold start is dominated by importing torch/transformers.
 - Benchmark "technical moat" → real strength but replicable, and limited by partial canonicalizer coverage.
 - "even expensive ESG rating agencies don't automate this" → removed (unverifiable competitor claim).
@@ -570,10 +581,112 @@ Each load-bearing claim above was checked against the source. Result: the review
 ## New findings (not in the original review)
 1. **The review predates the #17 re-score — its score numbers are now stale.** This session recalibrated the groundability/vagueness scorer (claim_type-aware) and re-scored all 1435 live rows (groundable ≥0.75: 879 → 368; vagueness ≥0.6: ~0 → 430). Any integrity-score example written above will have shifted. Re-run before quoting numbers.
 2. **`observability_type` is computed but thrown away.** `GroundabilityClassifier.score` returns it, but it is **not persisted to the DB** and **not exposed** by the fact-check API. The frontend `verificationMethod()` therefore re-derives routing from a **duplicated** OPTICAL keyword list — two sources of truth that will drift. Fix: persist `observability_type` on ingest and have the FE consume it.
+
+   > **✅ Resolved (commit `bbc1a54`).** Added the `observability_type` column (`schema.sql` + migration `2026-06-25_observability_type.sql`), written on ingest (`supabase_ingest.py`), selected through the fact-check API (`fact_check.py`/`api_reasoning.py`), and consumed by the frontend `verificationMethod(metric_key, hasValue, observability_type)` (`lib/api.ts:101`, used at `IntegrityAudit.tsx:157`). The OPTICAL keyword list is now an explicitly-documented **fallback for legacy rows only** (`api.ts:91-94`), and the existing 1435 rows were backfilled via `scripts/backfill_observability_type.py`. Single source of truth restored.
 3. **`audit_summary` silently caps contradictions at 3000 pairs** (`_numeric_contradictions(cap=3000)`). For a large single report this truncates without telling the caller. Surface a `truncated: true` flag.
+
+   > **✅ Resolved 2026-06-25 (this session).** `_numeric_contradictions` now returns `(contradictions, truncated)`; `truncated` is `True` when the pairwise scan hits `cap` and stops early. The `/audit/{doc_id}/summary` response always carries a `contradictions_truncated` boolean (so the frontend can caveat the executive summary instead of treating the contradiction set as exhaustive). The other call site — the portfolio scorecard loop — takes `[0]` (it doesn't need the flag). `py_compile`-checked; both call sites updated. (`api_reasoning.py`.)
 4. **`search_claims` does a full scan** (ORDER BY `embedding <=> q` with no ANN/ivfflat index). Fine at ~1.4k rows; add an index before scale.
+
+   > **⚠️ Corrected 2026-06-25 (this session) — the premise was wrong; no migration written.** Re-checked against the actual SQL before acting: `schema.sql:70-81` **already** creates **HNSW** indices (`USING hnsw (embedding vector_cosine_ops)`) on every partition — and HNSW is strictly better than the ivfflat I'd proposed. The `search_claims` RPC orders by `c.embedding <=> query_embedding`, and `<=>` (cosine distance) matches `vector_cosine_ops`, so the operator/index are aligned and per-partition ANN scans are the intended design ("HNSW indices per partition for massive scale"). Adding an ivfflat index would be redundant **and** inferior, so I deliberately did **not** write one. The genuine, narrower follow-ups that remain: (a) confirm with `EXPLAIN ANALYZE` on the live DB that the planner actually uses the per-partition HNSW for the parent-table `ORDER BY … LIMIT` (needs DB access); and (b) the `filter_doc IS NULL OR c.doc_id = filter_doc` predicate can't pre-filter an HNSW scan, so the doc-scoped path may approximate/under-return — splitting it into two query forms would be the real fix if that ever bites. Lesson: this is exactly why "verify before asserting" is in the process note — the original finding asserted "no ANN index" without checking the schema. **Deliverable added this session:** `backend/database/verify_search_claims_index.sql` — a no-op, ready-to-run script (index-existence check + `EXPLAIN (ANALYZE, BUFFERS)` for both the global and doc-scoped query forms, with "what to look for") so the live-DB confirmation is one paste rather than a research task.
 5. **Canonicalizer coverage is the quiet ceiling on three features at once** (fact-check, benchmark, contradiction). Verbose/compound units ("tonnes CO2 per year", "gCO2e/MJ", "million hectares") pass through unconverted. Expanding `UnitCanonicalizer._CONV` + the substring parser lifts all three simultaneously — high leverage, low risk.
+
+   > **✅ Partially resolved 2026-06-25.** Re-probed against the actual code first: several of the journal's examples were *already* handled — "tonnes CO2 per year" (cadence strip), "million hectares" (magnitude word), and "gCO2e/MJ" (correctly kept distinct as an intensity, not a gap). The **genuine** remaining gaps — found by probing realistic ESG units — were closed in `_CONV` + the substring fallback: **verbose joules** (gigajoule/terajoule/megajoule/joule → MWh; abbreviations GJ/TJ already worked), **barrels/bbl** (→ m3; directly relevant to the Shell/BP oil & gas reports), **verbose cubic metres**, **gallons**, and **m2/square metres** (→ hectares). These touch only `to_canonical` (read-time value comparison) — **not** `dimension_of`/`generate_metric_key` — so `metric_key`s and partitioning are unchanged and **no re-ingest is needed**. Locked with a new regression suite: `backend/tests/test_unit_canonicalizer.py` (runs under pytest *or* as a plain script; 7 groups incl. cross-unit equivalence, intensity-kept-distinct, cadence-stripped, and the #15 value-plausibility gates) — the first such suite, addressing the recurring "no pytest suite" note. Still open (lower value, deferred): MMT disambiguation, and intensity-unit *comparison* (currently they're correctly isolated, not compared).
 6. **`evidence_corpus.json` mixes a `_note`/`_schema` pseudo-record into the data array.** Works (filtered on load) but is a smell; prefer a `{ "_meta": {...}, "records": [...] }` shape.
+
+   > **✅ Resolved 2026-06-25 (this session).** The corpus is now `{ "_meta": { note, record_schema }, "records": [...] }` — metadata is cleanly separated from data, so no pseudo-record is smuggled in. `load_external_corpus` reads `records` from the dict shape, **still accepts the legacy bare-list** (filtering the inline `_schema` row) for forward/backward safety, and defensively drops non-dict / blank-`company_id` rows. Locked by `backend/tests/test_fact_check_corpus.py` (both shapes + malformed/missing file). All routing still goes through `load_external_corpus` (only reader), so no other call site changed.
 
 ## Process note
 Future entries: keep the "verify against code before asserting" discipline — the original review's few misses were all in *quantification* (RAM, "extensively", competitor claims), not in the structural critiques, which held up well.
+
+---
+
+# Resolution Log — 2026-06-25 (follow-up session)
+
+Re-verified each prior finding against the *current* code before acting (the journal's corrections pass predates commit `bbc1a54`, so several "highest-priority" items were already fixed but never marked). Status after this session — full notes inline at each finding above:
+
+| # | Finding | Status | Where |
+|---|---------|--------|-------|
+| NLI #1 | Textual entailment ran a single concatenated string, not a premise/hypothesis pair | ✅ Resolved (`bbc1a54`) | `nli_engine.py` |
+| Cross-cut | "Two products" — Portfolio score ≠ Integrity Audit score | ✅ Resolved (`bbc1a54`) | `/reports/portfolio/integrity`, `PortfolioOverview.tsx` |
+| New #2 | `observability_type` computed but not persisted/exposed; FE duplicated the routing list | ✅ Resolved (`bbc1a54`) | schema + ingest + `api.ts` |
+| New #3 | `audit_summary` silently capped contradictions at 3000 pairs | ✅ Resolved (this session) | `api_reasoning.py` |
+| Bench #4 | "CAGR" was a linear average and the field name was misleading | ✅ Resolved (this session) | `benchmark.py:trajectory` |
+| New #5 | Canonicalizer coverage gaps (joules/barrels/m²/gallons/cubic-metres) | ✅ Resolved (prior session) | `ontology.py` + first pytest suite |
+| New #6 | `evidence_corpus.json` smuggled a `_schema` pseudo-record into the data array | ✅ Resolved (this session) | `evidence_corpus.json` + `fact_check.py` |
+| NLI #2/#3 | NLI model loaded eagerly on import; NLI run even when numeric decided | ✅ Resolved (lazy-load this session; short-circuit `bbc1a54`) | `nli_engine.py` |
+| NLI suite | Contradiction path had no regression tests (blocked by eager model load) | ✅ Resolved (this session) | `tests/test_nli_engine.py` |
+| Fact-Check AI | `llm_verdict()` defined but never called | ✅ Resolved (grounding-guarded, opt-in, this session) | `fact_check.py` + `api_reasoning.py` |
+| New #4 | "`search_claims` has no ANN index → full scan" | ⚠️ Premise wrong — HNSW per-partition indices already exist; verification script shipped | `schema.sql:70-81`, `verify_search_claims_index.sql` |
+| Corr. | "No pytest suite" | ✅ Resolved (this session) | `tests/` (7 suites, 49 tests), `requirements-dev.txt` |
+| NLI #4 | Directed contradiction pairs not deduplicated (endpoint double-counted) | ✅ Resolved (this session) | `contradiction_scan.py` + `api_reasoning.py` |
+| Route tests | FastAPI route wiring untested (blocked by heavy transitive imports) | ✅ Resolved for `get_contradictions` (stub-and-remove harness) | `tests/test_api_routes.py` |
+
+**Implemented (code changed) — across this follow-up's rounds:**
+- `pytest>=8.0` pinned in new `backend/requirements-dev.txt`; **five regression suites** now collect + pass under pytest *and* standalone (**40 tests**): `test_unit_canonicalizer.py` (7), `test_benchmark.py` (8 — ranking, cross-unit comparability, modal-unit dropping, scorecard verdicts, CAGR fix), `test_fact_check_corpus.py` (4 — loader, both corpus shapes), `test_nli_engine.py` (13 — numeric rules + gates + evaluate_pair short-circuit + injected-model textual path), `test_fact_check_llm.py` (8 — grounding guards + opt-in fallback).
+- `_numeric_contradictions` → `(contradictions, truncated)`; `/audit/{doc_id}/summary` always returns `contradictions_truncated`. Portfolio scorecard call site updated to `[0]`.
+- `benchmark.trajectory`: linear field renamed `avg_change_per_year` (kept as the dimensionally-correct basis for `on_track`); added true compound `cagr` for display (positive-endpoints-only, else `None`).
+- `evidence_corpus.json` migrated to `{ "_meta", "records" }`; `load_external_corpus` reads the new shape, still accepts the legacy bare-list, and drops malformed rows.
+- **NLI model lazy-loaded** via an `nli_model` property (construction is ~0.02s, no `transformers` import until first textual NLI) — resolves the eager-load weakness and unblocked the contradiction-path suite.
+- **`llm_verdict` hardened + wired** as a guarded, opt-in, numeric-authoritative fallback in `fact_check_document(..., llm=...)`; routes pass `_optional_llm()`; response carries `llm_assisted`.
+- **Contradiction dedup (NLI #4)** — extracted the `get_contradictions` loop into pure `contradiction_scan.scan_contradictions(...)`, deduping unordered pairs so the endpoint no longer double-counts within a document. Six fast tests cover it.
+- **Route-level integration tests** — `backend/tests/test_api_routes.py` drives the real `get_contradictions` route end-to-end (real `scan_contradictions` + real numeric engine; only Supabase + the embedding model faked). Solved the import blocker with a **stub-and-remove** harness: the heavy import-time libs (`sentence_transformers`, `supabase`, `dotenv`, `claim_extractor`) are stubbed in `sys.modules` *only during* `api_reasoning`'s import, then removed so other suites still get the real libraries. Covers dedup-through-the-route, the no-conflict path (fake NLI injected so no real model loads), and the 404. (Now **7 suites, 49 tests**.)
+- **`search_claims` verification script** — `backend/database/verify_search_claims_index.sql` (see corrected New #4); the live `EXPLAIN ANALYZE` is now a one-paste step.
+
+**Still open (deferred — needs live infra / content / a heavier tier):**
+- **Run** `verify_search_claims_index.sql` on the live DB and act on the plan (only step that needs DB access; script is ready).
+- **Evidence-corpus depth** (3 illustrative records) — content/sourcing work; deliberately **not** fabricating reference figures (that would undermine the product's integrity premise).
+- **Remaining route coverage** — `test_api_routes.py` proves the harness; extending it to `get_fact_check` / `audit_summary` / the benchmark routes is mechanical follow-on. Also `_numeric_contradictions`'s grouping+cap wrapper is still only compile-checked (its `contradictions_truncated` flag), though its underlying engine is unit-tested.
+
+## Process note (session 2)
+Verifying-before-asserting paid off **three** more times this round: (1) three findings flagged "highest-priority / confirmed broken" were already fixed in `bbc1a54`; (2) the CAGR field is *correctly* linear for the target math, so I renamed + augmented rather than naively "fixing" it into a dimension bug; (3) **New #4 was simply wrong** — I was about to write an ivfflat migration when the schema already had superior HNSW indices. Checking the SQL first turned a redundant-and-inferior change into a one-line correction. The pattern holds: read the load-bearing code before writing the fix, especially when the fix is a migration or a "make it match the textbook" rewrite.
+
+---
+
+# Resolution Log — 2026-06-25 (session 3: 5 additive improvements)
+
+Five low-risk, additive improvements (no behaviour change to existing scores/verdicts; all new fields/messages). Each is locked by a fast, dual-mode test. Inline ✅ notes at each finding above.
+
+| Finding | Change | Where |
+|---------|--------|-------|
+| Integrity Report — score decomposition | `penalty_breakdown` (per-flag points, sorted) | `integrity_report.py` |
+| Integrity Report — provenance | `computed_at` + `report_version` (extraction/model version still TODO) | `integrity_report.py` |
+| Fact-Check — coverage metric | `checkable` + `coverage` = checked/checkable | `fact_check.py` |
+| Fact-Check — actionable UNVERIFIED | reason names metric/year/company + remedy; flags incomparable-unit case | `fact_check.py` |
+| Auditor — robust LLM JSON parse | `json_utils.loads_lenient` (fences/preamble) wired into 3 LLM callers | `json_utils.py` + `agent.py` + `fact_check.py` |
+
+**Tests:** +9 (now **9 suites, 58 tests** — added `test_json_utils.py` ×5, `test_report_extras.py` ×4). All green under pytest + standalone.
+
+**Still open (unchanged):** run `verify_search_claims_index.sql` on live DB; evidence-corpus depth (content, no-fabricate); extend route harness to remaining endpoints; thread `extraction_version`/`model_version` from ingest into `build_report`; count-weighted integrity penalties (deferred — would shift demoed scores).
+
+---
+
+# Resolution Log — 2026-06-25 (session 4: 5 more additive improvements)
+
+All additive (no change to existing scores/verdicts), each test-locked.
+
+| Finding | Change | Where |
+|---------|--------|-------|
+| Benchmark — peer-depth confidence | `cross_company.confidence`, scorecard `low_confidence`/`low_confidence_metrics` (n<3) | `benchmark.py` |
+| Auditor — suggested questions | pure `suggest_questions(report)` + `GET /audit/{doc_id}/suggested-questions` | `agent.py` + `api_reasoning.py` |
+| Auditor — citation grounding | `ask` returns `unsupported_citations` (hallucinated `[n]`) | `agent.py` |
+| Auditor — scope signal | `ask` returns `top_similarity` + `low_relevance` (soft, not a hard refusal) | `agent.py` |
+| Integrity Report — richer non-LLM fallback | `_key_findings` bullets; `synthesize_audit` emits `key_findings` + uses it as structured summary | `agent.py` |
+
+**Tests:** +5 (now **11 suites, 63 tests** — `test_agent_helpers.py` ×4 via the stub-and-remove harness, +1 in `test_benchmark.py`). Green under pytest + standalone.
+
+**Still partial / open:** citation *semantic-relevance* check (only existence done); UI display of `of`/gray-out (frontend); the deferred set above unchanged.
+
+---
+
+# Resolution Log — 2026-06-25 (session 5: 2 additive + 1 verified-N/A)
+
+| Finding | Change | Where |
+|---------|--------|-------|
+| Verification method in Integrity Report | `statistics.verification_profile` {imagery/data_crosscheck/document_review}; backend `_verification_method` mirrors the frontend mapping | `integrity_report.py` |
+| Weighted credibility (materiality) | additive `weighted_credibility` + per-verdict `materiality`; plain `credibility` unchanged | `fact_check.py` |
+| Evidence freshness/staleness | ⚠️ **N/A** — `find_evidence` matches exact year, so no staleness gap exists; flag would be dead code → reverted | (n/a) |
+
+**Tests:** +2 (now **11 suites, 65 tests** — both in `test_report_extras.py`). Green under pytest + standalone.
+
+**Process note (session 5):** verify-before-asserting caught the staleness item *during implementation* — a smoke test showed the `stale` flag could only ever be False under exact-year matching. Reverted rather than ship dead code that implies a freshness check the system doesn't actually perform.
