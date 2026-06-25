@@ -67,10 +67,12 @@ def build_report(claims: List[Dict[str, Any]],
     flag_dicts = [f.to_dict() for f in flags]
     flag_counts = collections.Counter(f.severity for f in flags)
 
-    # ── integrity score: 100 minus weighted flag penalties (diminishing) ────────
+    # ── integrity score: 100 minus a flat per-flag severity penalty ─────────────
+    # NOTE: this is a flat subtraction (one penalty per distinct flag type), NOT
+    # count-weighted or diminishing. Count-weighting (penalty scaled by how many
+    # claims triggered the flag) is a planned improvement — see self_improvement.md.
     score = 100.0
     for f in flags:
-        # diminishing: repeated same-severity flags hurt less each time
         score -= _PENALTY.get(f.severity, 0)
     score = max(0.0, min(100.0, score))
     grade = _grade(score)
