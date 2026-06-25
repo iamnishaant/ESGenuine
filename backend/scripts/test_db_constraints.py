@@ -67,9 +67,11 @@ def test_db():
     except Exception as e:
         print(f"❌ Entry 2 FAILED: {e}")
 
-    # Cleanup (Optional: remove them)
-    # supabase.table("claims").delete().eq("company_id", "test_corp").execute()
-    # print("\nTest entries cleaned up.")
+    # Cleanup — this test writes to the LIVE DB, so it MUST remove its own sentinels.
+    # Without this, the two 'test_corp' rows leak into the corpus and show up as a bogus
+    # 2-claim "test_corp" company (grade A/100) in the portfolio after every test run.
+    supabase.table("claims").delete().eq("company_id", "test_corp").execute()
+    print("\nTest entries cleaned up.")
 
 if __name__ == "__main__":
     test_db()

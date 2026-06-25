@@ -6,6 +6,21 @@
 
 ---
 
+## Batch 2026-06-26 — #19 deterministic layer RESOLVED + test-leak fix
+
+### ✅ #19 metric_key conflation — deterministic layer fixed (split dimensions) + backfilled
+- **What ran:** probed live units under the conflated keys. `social.health_safety.ltifr.count` (n=51) actually held `employees`(10)/`people`(4)/`fatalities`(1)/`events`+`incidents`(7)/`hours`(rate denominators); `emissions.scope1.co2e` (n=106) mixed ~96 absolutes with ~10 intensities (`gco2e/mj`, `co2e/kwh`, `co2e per inr`).
+- **Fix (deterministic, no LLM):** in [ontology.py](backend/src/extractors/ontology.py) `_DIM_RULES` — added an `intensity` dimension (physical denominators only, matched before co2e/energy/mass; a time denominator like `tCO2e/year` stays absolute) and split the `count` catch-all into `headcount`/`fatalities`/`injuries`/`incidents` (+ generic `count`). `_PLAUSIBLE` updated per family; `is_value_plausible` integer-gate extended to the new count-family suffixes; dropped the dangerous bare `men`/`women` keyword (substring-matched `assessments`, `management`, …).
+- **Backfill:** recomputed `metric_key` + `claim_signature` over all 2385 live claims (via `DATABASE_URL`) — **97 rows updated** (41 headcount, 31 intensity, 11 incidents, 4 rate, 1 fatalities; 9 mislabeled diversity-as-biodiversity rows collapsed to `.unspecified`, acceptable). Now `emissions.scope1.intensity` benchmarks separately from `.co2e`; `ltifr` splits into `.rate`/`.headcount`/`.incidents`/`.fatalities`. Test `test_metric_key_dimension_routing` updated to lock the new routing; 72 tests green.
+- **Scores unchanged** (Tata B84 / MS D44 / Shell F26 / Infosys D42) and **contradiction counts unchanged** — expected: the contradiction `_comparable` gate already required identical canonical units, so cross-quantity pairs were never compared. The win here is **benchmark/grouping precision**, not contradiction reduction.
+- **Residual (accepted ceiling):** the LLM *aspect/scope* mislabels (diversity claims tagged `biodiversity.conservation`; 58Mt vs 305Mt both tagged `scope1` same year) are NOT deterministically fixable — they need 70B re-extraction with tighter aspect derivation. Tracked as the standing extraction-quality remainder, not an engine defect.
+
+### ✅ test_db_constraints leaked `test_corp` rows into the live corpus
+- **Test:** `scripts/test_db_constraints.py` inserts two sentinel claims (`company_id='test_corp'`) into the **live** `claims` table on every run, with the cleanup commented out — so a bogus 2-claim "test_corp" company (grade A/100) appeared in the portfolio after each test run.
+- **Fixed:** enabled the delete-by-`company_id` cleanup at the end of the test; purged the lingering rows (corpus back to 2385 claims, 4 companies).
+
+---
+
 ## Batch 2026-06-25d — score saturation RESOLVED: count-weighted scoring
 
 ### ✅ Score saturation fixed — the integrity metric now discriminates (closes the #18 ⚠️ result)
@@ -35,6 +50,7 @@
 - **Root cause:** upstream — the 8B extractor + the `.count`/`.co2e` dimension being a catch-all (the #14/#15/#16 family). The canonicalizer correctly keeps incomparable units apart at compare time, so these mostly don't *numerically* conflict, but they share a key and pollute grouping/benchmarking.
 - **Impact:** feeds spurious pairs into #18 and muddies per-metric benchmarks. Tracked as the existing operational remainder (needs 70B extraction + tighter metric_key derivation), not a new engine defect.
 - **✅ Verified (2026-06-25d) — the contradiction layer is NOT the place to fix this; it's pure extraction quality.** Checked shell_2022's 350 `Metric` contradictions on live data: only 63 pair claims with differing raw units, and `_comparable` already blocks the clean conflation (e.g. `fatalities` vs `employees` canonicalize to distinct non-empty units → guard rejects). The 63 are **same-canonical-unit genuine magnitude differences** — canonicalization is correct (`51 'million tonnes co2e'` → `51,000,000 tCO2e`; `58000000 'tco2e'` → `58,000,000 tCO2e`), so they read as `58Mt vs 51Mt vs 305Mt vs 1.1Mt` of "Scope 1" in the **same year/global**. That spread is the **8B extractor mislabeling different entities/scopes/contexts all as `emissions.scope1.co2e`** — an aspect/scope-assignment error upstream, with **no deterministic guard** that distinguishes them (they're physically the same dimension). Realizing any score benefit requires re-extraction (70B / tighter aspect+scope derivation) **and a re-ingest/backfill** of the stored `metric_key`/`location_scope` — not a pure-logic patch. Conclusion stands: this is the extraction ceiling, deferred pending model/source work.
+- **✅ Deterministic layer RESOLVED (2026-06-26) — see top batch.** The conflation's tractable half (coarse `count` catch-all + intensity colliding with absolute `co2e`) is fixed in the ontology + backfilled over live claims. Only the LLM aspect/scope-mislabel residual remains (needs 70B re-extraction).
 
 ### ✅ Schema fix — `claims_default` partition had no HNSW index
 - **Test:** `verify_search_claims_index.sql` on the live DB → only 4 of 5 claims partitions had an embedding index; `claims_default` (the catch-all holding `emissions.scope1`, currently the **largest** partition at 746 rows) had none.

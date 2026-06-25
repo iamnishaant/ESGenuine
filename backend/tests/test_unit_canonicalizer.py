@@ -119,8 +119,17 @@ def test_value_plausibility_gates():
 def test_metric_key_dimension_routing():
     assert S.generate_metric_key("emissions.scope1", "tCO2e") == "emissions.scope1.co2e"
     assert S.generate_metric_key("emissions.scope1", "km") == "emissions.scope1.unspecified"
-    assert S.generate_metric_key("social.workforce.total", "employees") == "social.workforce.total.count"
     assert S.generate_metric_key("uncategorized", "tCO2e") == "uncategorized"
+    # #19: the count catch-all is split so physically different quantities stop sharing a key.
+    assert S.generate_metric_key("social.workforce.total", "employees") == "social.workforce.total.headcount"
+    assert S.generate_metric_key("social.health_safety.ltifr", "fatalities") == "social.health_safety.ltifr.fatalities"
+    assert S.generate_metric_key("social.health_safety.ltifr", "incidents") == "social.health_safety.ltifr.incidents"
+    assert S.generate_metric_key("social.health_safety.ltifr", "per million hours") == "social.health_safety.ltifr.rate"
+    # #19: per-unit intensity separated from absolute co2e (was both '.co2e').
+    assert S.generate_metric_key("emissions.scope1", "gCO2e/MJ") == "emissions.scope1.intensity"
+    assert S.generate_metric_key("emissions.scope1", "tCO2e/kWh") == "emissions.scope1.intensity"
+    # a time denominator is a cadence, not an intensity → stays absolute co2e
+    assert S.generate_metric_key("emissions.scope1", "tCO2e/year") == "emissions.scope1.co2e"
 
 
 def test_cross_unit_equivalence():

@@ -155,38 +155,56 @@ class SignatureGenerator:
         return parts[0]
 
     # Canonical physical DIMENSION for a unit string (ordered keyword match).
-    # Order matters: more specific dimensions (co2e, rate) checked before generic ones.
+    # Order matters: more specific dimensions are checked before generic ones. In
+    # particular `rate` (safety frequency rates) is matched before `intensity` so an LTIFR
+    # "per million hours" denominator is not mistaken for an emissions intensity; and
+    # `intensity` is matched before `co2e`/`energy`/`mass` so "tCO2e/MWh" (per-unit) is not
+    # bucketed with absolute "tCO2e". The count family is split (fatalities/injuries/
+    # headcount/incidents) so physically different quantities stop sharing a `.count` key
+    # (existing_issues.md #19: fatalities vs employee headcount under `ltifr.count`).
     _DIM_RULES = [
-        ("percent",  ("%", "percent", "per cent")),
-        ("rate",     ("per million hours", "per 100 million", "per hundred thousand",
-                      "per 100,000", "ltifr", "frequency rate", " rate", "/hour")),
-        ("co2e",     ("co2e", "co2", "tco2", "mtco2", "ktco2", "ghg")),
-        ("energy",   ("kwh", "mwh", "gwh", "twh", "mwac", "wac", "kva", "gj", "tj",
-                      "joule", "megawatt", "gigawatt", "watt")),
-        ("volume",   ("litre", "liter", "cubic met", "m3", "m³", "kilolitre",
-                      "megalitre", "gallon", "barrel", "bbl")),
-        ("area",     ("hectare", "acre", "km2", "km²", "sq km", "square", "m2", "m²")),
-        ("currency", ("usd", "inr", "eur", "gbp", "$", "dollar", "rupee", "euro", "spend", "cost")),
-        ("mass",     ("tonne", "ton", "kilogram", "gram", "kg", "kt", "mt")),
-        ("length",   ("km", "kilomet", "mile", "metre", "meter")),
-        ("count",    ("employee", "people", "person", "headcount", "fte", "count", "number",
-                      "incident", "event", "case", "tree", "sapling", "credit", "report",
-                      "fatalit", "injur", "women", "men", "director", "hour")),
+        ("percent",   ("%", "percent", "per cent")),
+        ("rate",      ("per million hours", "per 100 million", "per hundred thousand",
+                       "per 100,000", "per one million", "/100 million", "million hours",
+                       "ltifr", "frequency rate", " rate", "/hour")),
+        # Per-unit intensity (emissions/energy normalized by a physical denominator). Must
+        # precede co2e/energy/mass. Keyed on PHYSICAL denominators only (not bare "co2e/"
+        # or a time denominator), so absolute "tCO2e/year" / "co2 per year" stay co2e.
+        ("intensity", ("intensity", "/mj", "/gj", "/tj", "/kwh", "/mwh", "/gwh", "/boe",
+                       "/inr", "/usd", "/tonne", "/m2", "/m²", "uedctm",
+                       "per inr", "per boe", "per kwh", "per mwh", "per tonne", "per unit")),
+        ("co2e",      ("co2e", "co2", "tco2", "mtco2", "ktco2", "ghg")),
+        ("energy",    ("kwh", "mwh", "gwh", "twh", "mwac", "wac", "kva", "gj", "tj",
+                       "joule", "megawatt", "gigawatt", "watt")),
+        ("volume",    ("litre", "liter", "cubic met", "m3", "m³", "kilolitre",
+                       "megalitre", "gallon", "barrel", "bbl")),
+        ("area",      ("hectare", "acre", "km2", "km²", "sq km", "square", "m2", "m²")),
+        ("currency",  ("usd", "inr", "eur", "gbp", "$", "dollar", "rupee", "euro", "spend", "cost")),
+        ("mass",      ("tonne", "ton", "kilogram", "gram", "kg", "kt", "mt")),
+        ("length",    ("km", "kilomet", "mile", "metre", "meter")),
+        # Split count family — checked before the generic `count` catch-all (first match wins).
+        ("fatalities", ("fatalit",)),
+        ("injuries",   ("injur",)),
+        ("headcount",  ("employee", "people", "person", "headcount", "fte", "staff",
+                        "workforce", "worker", "director")),
+        ("incidents",  ("incident", "event", "case", "breach", "spill", "assessment")),
+        ("count",      ("count", "number", "tree", "sapling", "credit", "report", "hour")),
     ]
 
     # Plausible dimensions per metric family (prefix match). Used to collapse garbage
-    # (e.g. emissions reported in 'km'/'litres') down to '.unspecified'.
+    # (e.g. emissions reported in 'km'/'litres') down to '.unspecified'. New split/intensity
+    # dimensions are added per family so they are not collapsed to '.unspecified'.
     _PLAUSIBLE = {
-        "emissions": {"co2e", "mass", "percent"},
-        "energy": {"energy", "percent"},
-        "water": {"volume", "mass", "percent"},
+        "emissions": {"co2e", "mass", "intensity", "percent"},
+        "energy": {"energy", "intensity", "percent"},
+        "water": {"volume", "mass", "intensity", "percent"},
         "waste": {"mass", "volume", "percent"},
-        "biodiversity": {"area", "count", "percent"},
-        "social.diversity": {"percent", "count"},
-        "social.health_safety": {"rate", "count", "percent"},
-        "social.workforce": {"count", "percent"},
-        "social.training": {"count", "rate"},
-        "governance": {"count", "percent"},
+        "biodiversity": {"area", "count", "headcount", "incidents", "percent"},
+        "social.diversity": {"percent", "count", "headcount"},
+        "social.health_safety": {"rate", "count", "fatalities", "injuries", "incidents", "headcount", "percent"},
+        "social.workforce": {"count", "headcount", "percent"},
+        "social.training": {"count", "headcount", "rate"},
+        "governance": {"count", "incidents", "percent"},
     }
 
     @classmethod
@@ -431,8 +449,8 @@ class UnitCanonicalizer:
         k = str(metric_key)
         if k.endswith(".percent"):
             return -100.0 <= v <= 1000.0
-        if k.endswith(".count"):
-            # counts are non-negative (near-)integers; 74.445 employees is a mislabel
+        if k.endswith((".count", ".headcount", ".fatalities", ".injuries", ".incidents")):
+            # counts are non-negative (near-)integers; 74.445 employees is a mislabel (#15)
             return v >= 0 and abs(v - round(v)) < 0.01
         if k.endswith(".rate"):
             return 0 <= v <= 10000
