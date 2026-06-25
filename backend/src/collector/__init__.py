@@ -1,1 +1,1 @@
-# Pharos Integrity — Collector Module
+# ESGenuine — Collector Module

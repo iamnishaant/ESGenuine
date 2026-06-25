@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Semantic Vector Reasoner
+ESGenuine — Semantic Vector Reasoner
 ===========================================
 Replaces O(N^2) brute-force reasoning with an O(1) semantic neighborhood search.
 Uses pgvector (HNSW) to find the Top 3 most semantically identical claims

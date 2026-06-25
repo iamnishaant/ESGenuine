@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Phase 3: Extraction Pipeline Orchestrator
+ESGenuine — Phase 3: Extraction Pipeline Orchestrator
 =============================================================
 
 Extended from Week 3 to include:
@@ -25,6 +25,29 @@ from .claim_extractor import ClaimExtractor
 from .table_parser import StructuredTableParser
 from .models import ExtractedClaim
 from .location_extractor import LocationExtractor
+
+
+def build_section_windows(sentences: List[Dict[str, Any]], max_chars: int = 3500) -> List[Dict[str, Any]]:
+    """Group parsed sentences (reading order) into char-budgeted windows for
+    section-level extraction (one LLM call each). Each window carries the most
+    common section_title of its sentences."""
+    blocks: List[Dict[str, Any]] = []
+    cur: List[Dict[str, Any]] = []
+    size = 0
+
+    def flush():
+        if cur:
+            titles = [x.get("section_title") for x in cur if x.get("section_title")]
+            title = max(set(titles), key=titles.count) if titles else "Document"
+            blocks.append({"section_title": title, "sentences": list(cur)})
+
+    for s in sentences:
+        t = s.get("text", "") or ""
+        if cur and size + len(t) > max_chars:
+            flush(); cur.clear(); size = 0
+        cur.append(s); size += len(t) + 1
+    flush()
+    return blocks
 
 
 class ExtractionPipeline:
@@ -53,11 +76,12 @@ class ExtractionPipeline:
 
     def run(
         self,
-        chunks: List[Dict[str, Any]],
+        chunks: Optional[List[Dict[str, Any]]] = None,
         pdf_path: str = "",
         table_rows: Optional[List[Dict[str, Any]]] = None,  # kept for backward compat
         document_id: str = "",
         report_metadata: Optional[Dict[str, Any]] = None,
+        sentences: Optional[List[Dict[str, Any]]] = None,   # SOTA: section-level extraction
     ) -> List[ExtractedClaim]:
         """
         Run both extraction pipelines and merge results.
@@ -73,13 +97,28 @@ class ExtractionPipeline:
         print(f"Phase 3 — Claim Extraction Pipeline")
         print(f"{'='*60}\n")
 
-        # Pipeline 1: Text claims from LLM on semantic chunks
-        text_claims = self.text_extractor.extract_from_chunks(chunks, document_id)
+        # Pipeline 1: Text claims via LLM.
+        # SOTA path: section-level extraction (one call per section-window, full
+        # context, ~15x fewer calls). Falls back to per-chunk if sentences absent.
+        if sentences:
+            section_blocks = build_section_windows(sentences)
+            print(f"  Text pipeline (section mode): {len(section_blocks)} windows from {len(sentences)} sentences")
+            text_claims = self.text_extractor.extract_from_sections(section_blocks, document_id)
+        else:
+            text_claims = self.text_extractor.extract_from_chunks(chunks or [], document_id)
         print(f"  Text pipeline: {len(text_claims)} claims")
 
-        # Pipeline 2: Structured table parsing
+        # Pipeline 2: Table claims.
+        # SOTA path (USE_VLM_TABLES=1): VLM reads table pages as clean markdown ->
+        # structured claims (existing_issues #5). Falls back to pdfplumber/legacy.
+        import os as _os
         table_claims: List[ExtractedClaim] = []
-        if pdf_path:
+        if pdf_path and _os.environ.get("USE_VLM_TABLES") == "1":
+            from .vlm_tables import VLMTableExtractor
+            md_tables = VLMTableExtractor().extract(pdf_path)
+            table_claims = self.text_extractor.extract_from_table_markdown(md_tables, document_id)
+            print(f"  Table pipeline (VLM): {len(table_claims)} claims")
+        elif pdf_path:
             table_claims = self.table_parser.parse(pdf_path, document_id)
             print(f"  Table pipeline (structured): {len(table_claims)} claims")
         elif table_rows:

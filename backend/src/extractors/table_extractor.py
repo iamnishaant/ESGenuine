@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Week 3: Table Claim Extractor
+ESGenuine — Week 3: Table Claim Extractor
 ==================================================
 
 Parallel extraction pipeline for claims embedded in tables.

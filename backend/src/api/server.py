@@ -1,5 +1,5 @@
 """
-Pharos Integrity — FastAPI Server (Week 2 + 3)
+ESGenuine — FastAPI Server (Week 2 + 3)
 ===============================================
 Serves:
   Week 2: 8-step document parsing pipeline
@@ -21,7 +21,7 @@ from extractors.pipeline import ExtractionPipeline
 from reasoning.api_reasoning import router as reasoning_router
 
 app = FastAPI(
-    title="Pharos Integrity API",
+    title="ESGenuine API",
     version="4.0.0",
     description="ESG Report Parsing & Claim Extraction — Weeks 2+3+4",
 )
@@ -118,7 +118,8 @@ async def get_full_document(doc_id: str):
 
 @app.get("/v1/documents/{doc_id}/sections")
 async def get_sections(doc_id: str):
-    return {"document_id": doc_id, "sections": _load_json(doc_id, "sections")}
+    sections = _load_json(doc_id, "sections")
+    return {"document_id": doc_id, "total": len(sections), "sections": sections}
 
 @app.get("/v1/documents/{doc_id}/sentences")
 async def get_sentences(doc_id: str, section: str = None):
@@ -179,8 +180,15 @@ async def extract_claims(req: ExtractRequest):
             detail=f"Document {doc_id} not found. Upload and parse a PDF first."
         )
 
+    # SOTA: prefer section-level extraction when parsed sentences are available
+    # (full context, ~15x fewer LLM calls). Falls back to per-chunk otherwise.
+    try:
+        sentences = _load_json(doc_id, "sentences")
+    except HTTPException:
+        sentences = None
+
     pipeline = ExtractionPipeline()
-    claims = pipeline.run(chunks=chunks, table_rows=table_rows, document_id=doc_id)
+    claims = pipeline.run(chunks=chunks, table_rows=table_rows, document_id=doc_id, sentences=sentences)
     pipeline.save(claims, str(PARSED_DIR), doc_id)
 
     claims_data = [c.model_dump() for c in claims]
@@ -215,7 +223,7 @@ async def get_claims(doc_id: str):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "pharos-integrity-api", "version": "3.0.0"}
+    return {"status": "ok", "service": "esgenuine-api", "version": app.version}
 
 
 if __name__ == "__main__":

@@ -1,0 +1,8 @@
+# Backend (from repo root)
+.\.venv\Scripts\activate
+cd backend
+uvicorn src.api.server:app --reload     # http://localhost:8000
+
+# Frontend (from repo root)
+cd frontend
+npm run dev                              # http://localhost:8080

@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Week 3: Pydantic Models + Unit Normalizer + Groundability Scorer
+ESGenuine — Week 3: Pydantic Models + Unit Normalizer + Groundability Scorer
 =====================================================================================
 
 Shared data models and utility functions used across the extraction pipeline.

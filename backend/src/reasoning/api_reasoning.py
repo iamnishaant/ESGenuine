@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Week 4: Reasoning API Endpoints
+ESGenuine — Week 4: Reasoning API Endpoints
 ==================================================
 Exposes the Contradiction Engine and Greenwashing Risk Score 
 to the React Frontend Dashboard.

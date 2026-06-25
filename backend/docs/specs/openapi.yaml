@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Pharos Integrity Platform API
+  title: ESGenuine Platform API
   description: Backend API contracts for ESG integrity evaluation — frozen at Week 1.
   version: 2.0.0
 servers:

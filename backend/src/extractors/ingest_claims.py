@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Week 4: Postgres Vector Ingestion
+ESGenuine — Week 4: Postgres Vector Ingestion
 ====================================================
 Validates, embeds, and batch-inserts extracted JSON claims
 into the partitioned PostgreSQL Vector Store.

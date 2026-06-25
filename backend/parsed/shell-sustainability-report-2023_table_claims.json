@@ -1,0 +1,1300 @@
+[
+  {
+    "claim_id": "e162087a-b9c",
+    "aspect": "divestment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Canada",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Canada LNG Canada TI-2",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "fc0074d6-898",
+    "aspect": "divestment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Indonesia",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Indonesia Masela PSC/Abadi divestment",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "7da82467-f47",
+    "aspect": "divestment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Nigeria",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Nigeria NLNG T7",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "a33f9939-954",
+    "aspect": "divestment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Qatar",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Qatar QatarEnergy LNG NFE(2)",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "8614745d-c33",
+    "aspect": "start-up",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Brazil",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Brazil Mero-2 start-up",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "90647438-5bf",
+    "aspect": "start-up",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Brazil",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Brazil Mero-3",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "7a39a353-1bc",
+    "aspect": "start-up",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Brazil",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Brazil Mero-4",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "6f49a356-188",
+    "aspect": "divestment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Malaysia",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Malaysia Marjoram/Rosmari",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "12ddb0f3-cae",
+    "aspect": "redevelopment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "United Kingdom",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "United Kingdom Pierce redevelopment",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "15b721d1-11c",
+    "aspect": "start-up",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "United Kingdom",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "United Kingdom Jackdaw",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "f4d60323-4ca",
+    "aspect": "divestment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "USA",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "USA Aera Energy divestment",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "2d6865d8-099",
+    "aspect": "investment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "USA",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "USA Sparta FID",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "b78fb67d-3e4",
+    "aspect": "start-up",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "USA",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "USA Vito start-up",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "fb5907a4-201",
+    "aspect": "start-up",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "USA",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "USA Whale",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "193d0595-6fc",
+    "aspect": "divestment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Malaysia",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Malaysia Baram Delta divestment",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "a18f467b-ea4",
+    "aspect": "start-up",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Malaysia",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Malaysia Timi start-up",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "75a4d220-d94",
+    "aspect": "divestment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Nigeria",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Nigeria Nigerian onshore (SPDC) divestment agreed",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "990ce97e-93f",
+    "aspect": "growth",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "China",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "China EV growth",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "7ccb07d5-de5",
+    "aspect": "acquisition",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Denmark",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Denmark Nature Energy acquisition",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "ca6d7607-965",
+    "aspect": "investment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Germany",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Germany FID to repurpose Energy and Chemicals Park Rheinland",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "6df50d0c-93c",
+    "aspect": "divestment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Germany",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Germany Shell home energy retail divestment",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "9432c6fd-1aa",
+    "aspect": "investment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "India",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "India Sprng Energy investment funnel",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "aead4267-a74",
+    "aspect": "investment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Netherlands",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Netherlands CrossWind/HKN",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "6a35d337-5f1",
+    "aspect": "investment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "target",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Netherlands",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Netherlands HEFA Biofuels Plant Rotterdam",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "bf2697b1-874",
+    "aspect": "investment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Netherlands",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Netherlands Holland Hydrogen I",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "86a7fc93-26f",
+    "aspect": "investment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Netherlands",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Netherlands Ecowende/HKW",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "147bf3b4-d88",
+    "aspect": "investment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Norway",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Norway Northern Lights JV (Phase 1)",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "2abe00bf-5ef",
+    "aspect": "divestment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "narrative",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": {
+      "raw_text": "Pakistan",
+      "specificity": "region"
+    },
+    "time": {
+      "start_date": null,
+      "end_date": null,
+      "baseline_year": null
+    },
+    "provenance": {
+      "source_sentence": "Pakistan Shell Pakistan Limited divestment agreed",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.9,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.7,
+    "vagueness_score": 0.3,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "region",
+    "claim_signature": "uncategorized|unknown_time|region",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  },
+  {
+    "claim_id": "e91e7422-303",
+    "aspect": "divestment",
+    "normalized_aspect": "uncategorized",
+    "action": "reported",
+    "claim_type": "target",
+    "metric": {
+      "value": 0.0,
+      "unit": "unspecified",
+      "direction": "absolute",
+      "normalized_value": 0.0,
+      "normalized_unit": "unspecified"
+    },
+    "location": null,
+    "time": null,
+    "provenance": {
+      "source_sentence": "Singapore Aspired divestment of Energy and Chemicals Park Singapore",
+      "page_number": 26,
+      "chunk_id": "tbl_p26",
+      "block_id": "tbl_p26",
+      "section_label": "Performance Data",
+      "bbox": null
+    },
+    "confidence": 0.5,
+    "observability_type": "reported_metric",
+    "groundability_score": 0.4,
+    "vagueness_score": 0.5,
+    "metric_family": "uncategorized",
+    "metric_key": "uncategorized",
+    "time_bucket": "unknown_time",
+    "location_scope": "global",
+    "claim_signature": "uncategorized|unknown_time|global",
+    "source_type": "table",
+    "company_id": null,
+    "company_name": null,
+    "report_year": null,
+    "report_id": null
+  }
+]

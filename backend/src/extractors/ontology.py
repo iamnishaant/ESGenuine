@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Week 4: ESG Ontology & Claim Normalization
+ESGenuine — Week 4: ESG Ontology & Claim Normalization
 =============================================================
 
 This module aligns raw extracted claims to a standardized ESG 
@@ -145,31 +145,82 @@ class SignatureGenerator:
             return f"{parts[0]}.{parts[1]}" # e.g., social.diversity
         return parts[0]
 
+    # Canonical physical DIMENSION for a unit string (ordered keyword match).
+    # Order matters: more specific dimensions (co2e, rate) checked before generic ones.
+    _DIM_RULES = [
+        ("percent",  ("%", "percent", "per cent")),
+        ("rate",     ("per million hours", "per 100 million", "per hundred thousand",
+                      "per 100,000", "ltifr", "frequency rate", " rate", "/hour")),
+        ("co2e",     ("co2e", "co2", "tco2", "mtco2", "ktco2", "ghg")),
+        ("energy",   ("kwh", "mwh", "gwh", "twh", "mwac", "wac", "kva", "gj", "tj",
+                      "joule", "megawatt", "gigawatt", "watt")),
+        ("volume",   ("litre", "liter", "cubic met", "m3", "m³", "kilolitre",
+                      "megalitre", "gallon", "barrel", "bbl")),
+        ("area",     ("hectare", "acre", "km2", "km²", "sq km", "square", "m2", "m²")),
+        ("currency", ("usd", "inr", "eur", "gbp", "$", "dollar", "rupee", "euro", "spend", "cost")),
+        ("mass",     ("tonne", "ton", "kilogram", "gram", "kg", "kt", "mt")),
+        ("length",   ("km", "kilomet", "mile", "metre", "meter")),
+        ("count",    ("employee", "people", "person", "headcount", "fte", "count", "number",
+                      "incident", "event", "case", "tree", "sapling", "credit", "report",
+                      "fatalit", "injur", "women", "men", "director", "hour")),
+    ]
+
+    # Plausible dimensions per metric family (prefix match). Used to collapse garbage
+    # (e.g. emissions reported in 'km'/'litres') down to '.unspecified'.
+    _PLAUSIBLE = {
+        "emissions": {"co2e", "mass", "percent"},
+        "energy": {"energy", "percent"},
+        "water": {"volume", "mass", "percent"},
+        "waste": {"mass", "volume", "percent"},
+        "biodiversity": {"area", "count", "percent"},
+        "social.diversity": {"percent", "count"},
+        "social.health_safety": {"rate", "count", "percent"},
+        "social.workforce": {"count", "percent"},
+        "social.training": {"count", "rate"},
+        "governance": {"count", "percent"},
+    }
+
+    @classmethod
+    def dimension_of(cls, unit) -> str:
+        """Map a raw unit string to a canonical physical dimension."""
+        if not unit:
+            return "unspecified"
+        u = str(unit).lower().strip()
+        if u in ("", "unspecified", "none", "null"):
+            return "unspecified"
+        for dim, keys in cls._DIM_RULES:
+            if any(k in u for k in keys):
+                return dim
+        return "unspecified"
+
+    @classmethod
+    def is_plausible_metric(cls, normalized_aspect: str, unit: str) -> bool:
+        """Is this unit's dimension physically plausible for the aspect?"""
+        dim = cls.dimension_of(unit)
+        if dim == "unspecified":
+            return True
+        fam = (normalized_aspect or "").split(".")
+        for key, allowed in cls._PLAUSIBLE.items():
+            kp = key.split(".")
+            if fam[:len(kp)] == kp:
+                return dim in allowed
+        return True  # unknown family -> don't filter
+
     @classmethod
     def generate_metric_key(cls, normalized_aspect: str, unit: str) -> str:
-        """Example: social.diversity.gender + percent -> social.diversity.gender.percent"""
+        """
+        normalized_aspect + canonical unit DIMENSION (not a raw-unit slug).
+        Implausible (aspect, dimension) pairs collapse to '.unspecified' so garbage
+        units (emissions in 'km'/'litres', LTIFR in 'cages') no longer spawn distinct
+        keys and pollute cross-year matching. e.g. emissions.scope1 + 'tCO2e' ->
+        'emissions.scope1.co2e'; emissions.scope1 + 'km' -> 'emissions.scope1.unspecified'.
+        """
         if not normalized_aspect or normalized_aspect == "uncategorized":
             return "uncategorized"
-            
-        # Clean unit
-        clean_unit = "count"
-        if unit:
-            u = unit.lower()
-            if "%" in u or "percent" in u:
-                clean_unit = "percent"
-            elif "employee" in u or "people" in u:
-                clean_unit = "count"
-            elif "tco2" in u:
-                clean_unit = "tco2e"
-            elif "mwh" in u or "kwh" in u:
-                clean_unit = "energy"
-            elif "r" in u[-1:] or "rate" in u: # covering ltifr
-                clean_unit = "rate"
-            elif u != "unspecified" and u != "none":
-                # Fallback to alpha-only string
-                clean_unit = ''.join(c for c in u if c.isalpha())
-                
-        return f"{normalized_aspect}.{clean_unit}"
+        dim = cls.dimension_of(unit)
+        if not cls.is_plausible_metric(normalized_aspect, unit):
+            dim = "unspecified"
+        return f"{normalized_aspect}.{dim}"
 
     @classmethod
     def generate_time_bucket(cls, claim) -> str:

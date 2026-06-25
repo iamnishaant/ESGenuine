@@ -1,5 +1,5 @@
 -- ══════════════════════════════════════════════
--- Pharos Integrity: PostgreSQL Vector Store Schema
+-- ESGenuine: PostgreSQL Vector Store Schema
 -- ══════════════════════════════════════════════
 -- Features:
 -- 1. pgvector for semantic search over claim embeddings

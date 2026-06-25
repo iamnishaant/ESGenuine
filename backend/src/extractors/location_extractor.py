@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Phase 3: Geographic Claim Extractor
+ESGenuine — Phase 3: Geographic Claim Extractor
 =======================================================
 
 Uses spaCy NER to detect location entities in claim sentences.

@@ -1,5 +1,5 @@
 """
-Pharos Integrity — End-to-End Pipeline Test (Weeks 2+3)
+ESGenuine — End-to-End Pipeline Test (Weeks 2+3)
 ========================================================
 Runs the full pipeline on a real ESG report:
   Week 2: PDF → blocks → classify → sections → sentences → tables → candidates → chunks → provenance
@@ -21,7 +21,7 @@ from extractors.pipeline import ExtractionPipeline
 
 def run_test(pdf_path: str):
     print("=" * 70)
-    print(f"PHAROS INTEGRITY — End-to-End Pipeline Test")
+    print(f"ESGenuine — End-to-End Pipeline Test")
     print(f"PDF: {Path(pdf_path).name}")
     print("=" * 70)
 

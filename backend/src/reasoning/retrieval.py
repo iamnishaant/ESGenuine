@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Week 4: Semantic Retrieval & Bucketing
+ESGenuine — Week 4: Semantic Retrieval & Bucketing
 =========================================================
 Retrieves historically extracted claims from the Supabase 
 Vector Store that share the same metric family and have 

@@ -1,5 +1,5 @@
 """
-Pharos Integrity 1.0 — Full Integration Test
+ESGenuine 1.0 — Full Integration Test
 ==============================================
 
 Runs the complete pipeline on all ESG reports in ESG_Reports/:
@@ -33,7 +33,7 @@ load_dotenv(ROOT / ".env")
 # Also load the project root .env (one level up) where GROQ_API_KEY lives
 load_dotenv(ROOT.parent / ".env", override=True)
 
-# ── Imports from Pharos modules ─────────────────────────────────
+# ── Imports from ESGenuine modules ─────────────────────────────────
 from parsers.pdf_parser import DocumentParsingPipeline
 from extractors.pipeline import ExtractionPipeline
 from extractors.table_parser import StructuredTableParser
@@ -532,7 +532,7 @@ def step8_save_artifacts():
 
 
 def generate_test_report():
-    """Generate the PHAROS_INTEGRITY_TEST_REPORT.md — rich, informative version."""
+    """Generate the ESGENUINE_TEST_REPORT.md — rich, informative version."""
     log("\nGenerating final test report...")
 
     total_pages = sum(r.get("pages_processed", 0) for r in per_report_results)
@@ -605,7 +605,7 @@ def generate_test_report():
     errors = [l for l in pipeline_logs if l["level"] in ("ERROR", "WARN")]
 
     # ─────────────────────────────────────────────────────────────
-    report = f"""# Pharos Integrity 1.0 — Full Integration Test Report
+    report = f"""# ESGenuine 1.0 — Full Integration Test Report
 
 **Generated:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  
 **Test Environment:** Local (Windows)  
@@ -820,9 +820,9 @@ Geographic entities detected in claim sentences:
 
     # ── Final evaluation ──────────────────────────────────────────
     eval_line = (
-        f"**Pharos Integrity 1.0 has PASSED the full integration test across {len(per_report_results)} ESG report(s).**"
+        f"**ESGenuine 1.0 has PASSED the full integration test across {len(per_report_results)} ESG report(s).**"
         if passed
-        else "**Pharos Integrity 1.0 produced partial results.** Some stages encountered issues — see Section 11 above."
+        else "**ESGenuine 1.0 produced partial results.** Some stages encountered issues — see Section 11 above."
     )
     report += f"""
 ---
@@ -856,7 +856,7 @@ Geographic entities detected in claim sentences:
 > Upgrading to the Groq Dev Tier ($x/month) removes this constraint entirely.
 """
 
-    report_path = OUTPUT_DIR / "PHAROS_INTEGRITY_TEST_REPORT.md"
+    report_path = OUTPUT_DIR / "ESGENUINE_TEST_REPORT.md"
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(report)
     log(f"  Test report saved: {report_path}")
@@ -871,7 +871,7 @@ def main():
     t_start = time.time()
     
     log("╔══════════════════════════════════════════════════════════════╗")
-    log("║   Pharos Integrity 1.0 — Full Integration Test             ║")
+    log("║   ESGenuine 1.0 — Full Integration Test             ║")
     log("║   " + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "                                       ║")
     log("╚══════════════════════════════════════════════════════════════╝")
     

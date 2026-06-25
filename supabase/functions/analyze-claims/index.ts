@@ -35,7 +35,7 @@ serve(async (req) => {
 
     const claimsList = claims.map((c: ClaimInput, i: number) => `[Claim ${i + 1} - ID: ${c.id}]: "${c.text}"`).join('\n\n');
 
-    const systemPrompt = `You are an ESG (Environmental, Social, Governance) claim analysis expert for the PHAROS-INTEGRITY platform. You analyze multiple corporate sustainability claims and identify relationships between them.
+    const systemPrompt = `You are an ESG (Environmental, Social, Governance) claim analysis expert for the ESGenuine platform. You analyze multiple corporate sustainability claims and identify relationships between them.
 
 For EACH claim, analyze:
 1. **Claim Type**: Categorize (Carbon Emissions, Renewable Energy, Water Conservation, Biodiversity, Supply Chain, Social Impact, Governance)

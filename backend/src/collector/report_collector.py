@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Phase 3: Automated ESG Report Collector
+ESGenuine — Phase 3: Automated ESG Report Collector
 ===========================================================
 
 Crawls public company sustainability pages, detects PDF links,
@@ -84,7 +84,7 @@ class ReportCollector:
         self.metadata_file = self.output_dir.parent / "reports_metadata.json"
         self.session = requests.Session()
         self.session.headers.update({
-            "User-Agent": "Mozilla/5.0 (compatible; PharosIntegrity/1.0; ESG Research Bot)"
+            "User-Agent": "Mozilla/5.0 (compatible; ESGenuine/1.0; ESG Research Bot)"
         })
         self._load_metadata()
 

@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Week 3: Context-Aware LLM AAMLT Extractor
+ESGenuine — Week 3: Context-Aware LLM AAMLT Extractor
 =============================================================
 
 Takes semantic chunks (Week 2, Step 7 output) and extracts structured
@@ -11,7 +11,12 @@ Supports: OpenAI (GPT-4o), Anthropic (Claude), or local fallback.
 import json
 import os
 import re
+import sys
 import time
+import difflib
+import itertools
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional, Dict, Any
 from pydantic import ValidationError
 
@@ -96,6 +101,78 @@ Extract all claims as JSON:"""
 
 
 # ══════════════════════════════════════════════
+# SECTION-LEVEL EXTRACTION PROMPT (SOTA: one call per section, full context)
+# ══════════════════════════════════════════════
+
+SECTION_EXTRACTION_PROMPT = """You are an ESG (Environmental, Social, Governance) claim extraction system.
+
+You will receive ONE SECTION of a corporate sustainability report. Extract EVERY distinct, factual ESG claim it contains as structured JSON.
+
+## Output Format
+Return a JSON object: {{"claims": [ ... ]}}. Each claim object:
+{{
+  "source_sentence": "the exact sentence copied VERBATIM from the text below that states this claim (for traceability)",
+  "aspect": "topic (emissions, water, energy, waste, biodiversity, safety, diversity, governance, etc.)",
+  "action": "what was done (reduced, increased, achieved, maintained, etc.)",
+  "metric": {{ "value": 40.0, "unit": "%", "direction": "decrease" }},
+  "location": {{ "raw_text": "Pune facility", "specificity": "facility" }},
+  "time": {{ "start_date": "2023-04-01", "end_date": "2024-03-31", "baseline_year": null }},
+  "confidence": 0.9
+}}
+
+## Rules
+1. "source_sentence" MUST be copied verbatim from the provided text so it can be traced back. Never invent it.
+2. Any field not determinable from the text -> null.
+3. metric.direction: "absolute" for a reported figure/snapshot, "decrease"/"increase" for changes. Most table figures are "absolute".
+4. location.specificity: "facility","city","region","country","global". Do NOT default to "global"; use null if unknown.
+5. Dates ISO (YYYY-MM-DD). Indian FY: FY2024 = 2023-04-01 to 2024-03-31. If a row shows current vs previous year, emit TWO claims.
+6. Do NOT extract aspirational/policy intentions ("we aim to...", "we are committed to...", "we plan to...") — only factual, REPORTED data.
+7. Numbers over 999 must have NO thousands separators: 22,372 -> 22372.0.
+8. If a number has no explicit unit, infer it from context (employees, INR, %, hours, tCO2e, MWh, etc.).
+9. Return at most 25 claims for this section; prefer the most specific and measurable.
+10. If the section has no factual ESG claims, return {{"claims": []}}.
+
+## Section title: {section_title}
+
+## Section text
+{section_text}
+
+Return the JSON object now:"""
+
+
+# ══════════════════════════════════════════════
+# TABLE-CLAIMS PROMPT (Phase 2: from VLM-extracted markdown tables)
+# ══════════════════════════════════════════════
+
+TABLE_CLAIMS_PROMPT = """You are an ESG claim extraction system. You will receive MARKDOWN TABLES read from page {page} of a corporate sustainability report. Extract EVERY quantified ESG metric as a structured JSON claim.
+
+Return {{"claims": [ ... ]}}. Each claim:
+{{
+  "source_sentence": "a short label identifying the row/metric, e.g. 'Scope 1 GHG emissions 2023'",
+  "aspect": "emissions, water, energy, waste, biodiversity, safety, diversity, workforce, training, governance, ...",
+  "action": "reported",
+  "metric": {{ "value": 58.0, "unit": "million tonnes CO2e", "direction": "absolute" }},
+  "location": null,
+  "time": {{ "start_date": "2023-01-01", "end_date": "2023-12-31", "baseline_year": null }},
+  "confidence": 0.9
+}}
+
+## Rules
+1. ONE claim per (metric, year) cell. If a row shows current vs previous year (e.g. 2023 and 2022), emit TWO claims, each with its own year.
+2. metric.value: numbers only, no thousands separators (1,234 -> 1234).
+3. metric.unit: take the unit from the column header, the table title, or a units row, and INHERIT it for every row in that table. e.g. "million tonnes CO2e", "%", "GWh", "thousand m3", "MWh". NEVER output "number", "unit", or an empty unit if a unit is discernible from the table; only use null if truly none exists.
+4. metric.direction: "absolute" for a reported figure (most table cells).
+5. time: infer the year from the column header (calendar year unless the table states a fiscal year).
+6. Skip non-numeric / explanatory rows. baseline_year must be an integer or null.
+7. If the tables contain no quantified ESG metrics, return {{"claims": []}}.
+
+## Page {page} tables
+{tables}
+
+Return the JSON object now:"""
+
+
+# ══════════════════════════════════════════════
 # LLM CLIENT ABSTRACTION
 # ══════════════════════════════════════════════
 
@@ -103,9 +180,77 @@ class LLMClient:
     """Unified LLM client supporting OpenAI, Anthropic, or mock fallback."""
 
     def __init__(self):
-        self.provider = self._detect_provider()
+        # Round-robin pool of OpenAI-compatible endpoints (NVIDIA + Groq, multi-key).
+        # Concurrent workers spread across all keys/providers -> faster, fewer stalls.
+        self.endpoints = self._build_pool()
+        self._rr = itertools.count()
+        self._rr_lock = threading.Lock()
+        if self.endpoints:
+            counts = {}
+            for e in self.endpoints:
+                counts[e["provider"]] = counts.get(e["provider"], 0) + 1
+            self.provider = "pool[" + ", ".join(f"{p}x{n}" for p, n in counts.items()) + "]"
+        else:
+            self.provider = self._detect_provider()  # legacy single-provider / fallback
+
+    @staticmethod
+    def _keys(*env_names) -> list:
+        """Collect API keys from env vars (comma-separated lists supported), de-duplicated."""
+        out, seen = [], set()
+        for name in env_names:
+            for k in (os.environ.get(name, "") or "").split(","):
+                k = k.strip()
+                if k and k not in seen:
+                    seen.add(k)
+                    out.append(k)
+        return out
+
+    def _build_pool(self) -> list:
+        eps = []
+        nv_model = os.environ.get("NVIDIA_MODEL", "meta/llama-3.3-70b-instruct")
+        for k in self._keys("NVIDIA_API_KEYS", "NVIDIA_API_KEY"):
+            eps.append({"provider": "nvidia", "key": k, "model": nv_model,
+                        "url": "https://integrate.api.nvidia.com/v1/chat/completions"})
+        gq_model = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
+        for k in self._keys("GROQ_API_KEYS", "GROQ_API_KEY"):
+            eps.append({"provider": "groq", "key": k, "model": gq_model,
+                        "url": "https://api.groq.com/openai/v1/chat/completions"})
+        # HuggingFace Inference Providers (OpenAI-compatible router) — another route.
+        hf_model = os.environ.get("HF_MODEL", "meta-llama/Llama-3.1-8B-Instruct")
+        for k in self._keys("HF_API_KEYS", "HF_TOKEN", "HUGGING_FACE_HUB_TOKEN"):
+            eps.append({"provider": "hf", "key": k, "model": hf_model,
+                        "url": "https://router.huggingface.co/v1/chat/completions"})
+        return eps
+
+    def _next_endpoint(self) -> dict:
+        with self._rr_lock:
+            i = next(self._rr)
+        return self.endpoints[i % len(self.endpoints)]
+
+    def _call_endpoint(self, ep: dict, prompt: str) -> str:
+        """Call any OpenAI-compatible chat endpoint (NVIDIA / Groq) with JSON mode."""
+        import requests
+        resp = requests.post(
+            ep["url"],
+            headers={"Authorization": f"Bearer {ep['key']}", "Content-Type": "application/json"},
+            json={
+                "model": ep["model"],
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.1,
+                "max_tokens": int(os.environ.get("LLM_MAX_TOKENS", "3000")),
+                "response_format": {"type": "json_object"},
+            },
+            timeout=(15, 300),
+        )
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
 
     def _detect_provider(self) -> str:
+        # NVIDIA NIM is preferred when configured (larger/stronger models, no Groq
+        # free-tier daily cap). Falls back through the other providers, then to the
+        # rule-based extractor if no key is present.
+        if os.environ.get("NVIDIA_API_KEY"):
+            return "nvidia"
         if os.environ.get("OPENAI_API_KEY"):
             return "openai"
         if os.environ.get("ANTHROPIC_API_KEY"):
@@ -116,14 +261,38 @@ class LLMClient:
         return "fallback"
 
     def extract(self, prompt: str) -> str:
+        # Pool path: round-robin across all configured NVIDIA/Groq keys.
+        if self.endpoints:
+            return self._call_endpoint(self._next_endpoint(), prompt)
+        # Legacy single-provider fallback (openai/anthropic/rule-based).
         if self.provider == "openai":
             return self._call_openai(prompt)
-        elif self.provider == "anthropic":
+        if self.provider == "anthropic":
             return self._call_anthropic(prompt)
-        elif self.provider == "groq":
-            return self._call_groq(prompt)
-        else:
-            return self._fallback_extract(prompt)
+        return self._fallback_extract(prompt)
+
+    def _call_nvidia(self, prompt: str) -> str:
+        """NVIDIA NIM (OpenAI-compatible). Model is configurable via NVIDIA_MODEL."""
+        import requests
+
+        model = os.environ.get("NVIDIA_MODEL", "meta/llama-3.3-70b-instruct")
+        resp = requests.post(
+            "https://integrate.api.nvidia.com/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {os.environ['NVIDIA_API_KEY']}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.1,
+                "max_tokens": int(os.environ.get("NVIDIA_MAX_TOKENS", "3000")),
+                "response_format": {"type": "json_object"},
+            },
+            timeout=(15, 300),  # (connect, read) — large 70B section calls can be slow
+        )
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
 
     def _call_openai(self, prompt: str) -> str:
         from openai import OpenAI
@@ -381,6 +550,187 @@ class ClaimExtractor:
         print(f"[Extractor] Done. {len(all_claims)} total claims extracted.")
         return all_claims
 
+    # ──────────────────────────────────────────────
+    # SOTA: section-level extraction (one call per section, full context)
+    # ──────────────────────────────────────────────
+
+    _SIGNAL_NUM = re.compile(r"\d")
+    _SIGNAL_ESG = re.compile(
+        r"\b(emission|carbon|co2|ghg|scope\s*[123]|energy|renewable|solar|wind|water|waste|"
+        r"recycl|biodiversity|safety|ltifr|injur|fatal|diversity|gender|women|employee|workforce|"
+        r"training|governance|board|tonne|mwh|gwh|kwh|hectare|percent)\b|%", re.IGNORECASE)
+
+    def _section_has_signal(self, text: str) -> bool:
+        """Cheap pre-filter: skip boilerplate sections (no number AND no ESG term) to save calls."""
+        return bool(self._SIGNAL_NUM.search(text) and self._SIGNAL_ESG.search(text))
+
+    def _window_sentences(self, sentences: List[Dict[str, Any]], max_chars: int = 6000):
+        """Yield consecutive-sentence windows that fit a per-call character budget."""
+        window: List[Dict[str, Any]] = []
+        size = 0
+        for s in sentences:
+            t = s.get("text", "") or ""
+            if window and size + len(t) > max_chars:
+                yield window
+                window, size = [], 0
+            window.append(s)
+            size += len(t) + 1
+        if window:
+            yield window
+
+    def _match_sentence(self, src: str, window: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """Map a model-returned source_sentence back to the real parsed sentence (for provenance)."""
+        if not src:
+            return None
+        src_l = src.lower()
+        best, best_ratio = None, 0.0
+        for s in window:
+            tl = (s.get("text", "") or "").lower()
+            if not tl:
+                continue
+            if src_l in tl or tl in src_l:
+                return s
+            r = difflib.SequenceMatcher(None, src_l, tl).ratio()
+            if r > best_ratio:
+                best, best_ratio = s, r
+        return best if best_ratio >= 0.5 else None
+
+    def extract_from_sections(
+        self,
+        sections: List[Dict[str, Any]],
+        document_id: str = "",
+        max_workers: Optional[int] = None,
+    ) -> List[ExtractedClaim]:
+        """
+        SOTA extraction path: ONE LLM call per (windowed) section instead of per
+        candidate sentence. Gives the model full section context (better quality),
+        cuts calls ~10-20x, and runs the calls CONCURRENTLY (NVIDIA_CONCURRENCY).
+
+        `sections` = [{"section_title": str,
+                       "sentences": [{"text","page_number","sentence_id","bbox"}]}]
+        """
+        if max_workers is None:
+            max_workers = int(os.environ.get("NVIDIA_CONCURRENCY", "6"))
+
+        # 1) Build the work list (one item per windowed section that passes the pre-filter).
+        work: List[tuple] = []
+        for sec in sections:
+            title = sec.get("section_title", "Unknown")
+            sentences = sec.get("sentences", []) or []
+            if not sentences:
+                continue
+            if not self._section_has_signal("\n".join(s.get("text", "") for s in sentences)):
+                continue
+            for window in self._window_sentences(sentences):
+                work.append((title, window))
+
+        print(f"[Extractor] Section mode: {len(work)} windows over {len(sections)} sections, "
+              f"{max_workers}-way concurrent...")
+
+        # 2) One window -> one LLM call -> validated claims.
+        def process(item) -> List[ExtractedClaim]:
+            title, window = item
+            wtext = "\n".join(s.get("text", "") for s in window)
+            prompt = SECTION_EXTRACTION_PROMPT.format(section_title=title, section_text=wtext)
+            out: List[ExtractedClaim] = []
+            try:
+                raws = self._call_with_retry(prompt)
+            except RuntimeError as e:
+                print(f"  [Failed] section '{title}': {e}")
+                return out
+            for raw in raws:
+                if not isinstance(raw, dict):
+                    continue
+                src = (raw.pop("source_sentence", "") or "").strip()
+                matched = self._match_sentence(src, window) or window[0]
+                chunk = {
+                    "target_sentence": matched.get("text", src),
+                    "page_number": matched.get("page_number", 0),
+                    "chunk_id": matched.get("sentence_id", ""),
+                    "candidate_id": matched.get("sentence_id", ""),
+                    "section_title": title,
+                    "bbox": matched.get("bbox"),
+                }
+                claim = self._validate_and_enrich(raw, chunk, document_id)
+                if claim and self._is_meaningful_claim(claim):
+                    out.append(claim)
+            return out
+
+        # 3) Fan out concurrently, with a live progress bar.
+        all_claims: List[ExtractedClaim] = []
+        total = len(work)
+        if total:
+            is_tty = sys.stdout.isatty()
+            done = 0
+            t0 = time.time()
+            with ThreadPoolExecutor(max_workers=max_workers) as ex:
+                futures = [ex.submit(process, item) for item in work]
+                for fut in as_completed(futures):
+                    all_claims.extend(fut.result())
+                    done += 1
+                    filled = int(24 * done / total)
+                    bar = "█" * filled + "·" * (24 - filled)
+                    rate = done / max(time.time() - t0, 1e-6)
+                    eta = (total - done) / rate if rate else 0
+                    msg = f"  [extract] |{bar}| {done}/{total} windows · {len(all_claims)} claims · ETA {eta:4.0f}s"
+                    if is_tty:
+                        print("\r" + msg, end="" if done < total else "\n", flush=True)
+                    elif done == total or done % 5 == 0:
+                        print(msg, flush=True)        # periodic lines for redirected logs
+
+        print(f"[Extractor] Section mode done: {total} LLM calls -> {len(all_claims)} claims.")
+        return all_claims
+
+    def extract_from_table_markdown(
+        self,
+        tables: List[Dict[str, Any]],
+        document_id: str = "",
+        max_workers: Optional[int] = None,
+    ) -> List[ExtractedClaim]:
+        """
+        Phase 2: turn VLM-extracted markdown tables into structured claims.
+        `tables` = [{"page_number": int, "markdown": str}] (from VLMTableExtractor).
+        """
+        if max_workers is None:
+            max_workers = int(os.environ.get("NVIDIA_CONCURRENCY", "4"))
+        work = [t for t in tables if (t.get("markdown") or "").strip()]
+        print(f"[Extractor] Table mode: {len(work)} table pages, {max_workers}-way concurrent...")
+
+        def process(t) -> List[ExtractedClaim]:
+            prompt = TABLE_CLAIMS_PROMPT.format(page=t["page_number"], tables=t["markdown"][:8000])
+            out: List[ExtractedClaim] = []
+            try:
+                raws = self._call_with_retry(prompt)
+            except RuntimeError as e:
+                print(f"  [Failed] table page {t['page_number']}: {e}")
+                return out
+            for raw in raws:
+                if not isinstance(raw, dict):
+                    continue
+                src = (raw.pop("source_sentence", "") or "").strip()
+                chunk = {
+                    "target_sentence": src or f"table page {t['page_number']}",
+                    "page_number": t["page_number"],
+                    "chunk_id": f"tbl_p{t['page_number']}",
+                    "candidate_id": f"tbl_p{t['page_number']}",
+                    "section_title": "Performance Data",
+                    "bbox": None,
+                }
+                claim = self._validate_and_enrich(raw, chunk, document_id)
+                if claim:
+                    claim.source_type = "table"
+                    if self._is_meaningful_claim(claim):
+                        out.append(claim)
+            return out
+
+        all_claims: List[ExtractedClaim] = []
+        if work:
+            with ThreadPoolExecutor(max_workers=max_workers) as ex:
+                for res in ex.map(process, work):
+                    all_claims.extend(res)
+        print(f"[Extractor] Table mode done: {len(work)} calls -> {len(all_claims)} claims.")
+        return all_claims
+
     def _build_context(self, chunk: Dict[str, Any]) -> str:
         """Build context window from chunk neighbors."""
         parts = []
@@ -468,9 +818,10 @@ class ClaimExtractor:
                         unit=str(m.get("unit", "unspecified")),
                         direction=m.get("direction"),
                     )
-                    # Normalize the unit
+                    # Normalize the unit (pass aspect so aspect-based inference works)
                     metric = self.normalizer.normalize_metric_field(
-                        metric, context=chunk.get("target_sentence", "")
+                        metric, context=chunk.get("target_sentence", ""),
+                        aspect=str(raw.get("aspect", "")),
                     )
 
             # Build location field

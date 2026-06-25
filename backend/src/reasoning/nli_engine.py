@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Week 4: NLI & Numeric Reasoning Engine
+ESGenuine — Week 4: NLI & Numeric Reasoning Engine
 ===========================================================
 Executes Natural Language Inference (RoBERTa-MNLI) and strict
 numeric comparison rules to detect contradictions between

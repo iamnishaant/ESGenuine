@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Week 2: Production Document Parsing Pipeline
+ESGenuine — Week 2: Production Document Parsing Pipeline
 ================================================================
 
 8-Step Layered Pipeline:
@@ -30,6 +30,12 @@ from dataclasses import dataclass, field, asdict
 from typing import List, Optional, Dict, Any, Tuple
 from pathlib import Path
 from collections import defaultdict
+
+try:
+    from ftfy import fix_text
+except ImportError:
+    def fix_text(s):  # graceful no-op if ftfy is unavailable
+        return s
 
 try:
     import networkx as nx
@@ -282,7 +288,8 @@ class Step1_StructuralExtractor:
                             is_bold = True
                     full_text += "\n"
 
-                full_text = full_text.strip()
+                # Repair mojibake / double-encoded UTF-8 (e.g. "Indiaâ€™s" -> "India's")
+                full_text = fix_text(full_text).strip()
                 if not full_text or len(full_text) < 3:
                     continue
 
@@ -897,9 +904,11 @@ class DocumentParsingPipeline:
             Path(pdf_path).read_bytes()[:4096]
         ).hexdigest()[:12]
 
-    def run(self) -> Dict[str, Any]:
+    def run(self, skip_tables: bool = False) -> Dict[str, Any]:
+        # skip_tables=True bypasses the slow pdfplumber table scan (Step 5) when the
+        # caller only needs text/sentences (e.g. section-level extraction).
         print(f"\n{'='*60}")
-        print(f"PHAROS INTEGRITY - Document Parsing Pipeline")
+        print(f"ESGenuine - Document Parsing Pipeline")
         print(f"Document: {Path(self.pdf_path).name}")
         print(f"{'='*60}\n")
 
@@ -924,9 +933,13 @@ class DocumentParsingPipeline:
         step4 = Step4_SentenceSegmenter()
         sentences = step4.segment(classified_blocks, block_section_map, sections)
 
-        # Step 5
-        step5 = Step5_TableExtractor()
-        table_rows = step5.extract(self.pdf_path, block_section_map)
+        # Step 5 (skippable — pdfplumber table scan is the parse bottleneck)
+        if skip_tables:
+            print("  [Step 5] Skipped (skip_tables=True).")
+            table_rows = []
+        else:
+            step5 = Step5_TableExtractor()
+            table_rows = step5.extract(self.pdf_path, block_section_map)
 
         # Step 6
         step6 = Step6_ClaimCandidateDetector()

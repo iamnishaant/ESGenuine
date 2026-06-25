@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Phase 3: Structured Table Parser
+ESGenuine — Phase 3: Structured Table Parser
 =====================================================
 
 Replaces the broken text-blob table extraction with proper

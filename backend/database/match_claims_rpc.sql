@@ -1,5 +1,5 @@
 -- ══════════════════════════════════════════════
--- Pharos Integrity: Vector Similarity Search RPC
+-- ESGenuine: Vector Similarity Search RPC
 -- ══════════════════════════════════════════════
 -- Description:
 -- Performs Stanford Metric Signature Blocking by searching 

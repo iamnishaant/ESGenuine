@@ -1,5 +1,5 @@
 """
-Pharos Integrity — Pipeline DAG (Production)
+ESGenuine — Pipeline DAG (Production)
 =============================================
 
 Full pipeline flow:
@@ -197,7 +197,7 @@ pipeline_dag = builder.compile()
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("PHAROS INTEGRITY — Pipeline Integration Dry Run")
+    print("ESGenuine — Pipeline Integration Dry Run")
     print("=" * 60)
 
     result = pipeline_dag.invoke({

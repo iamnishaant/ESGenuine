@@ -29,7 +29,7 @@ serve(async (req) => {
 
     console.log('Analyzing claim for:', companyName, 'in sector:', sector);
 
-    const systemPrompt = `You are an ESG (Environmental, Social, Governance) claim analysis expert for the PHAROS-INTEGRITY platform. Your job is to analyze corporate sustainability claims and identify:
+    const systemPrompt = `You are an ESG (Environmental, Social, Governance) claim analysis expert for the ESGenuine platform. Your job is to analyze corporate sustainability claims and identify:
 
 1. **Claim Type**: Categorize the claim (e.g., Carbon Emissions, Renewable Energy, Water Conservation, Biodiversity, Supply Chain, Social Impact, Governance)
 2. **Specificity Score** (1-10): How specific and measurable is the claim? Vague promises get low scores.
