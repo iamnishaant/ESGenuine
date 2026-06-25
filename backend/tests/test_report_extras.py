@@ -31,7 +31,7 @@ def test_build_report_penalty_breakdown_and_provenance():
     rep = build_report(claims, contradictions=[])
     assert rep["status"] == "ok"
     # provenance present
-    assert rep["report_version"] == "1.0"
+    assert rep["report_version"] == "2.0"
     assert isinstance(rep["computed_at"], str) and "T" in rep["computed_at"]
     # decomposition present and well-formed
     bd = rep["penalty_breakdown"]
@@ -44,6 +44,26 @@ def test_build_report_penalty_breakdown_and_provenance():
     # score reconciles with the breakdown: 100 − Σ(points), clamped at 0
     total_pts = sum(pts)
     assert round(rep["integrity_score"]) == round(max(0, 100 - total_pts))
+
+
+def test_score_is_count_weighted_by_prevalence():
+    """The headline guarantee: the SAME flag costs more when it is more pervasive.
+    A report where 10% of claims are vague must outscore one where 90% are — flat
+    per-flag-type scoring gave both the identical deduction (everyone an F)."""
+    def report_with_vague_fraction(frac, n=50):
+        n_vague = round(n * frac)
+        claims = ([_claim(f"v{i}", ctype="narrative", vague=0.9) for i in range(n_vague)] +
+                  [_claim(f"c{i}", ctype="narrative", vague=0.0, ground=0.9) for i in range(n - n_vague)])
+        return build_report(claims, contradictions=[])
+
+    light = report_with_vague_fraction(0.10)
+    heavy = report_with_vague_fraction(0.90)
+    assert heavy["integrity_score"] < light["integrity_score"]   # prevalence discriminates
+    # the breakdown exposes prevalence, and points scale with it
+    lv = next(p for p in light["penalty_breakdown"] if p["type"] == "VAGUE")
+    hv = next(p for p in heavy["penalty_breakdown"] if p["type"] == "VAGUE")
+    assert hv["prevalence"] > lv["prevalence"]
+    assert hv["points_deducted"] > lv["points_deducted"]
 
 
 def test_build_report_no_data():
@@ -114,6 +134,7 @@ def test_weighted_credibility_and_materiality():
 
 _ALL_TESTS = [
     test_build_report_penalty_breakdown_and_provenance,
+    test_score_is_count_weighted_by_prevalence,
     test_build_report_no_data,
     test_fact_check_coverage,
     test_check_claim_unverified_reasons_are_actionable,

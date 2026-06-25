@@ -29,6 +29,7 @@ export interface GreenwashFlag {
 export interface VerificationProfile { imagery: number; data_crosscheck: number; document_review: number; }
 export interface PenaltyBreakdownItem {
   type: string; title: string; severity: string; count: number; points_deducted: number;
+  prevalence?: number;   // fraction of claims that triggered the flag (drives the penalty)
 }
 export interface IntegrityStatistics {
   by_type?: Record<string, number>;

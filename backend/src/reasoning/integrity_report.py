@@ -14,11 +14,20 @@ import collections
 
 from .greenwash_taxonomy import GreenwashTaxonomy, _SEV_RANK
 
-# Penalty (points off a 100 integrity score) per flag severity.
-_PENALTY = {"Critical": 25, "High": 15, "Medium": 8, "Low": 3, "None": 0}
+# Max points a flag removes when it affects (nearly) ALL claims. The realised penalty is
+# this weight × the flag's prevalence (fraction of claims that triggered it) — so a rare
+# flag barely dents the score and a pervasive one dominates it. (Was a flat per-flag-type
+# penalty: every real report trips ~all flag types, so flat scoring gave everyone an F —
+# zero discriminating power. Count-weighting is the fix. See self_improvement.md.)
+_SEV_WEIGHT = {"Critical": 50, "High": 30, "Medium": 16, "Low": 6, "None": 0}
+
+# A structural flag (e.g. DISCLOSURE_GAP) has no per-claim count — it's a binary "a whole
+# material category is missing". Score it as a half-prevalence hit so it still registers.
+_STRUCTURAL_PREVALENCE = 0.5
 
 # Bump when the scoring formula / flag set changes so a stored score's provenance is clear.
-_REPORT_VERSION = "1.0"
+# 2.0: flat per-flag-type penalty → count-weighted (penalty × prevalence). Shifts every score.
+_REPORT_VERSION = "2.0"
 
 
 # Mirror of frontend verificationMethod() (lib/api.ts) — keep the two in sync.
@@ -96,18 +105,23 @@ def build_report(claims: List[Dict[str, Any]],
     flag_dicts = [f.to_dict() for f in flags]
     flag_counts = collections.Counter(f.severity for f in flags)
 
-    # ── integrity score: 100 minus a flat per-flag severity penalty ─────────────
-    # NOTE: this is a flat subtraction (one penalty per distinct flag type), NOT
-    # count-weighted or diminishing. Count-weighting (penalty scaled by how many
-    # claims triggered the flag) is a planned improvement — see self_improvement.md.
+    # ── integrity score: 100 minus COUNT-WEIGHTED per-flag severity penalties ────
+    # Each flag removes (severity weight × prevalence) points, where prevalence is the
+    # fraction of claims that triggered it. So a flag affecting 4% of claims costs ~1/25th
+    # of the same flag affecting all of them — the score reflects how *pervasive* each
+    # problem is, not merely how many distinct problem types are present. (The old flat
+    # per-type penalty gave every real report ~all flag types → everyone scored F.)
+    # Structural binary flags (no per-claim count, e.g. DISCLOSURE_GAP) use a fixed prevalence.
     score = 100.0
     penalty_breakdown = []
     for f in flags:
-        pts = _PENALTY.get(f.severity, 0)
+        weight = _SEV_WEIGHT.get(f.severity, 0)
+        prevalence = min(1.0, f.count / total) if f.count else _STRUCTURAL_PREVALENCE
+        pts = round(weight * prevalence, 1)
         score -= pts
         penalty_breakdown.append({
             "type": f.type, "title": f.title, "severity": f.severity,
-            "count": f.count, "points_deducted": pts,
+            "count": f.count, "prevalence": round(prevalence, 3), "points_deducted": pts,
         })
     score = max(0.0, min(100.0, score))
     # Most-impactful first, so the UI can render "this flag cost you N points".

@@ -6,6 +6,16 @@
 
 ---
 
+## Batch 2026-06-25d — score saturation RESOLVED: count-weighted scoring
+
+### ✅ Score saturation fixed — the integrity metric now discriminates (closes the #18 ⚠️ result)
+- **What ran:** replaced the flat per-flag-type penalty in [integrity_report.py](backend/src/reasoning/integrity_report.py) with **count-weighting**: `penalty = sev_weight × prevalence`, `prevalence = count / total_claims` (weights `{Critical:50, High:30, Medium:16, Low:6}`; structural count=0 flags fixed at 0.5). `_REPORT_VERSION` → `"2.0"`; `penalty_breakdown` carries `prevalence`.
+- **Root cause it fixes:** the flat model deducted a fixed penalty per *distinct flag type* regardless of how many claims triggered it, so a flag hitting **4%** of claims cost the same −8 as one hitting **90%**. Every real ESG report trips ~all flag types → everyone saturated to **F** (the #18 ⚠️ finding). Prevalence-weighting makes pervasiveness the driver.
+- **Verified on live data (calibration):** **OLD all F** — Shell'22 13, Shell'23 6, Tata'24 28 (range 22, one grade). **NEW** — Shell'22 **34.5 (F)**, Shell'23 **25.7 (F)**, Tata'24 **84.2 (B)** (range 58, grades {B, F}). The clean metric-dense report (Tata) now separates from the greenwash-heavy ones (Shell). 71 tests green incl. new `test_score_is_count_weighted_by_prevalence`.
+- **#19 now has direct score impact:** Critical×prevalence makes `CONTRADICTION` the biggest single lever, so the metric_key conflation in #19 (inflating Metric contradictions) now feeds the headline score — fixing it upstream sharpens the score further. Still the right next move; not regressed by this change.
+
+---
+
 ## Batch 2026-06-25c — live-data run: contradiction over-fire + score saturation
 
 **What ran:** ran the full reasoning pipeline against the **live Supabase corpus** (1435 claims; docs `tata_power_2024`/`shell_2022`/`shell_2023`) and `verify_search_claims_index.sql` against the live DB. Two new defects + one schema fix.

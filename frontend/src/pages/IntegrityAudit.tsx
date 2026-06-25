@@ -178,15 +178,15 @@ const IntegrityAudit = () => {
                     {(report.data.penalty_breakdown ?? []).map((p, i) => (
                       <div key={i} className="flex items-center gap-3 text-xs">
                         <Badge className={cn('border w-16 justify-center text-[10px]', SEV_COLOR[p.severity])}>{p.severity}</Badge>
-                        <span className="flex-1 truncate" title={`${p.type} ×${p.count}`}>{p.title}</span>
+                        <span className="flex-1 truncate" title={`${p.type} ×${p.count} · ${Math.round((p.prevalence ?? 0) * 100)}% of claims`}>{p.title}</span>
                         <div className="w-28 h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div className="h-full bg-destructive/70" style={{ width: `${Math.min(100, p.points_deducted * 4)}%` }} />
+                          <div className="h-full bg-destructive/70" style={{ width: `${Math.min(100, p.points_deducted * 2)}%` }} />
                         </div>
                         <span className="text-destructive font-medium w-12 text-right">−{p.points_deducted}</span>
                       </div>
                     ))}
                     <p className="text-[11px] text-muted-foreground pt-1">
-                      Flat per-flag penalty (one deduction per distinct flag type), not count-weighted.
+                      Count-weighted: each penalty = severity × prevalence (share of claims that triggered the flag), so pervasive issues cost more than rare ones.
                       {report.data.computed_at && ` · computed ${report.data.computed_at.replace('T', ' ').replace('+00:00', 'Z')}`}
                       {report.data.report_version && ` · v${report.data.report_version}`}
                     </p>
