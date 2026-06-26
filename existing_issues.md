@@ -15,10 +15,14 @@ All 🔴 Critical and 🟠 major data defects are **resolved & verified on live 
 - **#7** contradiction noise addressed (#18 cross-year fix + unit-guard + #19 dimension split). **#18** count over-fire fixed. **#19** deterministic layer fixed + backfilled (top batch).
 - Score saturation fixed (count-weighted v2.0) + human-in-the-loop review (v2.1).
 
-**Still open — by choice or accepted ceiling (the remaining ~15%):**
+**Minor cosmetics #4/#5/#10/#11/#12 — ✅ all resolved & verified 2026-06-26** (were already fixed in code; entries below predate the fixes):
+- **#4** mojibake: Step 1 runs `fix_text` (ftfy) per block ([pdf_parser.py:292](backend/src/parsers/pdf_parser.py)); `fix_text("Indiaâ€™s")` → `"India's"`, and the live corpus has **0/2385** claims with mojibake markers.
+- **#5** table noise: Step 5 drops empty-header columns and rows with ≤2 chars of content ([pdf_parser.py:670-705](backend/src/parsers/pdf_parser.py)).
+- **#10** `/sections` now returns `total` ([server.py:141](backend/src/api/server.py)). **#11** `/health` returns `app.version` (4.0.0), not a hardcoded string ([server.py:371](backend/src/api/server.py)). **#12** filename is read back from the parse artifact instead of a "Discovered: {id}" placeholder ([server.py:55-62](backend/src/api/server.py)).
+
+**Still open — externally blocked / accepted ceiling (the remaining gap):**
 - **LLM extraction ceiling** (residual of #7/#19): aspect/scope *mislabels* (diversity claims tagged `biodiversity`; 58Mt vs 305Mt both tagged `scope1` same year). Not deterministically fixable — needs 70B re-extraction with tighter aspect derivation. The product's standing data-quality remainder.
 - **Evidence-corpus depth** (fact-check coverage 4–46%): needs *sourced* real reference figures (no-fabricate rule) — not an engine defect; blocked on external data.
-- **Minor cosmetics (unverified / untouched):** #4 mojibake in some parsed text, #5 noisy table rows, #10 `/sections` missing `total`, #11 `/health` version string, #12 in-memory filename lost on restart.
 
 ---
 
