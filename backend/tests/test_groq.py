@@ -6,6 +6,12 @@ import sys
 from pathlib import Path
 import json
 
+import pytest
+
+# Hits a live LLM provider (Groq/NVIDIA) over the network — deselected in CI via
+# `-m "not live"`. Run locally with credentials present.
+pytestmark = pytest.mark.live
+
 backend_src = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(backend_src))
 

@@ -1,0 +1,28 @@
+[project]
+name = "esgenuine-backend"
+version = "4.0.0"
+description = "ESGenuine — ESG report claim extraction, contradiction detection, and integrity scoring."
+requires-python = ">=3.11"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.pytest.ini_options]
+# Only collect the offline-by-design suites under tests/. scripts/test_db_constraints.py
+# is intentionally NOT collected here: it writes to the LIVE Supabase DB and must be run
+# explicitly, never as part of a normal/CI test run.
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "live: requires network or live credentials (DB / LLM provider). Deselect in CI with -m 'not live'.",
+]
+
+[tool.ruff]
+# Lenient by design: the lint gate should flag new egregious issues, not block CI on the
+# existing style. Tighten over time.
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82"]  # only real errors (syntax, undefined names, broken comparisons)
