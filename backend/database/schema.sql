@@ -152,3 +152,21 @@ CREATE INDEX IF NOT EXISTS claim_reviews_doc_idx ON claim_reviews (doc_id);
 
 -- App uses the anon/publishable key; grant it table privileges (RLS stays disabled).
 GRANT SELECT, INSERT, UPDATE, DELETE ON claim_reviews TO anon, authenticated;
+
+-- 9. Durable ingest-job state (was an in-memory dict that died on restart). `detail`
+-- holds the full flat job payload the API returns; status/error mirrored for queryability.
+CREATE TABLE IF NOT EXISTS jobs (
+    job_id       TEXT PRIMARY KEY,
+    report_id    TEXT,
+    company_name TEXT,
+    report_year  INT,
+    status       TEXT NOT NULL DEFAULT 'queued',
+    error        TEXT,
+    detail       JSONB,
+    created_at   TIMESTAMPTZ DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS jobs_status_idx ON jobs (status);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON jobs TO anon, authenticated;

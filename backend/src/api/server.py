@@ -23,6 +23,7 @@ from parsers.pdf_parser import DocumentParsingPipeline, PDFValidationError
 from extractors.pipeline import ExtractionPipeline
 from extractors.supabase_ingest import (
     ingest_claims_to_db, _get_sb, sha256_file, find_report_by_file_hash,
+    create_job, update_job, get_job as get_job_state,
 )
 from reasoning.api_reasoning import router as reasoning_router, bench_router, audit_router
 
@@ -70,7 +71,8 @@ for path in PARSED_DIR.glob("*_full.json"):
 print(f"  [Startup] Discovered {len(document_registry)} documents on disk.")
 
 claims_registry: dict = {}
-ingest_jobs: dict = {}   # job_id -> {status, stage, counts, error}
+# Ingest job state now lives in the DB-backed store (create_job/update_job/get_job_state
+# in supabase_ingest) so it survives restarts and is shared across workers.
 
 
 # ──────────────────────────────────────────────
@@ -284,13 +286,12 @@ def _slug(s: str) -> str:
 
 
 def _run_ingest(job_id: str, pdf_path: str, meta: dict, use_tables: bool):
-    job = ingest_jobs[job_id]
     try:
         if use_tables:
             os.environ["USE_VLM_TABLES"] = "1"
-        job.update(status="parsing")
+        update_job(job_id, status="parsing")
         res = DocumentParsingPipeline(pdf_path).run(skip_tables=True)
-        job.update(status="extracting", pages=res["triage"]["page_count"], sentences=len(res["sentences"]))
+        update_job(job_id, status="extracting", pages=res["triage"]["page_count"], sentences=len(res["sentences"]))
         pipe = ExtractionPipeline()
         claims = pipe.run(
             sentences=res["sentences"],
@@ -298,13 +299,13 @@ def _run_ingest(job_id: str, pdf_path: str, meta: dict, use_tables: bool):
             document_id=meta["report_id"],
             report_metadata=meta,
         )
-        job.update(status="ingesting", extracted=len(claims))
+        update_job(job_id, status="ingesting", extracted=len(claims))
         out = ingest_claims_to_db(claims, meta)
-        job.update(status="done", inserted=out["inserted"], total=out["total"], doc_id=out["doc_id"])
+        update_job(job_id, status="done", inserted=out["inserted"], total=out["total"], doc_id=out["doc_id"])
     except PDFValidationError as e:
-        job.update(status="error", error=f"Invalid PDF: {e}")
+        update_job(job_id, status="error", error=f"Invalid PDF: {e}")
     except Exception as e:
-        job.update(status="error", error=str(e))
+        update_job(job_id, status="error", error=str(e))
 
 
 @app.post("/v1/reports/ingest")
@@ -349,18 +350,18 @@ async def ingest_report(
         "file_hash": file_hash,
     }
     job_id = str(uuid.uuid4())[:8]
-    ingest_jobs[job_id] = {
+    create_job(job_id, {
         "job_id": job_id, "status": "queued",
         "report_id": meta["report_id"], "company_name": company_name, "report_year": int(report_year),
         "file_hash": file_hash,
-    }
+    })
     background.add_task(_run_ingest, job_id, str(save_path), meta, bool(use_vlm_tables))
     return {"job_id": job_id, "status": "queued", "report_id": meta["report_id"]}
 
 
 @app.get("/v1/jobs/{job_id}")
 async def get_job(job_id: str):
-    job = ingest_jobs.get(job_id)
+    job = get_job_state(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found.")
     return job

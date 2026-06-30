@@ -218,3 +218,55 @@ def ingest_claims_to_db(claims: List, report_meta: Dict[str, Any], batch_size: i
 
     print(f"[ingest] {inserted}/{len(claims)} claims -> Supabase (doc_id={doc_id}, replaced={replaced})")
     return {"inserted": inserted, "total": len(claims), "doc_id": doc_id, "replaced": replaced}
+
+
+# ── durable ingest-job state (DB-backed, with in-memory fallback) ─────────────
+# Replaces the in-memory `ingest_jobs` dict in server.py so job status survives a
+# restart and is shared across workers. The full flat payload is stored in `detail`
+# so the /v1/jobs API returns the same shape as before; status/error are mirrored to
+# columns. Every DB call is guarded — if the DB is unreachable the job still tracks in
+# memory (dev without creds, or a transient outage, never breaks the ingest flow).
+_jobs_mem: Dict[str, Dict[str, Any]] = {}
+
+
+def _job_row(flat: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "job_id": flat.get("job_id"),
+        "report_id": flat.get("report_id"),
+        "company_name": flat.get("company_name"),
+        "report_year": flat.get("report_year"),
+        "status": flat.get("status"),
+        "error": flat.get("error"),
+        "detail": flat,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+def create_job(job_id: str, base: Dict[str, Any]) -> None:
+    """Create/replace a job's state (memory + DB)."""
+    _jobs_mem[job_id] = dict(base)
+    try:
+        _get_sb().table("jobs").upsert(_job_row(_jobs_mem[job_id]), on_conflict="job_id").execute()
+    except Exception as e:
+        print(f"[jobs] persist create failed for {job_id} (memory only): {e}")
+
+
+def update_job(job_id: str, **fields) -> None:
+    """Merge fields into a job's state (memory + DB)."""
+    j = _jobs_mem.setdefault(job_id, {"job_id": job_id})
+    j.update(fields)
+    try:
+        _get_sb().table("jobs").upsert(_job_row(j), on_conflict="job_id").execute()
+    except Exception as e:
+        print(f"[jobs] persist update failed for {job_id} (memory only): {e}")
+
+
+def get_job(job_id: str) -> Optional[Dict[str, Any]]:
+    """Return a job's flat payload — DB first (survives restart), then memory."""
+    try:
+        res = _get_sb().table("jobs").select("detail").eq("job_id", job_id).limit(1).execute()
+        if res.data and res.data[0].get("detail"):
+            return res.data[0]["detail"]
+    except Exception as e:
+        print(f"[jobs] DB read failed for {job_id} (falling back to memory): {e}")
+    return _jobs_mem.get(job_id)
