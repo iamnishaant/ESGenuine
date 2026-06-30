@@ -173,6 +173,7 @@ const IntegrityAudit = () => {
               {factcheck.isLoading ? <Loader2 className="animate-spin" /> : factcheck.isError ? (
                 <p className="text-sm text-destructive">API offline</p>
               ) : (
+                <>
                 <div className="flex gap-6 items-center flex-wrap">
                   {Object.entries(factcheck.data?.verdict_counts ?? {}).map(([k, v]) => (
                     <div key={k} className="flex items-center gap-2">
@@ -207,6 +208,7 @@ const IntegrityAudit = () => {
                     <AlertTriangle className="w-3 h-3" /> Reference corpus is illustrative (no verified figures) — treat credibility as a demo signal, not production ground truth.
                   </p>
                 )}
+                </>
               )}
             </CardContent>
           </Card>
