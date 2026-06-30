@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import {
   getIntegrityReport, getFactCheck, getScorecard, askAudit, getSuggestedQuestions,
   getReviewQueue, postReview, getPortfolioIntegrity,
+  login as apiLogin, register as apiRegister, logout as apiLogout, me as apiMe, getToken,
   verificationMethod, VERIFICATION_LABEL, type AskAnswer, type ReviewItem,
 } from '@/lib/api';
 import { metricLabel } from '@/lib/metricLabels';
@@ -62,6 +63,33 @@ const IntegrityAudit = () => {
   const [asking, setAsking] = useState(false);
   const [notes, setNotes] = useState<Record<string, string>>({});
 
+  // ── auth (writes are gated) ──────────────────────────────────────────────
+  const [user, setUser] = useState<{ email: string; role: string } | null>(null);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPw, setAuthPw] = useState('');
+  const [authErr, setAuthErr] = useState('');
+  const [authBusy, setAuthBusy] = useState(false);
+
+  useEffect(() => {
+    if (getToken()) apiMe().then(setUser).catch(() => { apiLogout(); setUser(null); });
+  }, []);
+
+  const doAuth = async (kind: 'login' | 'register') => {
+    setAuthBusy(true); setAuthErr('');
+    try {
+      const s = await (kind === 'login' ? apiLogin : apiRegister)(authEmail.trim().toLowerCase(), authPw);
+      setUser({ email: s.email, role: s.role });
+      setAuthEmail(''); setAuthPw('');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : '';
+      setAuthErr(msg.includes('401') ? 'Invalid email or password'
+        : msg.includes('409') ? 'Email already registered'
+        : msg.includes('400') ? 'Password must be at least 8 characters'
+        : 'Auth failed — is the backend running?');
+    } finally { setAuthBusy(false); }
+  };
+  const doLogout = () => { apiLogout(); setUser(null); };
+
   // Doc list is derived from the portfolio so EVERY ingested company is reviewable
   // (was a hardcoded 3 — Microsoft/Infosys never appeared).
   const portfolio = useQuery({ queryKey: ['portfolio'], queryFn: getPortfolioIntegrity });
@@ -92,6 +120,10 @@ const IntegrityAudit = () => {
       qc.invalidateQueries({ queryKey: ['integrity', docId] });
       qc.invalidateQueries({ queryKey: ['reviewQueue', docId] });
       qc.invalidateQueries({ queryKey: ['portfolio'] });
+    },
+    onError: (e: unknown) => {
+      // Token expired/invalid → drop it so the auth bar reappears.
+      if (e instanceof Error && e.message.includes('401')) { apiLogout(); setUser(null); }
     },
   });
 
@@ -129,6 +161,28 @@ const IntegrityAudit = () => {
               </Button>
             ))}
           </div>
+        </div>
+
+        {/* Auth bar — writes (review verdicts, ingest) require sign-in */}
+        <div className="flex items-center gap-2 text-xs flex-wrap glass-panel rounded-lg px-3 py-2">
+          {user ? (
+            <>
+              <UserCheck className="w-3.5 h-3.5 text-success" />
+              <span className="text-muted-foreground">signed in as <span className="text-foreground">{user.email}</span> ({user.role})</span>
+              <Button size="sm" variant="ghost" className="h-7 text-xs ml-auto" onClick={doLogout}>Sign out</Button>
+            </>
+          ) : (
+            <>
+              <span className="text-muted-foreground">Sign in to review flags / ingest reports:</span>
+              <Input className="h-7 w-48 text-xs" placeholder="email" value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)} />
+              <Input className="h-7 w-40 text-xs" type="password" placeholder="password (8+ chars)" value={authPw}
+                onChange={(e) => setAuthPw(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && doAuth('login')} />
+              <Button size="sm" variant="outline" className="h-7 text-xs" disabled={authBusy} onClick={() => doAuth('login')}>Login</Button>
+              <Button size="sm" variant="ghost" className="h-7 text-xs" disabled={authBusy} onClick={() => doAuth('register')}>Register</Button>
+              {authErr && <span className="text-destructive">{authErr}</span>}
+            </>
+          )}
         </div>
 
         {/* Top row: score + fact-check summary */}
@@ -303,6 +357,7 @@ const IntegrityAudit = () => {
                   — {reviewQueue.data.reviewed}/{reviewQueue.data.total} reviewed · dismiss a false positive to raise the score
                 </span>
               )}
+              {!user && <span className="text-xs font-normal text-yellow-400">· sign in above to record verdicts</span>}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -334,19 +389,19 @@ const IntegrityAudit = () => {
                         value={notes[key] ?? ''} onChange={(e) => setNotes((n) => ({ ...n, [key]: e.target.value }))} />
                       {it.verdict ? (
                         <Button size="sm" variant="ghost" className="h-7 text-xs gap-1"
-                          disabled={reviewMut.isPending}
+                          disabled={reviewMut.isPending || !user}
                           onClick={() => reviewMut.mutate({ item: it, verdict: it.verdict === 'dismissed' ? 'confirmed' : 'dismissed' })}>
                           <Undo2 className="w-3 h-3" /> change
                         </Button>
                       ) : (
                         <>
                           <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-success border-success/40"
-                            disabled={reviewMut.isPending}
+                            disabled={reviewMut.isPending || !user}
                             onClick={() => reviewMut.mutate({ item: it, verdict: 'dismissed' })}>
                             <Check className="w-3 h-3" /> Dismiss
                           </Button>
                           <Button size="sm" variant="outline" className="h-7 text-xs gap-1"
-                            disabled={reviewMut.isPending}
+                            disabled={reviewMut.isPending || !user}
                             onClick={() => reviewMut.mutate({ item: it, verdict: 'confirmed' })}>
                             <X className="w-3 h-3" /> Valid
                           </Button>

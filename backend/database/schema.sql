@@ -170,3 +170,17 @@ CREATE TABLE IF NOT EXISTS jobs (
 CREATE INDEX IF NOT EXISTS jobs_status_idx ON jobs (status);
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON jobs TO anon, authenticated;
+
+-- 10. Auth users (gates the write endpoints). SECURITY: holds bcrypt password hashes;
+-- accessed ONLY by the backend via DATABASE_URL (psycopg2), NEVER the anon key — so anon
+-- is explicitly REVOKED (unlike every other table) and the hashes can't be read with the
+-- browser-side key.
+CREATE TABLE IF NOT EXISTS users (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email         TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role          TEXT NOT NULL DEFAULT 'user',
+    created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+REVOKE ALL ON users FROM anon, authenticated;

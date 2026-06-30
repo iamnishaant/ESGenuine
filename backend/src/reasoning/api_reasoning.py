@@ -5,8 +5,13 @@ Exposes the Contradiction Engine and Greenwashing Risk Score
 to the React Frontend Dashboard.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+
+try:
+    from api.auth import get_current_user
+except ImportError:  # pragma: no cover - path-setup fallback (mirrors this module's other imports)
+    from src.api.auth import get_current_user
 from typing import Optional
 import itertools
 import collections
@@ -239,14 +244,15 @@ async def get_review_queue(doc_id: str):
 
 
 @router.post("/{doc_id}/reviews")
-async def post_review(doc_id: str, body: ReviewIn):
+async def post_review(doc_id: str, body: ReviewIn, user: dict = Depends(get_current_user)):
     """Upsert a reviewer verdict on one flagged item (one current verdict per item).
-    A 'dismissed' verdict raises the integrity score on the next recompute."""
+    A 'dismissed' verdict raises the integrity score on the next recompute. Gated: requires
+    a logged-in user, and the verdict is attributed to that user's email (auditable)."""
     if body.verdict not in ("dismissed", "confirmed"):
         raise HTTPException(status_code=400, detail="verdict must be 'dismissed' or 'confirmed'.")
     sb = get_supabase()
     row = {"doc_id": doc_id, "subject_id": body.subject_id, "flag_type": body.flag_type,
-           "verdict": body.verdict, "note": body.note, "reviewer": body.reviewer}
+           "verdict": body.verdict, "note": body.note, "reviewer": user["email"]}
     try:
         sb.table("claim_reviews").upsert(row, on_conflict="doc_id,subject_id,flag_type").execute()
     except Exception as e:

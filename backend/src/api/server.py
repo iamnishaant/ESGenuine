@@ -6,7 +6,7 @@ Serves:
   Week 3: Claim extraction (text + table dual pipeline)
 """
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks, Form
+from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pathlib import Path
@@ -26,6 +26,8 @@ from extractors.supabase_ingest import (
     create_job, update_job, get_job as get_job_state,
 )
 from reasoning.api_reasoning import router as reasoning_router, bench_router, audit_router
+from api.auth_routes import router as auth_router
+from api.auth import get_current_user
 
 app = FastAPI(
     title="ESGenuine API",
@@ -36,6 +38,7 @@ app = FastAPI(
 app.include_router(reasoning_router)
 app.include_router(bench_router)
 app.include_router(audit_router)
+app.include_router(auth_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -315,6 +318,7 @@ async def ingest_report(
     company_name: str = Form(...),
     report_year: int = Form(...),
     use_vlm_tables: bool = Form(False),
+    user: dict = Depends(get_current_user),   # gated: ingest requires a logged-in user
 ):
     """
     Upload an ESG PDF → parse → extract → embed → write to Supabase (async).

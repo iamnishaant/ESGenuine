@@ -4,8 +4,19 @@
 export const API_BASE =
   (import.meta.env.VITE_API_BASE as string) || 'http://localhost:8000';
 
+// ── auth token (Bearer) ──────────────────────────────────────────────────────
+const TOKEN_KEY = 'esg_access_token';
+export const getToken = () => localStorage.getItem(TOKEN_KEY);
+export const setToken = (t: string | null) =>
+  t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY);
+
+function authHeaders(): Record<string, string> {
+  const t = getToken();
+  return t ? { Authorization: `Bearer ${t}` } : {};
+}
+
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`);
+  const res = await fetch(`${API_BASE}${path}`, { headers: { ...authHeaders() } });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} on ${path}`);
   return res.json() as Promise<T>;
 }
@@ -13,7 +24,7 @@ async function get<T>(path: string): Promise<T> {
 async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} on ${path}`);
@@ -87,6 +98,20 @@ export interface AskAnswer {
 }
 
 // ── endpoint wrappers ────────────────────────────────────────────────────────
+// ── auth (Bearer; gates the write endpoints) ─────────────────────────────────
+export interface AuthSession {
+  access_token: string; refresh_token: string; token_type: string; email: string; role: string;
+}
+async function _authPost(path: string, email: string, password: string): Promise<AuthSession> {
+  const s = await post<AuthSession>(path, { email, password });
+  setToken(s.access_token);
+  return s;
+}
+export const login = (email: string, password: string) => _authPost('/v1/auth/login', email, password);
+export const register = (email: string, password: string) => _authPost('/v1/auth/register', email, password);
+export const me = () => get<{ email: string; role: string }>('/v1/auth/me');
+export const logout = () => setToken(null);
+
 // ── human-in-the-loop flag review ────────────────────────────────────────────
 export interface ReviewItem {
   subject_id: string;          // claim_id | contradiction hash | '__report__'

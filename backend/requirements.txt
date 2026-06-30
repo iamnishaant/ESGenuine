@@ -27,3 +27,7 @@ requests==2.32.5
 
 # Text repair (fixes mojibake / double-encoded UTF-8 from PDF extraction)
 ftfy==6.3.1
+
+# Auth (JWT bearer tokens + bcrypt password hashing for the write-endpoint gate)
+python-jose[cryptography]==3.5.0
+bcrypt==5.0.0
