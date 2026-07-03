@@ -58,6 +58,7 @@ def unit_to_base(unit):
     u = str(unit).strip().lower()
     if u in ("", "unspecified", "none", "na", "n/a"):
         return None
+    u = re.sub(r"\s*/\s*", "/", u)  # "tonnes / kWh" == "tonnes/kwh"
     if "%" in u or "percent" in u:
         return "percent"
     if "co2" in u or "coe" in u or "co2e" in u:  # tonnes CO2e, gCO2e, milliontonnescoe
@@ -74,7 +75,8 @@ def unit_to_base(unit):
         return "mass"
     if any(k in u for k in ("gbp", "usd", "inr", "eur", "rs", "rupee", "$", "cr", "crore", "million gbp")):
         return "currency"
-    if any(k in u for k in ("employee", "worker", "count", "number", "no.", "connection")):
+    if any(k in u for k in ("employee", "worker", "count", "number", "no.", "connection",
+                            "case", "complaint", "incident")):
         return "count"
     return "other"
 

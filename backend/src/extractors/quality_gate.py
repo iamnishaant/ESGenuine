@@ -38,6 +38,26 @@ _WASTE = re.compile(r"\b(waste|e-waste)\b", re.I)
 _WATER = re.compile(r"\b(water|effluent|wastewater)\b", re.I)
 _FUTURE = re.compile(r"\b(target|aim|aspire|commit|pledge|goal|will|by\s+20[2-9]\d)\b", re.I)
 
+# Aspect backstops (gold v0.2 taxonomy-gap classes). Each maps an unmistakable
+# sentence signal to the node the taxonomy now has for it.
+_AIRPOLL = re.compile(r"\b(sox|nox|particulate matter|pm10|pm2\.5|air pollutant)", re.I)
+_DISCHARGE = re.compile(r"\bdischarg", re.I)
+# BRSR discharge-by-destination fragments carry no "discharge" word, just the row
+# label: "To Surface water 1,24,89,82,509 ..."
+_DISCHARGE_DEST = re.compile(r"^\s*to\s+(surface\s*water|sea\s*water|seawater|ground\s*water|third\s*part)", re.I)
+_BIODIV = re.compile(r"\b(afforestation|reforestation|tree plant\w*|plantation)\b", re.I)
+_WATER_REUSE = re.compile(r"\b(reused|recycled|zero.liquid discharge|zld)\b", re.I)
+_NONRENEW = re.compile(r"\b(non-?renewable|fuel consumption)\b", re.I)
+_TOTAL_ENERGY = re.compile(r"\btotal energy consum", re.I)
+_RENEW_WORD = re.compile(r"\brenewable\b", re.I)
+_HEATRATE = re.compile(r"\b(heat rate)\b|kcal\s*/\s*kwh", re.I)
+_POSH = re.compile(r"\b(posh|sexual harassment)\b", re.I)
+_HUMAN_RIGHTS = re.compile(r"\bhuman rights\b", re.I)
+_UNION = re.compile(r"\b(union|collective bargaining|freedom of association)\b", re.I)
+_CSR = re.compile(r"\b(csr|corporate social responsibility|beneficiaries)\b", re.I)
+_VALUE_CHAIN = re.compile(r"\bvalue chain partners\b", re.I)
+_ACCESS = re.compile(r"\b(wheelchair|assistive technolog|braille|differently.abled)\b", re.I)
+
 
 def _sentence(claim: ExtractedClaim) -> str:
     return (claim.provenance.source_sentence or "") if claim.provenance else ""
@@ -73,8 +93,77 @@ def _fix_aspect(claim: ExtractedClaim, sent: str) -> None:
             _refresh_keys(claim)
             return
 
+    def _set(node: str) -> None:
+        claim.normalized_aspect = node
+        claim.quality_flags.append("aspect_fixed")
+        _refresh_keys(claim)
+
+    # Air pollutants (PM/SOx/NOx) are mass emissions, not GHG totals.
+    if (asp.startswith("emissions") or asp == "uncategorized") and _AIRPOLL.search(sent):
+        if asp != "emissions.air_pollutants":
+            _set("emissions.air_pollutants")
+        return
+
+    # Heat-rate (Kcal/kWh) efficiency rows land on energy.renewable AND on
+    # emissions.* (PAT-scheme tables mention CO2 goals) — override both.
+    if (asp.startswith(("energy", "emissions")) or asp == "uncategorized") and _HEATRATE.search(sent):
+        if asp != "energy.efficiency":
+            _set("energy.efficiency")
+        return
+
+    # Fuel/non-renewable rows routinely force-fit to energy.renewable.
+    if asp.startswith("energy") or asp == "uncategorized":
+        if _NONRENEW.search(sent) or (_TOTAL_ENERGY.search(sent) and not _RENEW_WORD.search(sent)):
+            if asp != "energy.total":
+                _set("energy.total")
+            return
+
+    # Water discharge vs reuse: "treated and reused"/ZLD rows are recycling,
+    # plain discharge rows are their own node (not consumption).
+    if ((asp.startswith("water") or asp == "uncategorized")
+            and (_DISCHARGE.search(sent) or _DISCHARGE_DEST.search(sent))):
+        want = "water.recycled" if _WATER_REUSE.search(sent) else "water.discharge"
+        if asp != want:
+            _set(want)
+        return
+
+    # Afforestation/plantation narratives stay uncategorized without a keyword.
+    if asp == "uncategorized" and _BIODIV.search(sent):
+        _set("biodiversity.conservation")
+        return
+
+    # Social taxonomy-gap classes. POSH before the gender rescue below —
+    # "complaints on POSH as % of female employees" must not become diversity.
+    if asp.startswith("social") or asp == "uncategorized":
+        if _POSH.search(sent):
+            if asp != "social.posh_complaints":
+                _set("social.posh_complaints")
+            return
+        if _ACCESS.search(sent):
+            if asp != "social.accessibility":
+                _set("social.accessibility")
+            return
+        if _HUMAN_RIGHTS.search(sent):
+            if asp != "social.human_rights":
+                _set("social.human_rights")
+            return
+        if _VALUE_CHAIN.search(sent):
+            if asp != "social.supply_chain.training":
+                _set("social.supply_chain.training")
+            return
+        if _UNION.search(sent):
+            if asp != "social.labor_relations":
+                _set("social.labor_relations")
+            return
+        if _CSR.search(sent):
+            if asp != "social.community":
+                _set("social.community")
+            return
+
     # Gender/workforce rows can never be biodiversity; rescue uncategorized ones too.
-    if asp in ("uncategorized",) or asp.startswith("biodiversity"):
+    # A workforce stat split by male/female ("Female FY23" headcount) is a
+    # gender-diversity disclosure, not a plain headcount.
+    if asp in ("uncategorized",) or asp.startswith(("biodiversity", "social.workforce")):
         if _GENDER.search(sent):
             claim.normalized_aspect = "social.diversity.gender"
             claim.quality_flags.append("gender_fixed")
@@ -89,12 +178,36 @@ def _fix_aspect(claim: ExtractedClaim, sent: str) -> None:
 
 
 def _fix_type(claim: ExtractedClaim, sent: str) -> None:
-    """A table row carrying a reported value is performance data, not narrative."""
-    if claim.source_type != "table" or claim.metric is None or claim.metric.value is None:
+    """A row carrying a reported value is performance data, not narrative; and a
+    'target' with no future marker in its sentence is a description, not a promise."""
+    has_value = claim.metric is not None and claim.metric.value is not None
+    if claim.source_type == "table":
+        if not has_value:
+            return
+        want = "target" if _FUTURE.search(sent) else "performance"
+        if claim.claim_type != want:
+            claim.claim_type = want
+            claim.quality_flags.append("type_fixed")
         return
-    want = "target" if _FUTURE.search(sent) else "performance"
-    if claim.claim_type != want:
-        claim.claim_type = want
+    # Text claims (gold v0.2 misses): ongoing practice mistyped 'target'
+    # ("Since 1972 ... arranging afforestation", ZLD descriptions)...
+    if claim.claim_type == "target" and not _FUTURE.search(sent):
+        claim.claim_type = "narrative"
+        claim.quality_flags.append("type_fixed")
+        return
+    # ...and reported numbers mistyped 'narrative' (row-label leaks like
+    # "To Surface water 1,24,89,82,509", CSR spend sentences). Requires digits
+    # in the sentence so pure prose stays narrative.
+    if (claim.claim_type == "narrative" and has_value
+            and not _FUTURE.search(sent) and _HAS_DIGIT.search(sent)):
+        claim.claim_type = "performance"
+        claim.quality_flags.append("type_fixed")
+        return
+    # ...and 'performance' whose value cannot have come from a digit-free
+    # sentence is at best a narrative with an invented number.
+    if (claim.claim_type == "performance" and has_value
+            and not _HAS_DIGIT.search(sent)):
+        claim.claim_type = "narrative"
         claim.quality_flags.append("type_fixed")
 
 
@@ -134,6 +247,102 @@ def _flag_suspicions(claim: ExtractedClaim, sent: str) -> None:
             claim.quality_flags.append("implausible_unit")
 
 
+# ── page furniture (candidate-precision killer) ───────────────────
+# Text "claims" whose source is a BRSR form question / bare row label, with a value
+# the extractor necessarily invented. Table claims never hit this (their label-only
+# source is expected).
+_QUESTION_END = re.compile(r"\?\s*$")
+_FORM_LABEL = re.compile(r"^\s*(please specify|not applicable|if yes)", re.I)
+_DISCLOSE = re.compile(r"\bdisclose\b", re.I)
+_COUNT_LABEL = re.compile(r"^\s*(no\.|number)\s+of\b", re.I)
+_HAS_DIGIT = re.compile(r"\d")
+
+
+def is_furniture(claim: ExtractedClaim) -> bool:
+    if claim.source_type == "table":
+        return False
+    sent = _sentence(claim).strip()
+    if not sent:
+        return True
+    if _QUESTION_END.search(sent) or _FORM_LABEL.search(sent) or _DISCLOSE.search(sent):
+        return True
+    if not _HAS_DIGIT.search(sent):
+        if _COUNT_LABEL.match(sent):
+            return True
+        # a short digit-free label carrying a numeric metric: the number cannot
+        # have come from this sentence ("Permanent Employees" + 22,372)
+        if len(sent) < 80 and claim.metric is not None and claim.metric.value is not None:
+            return True
+    return False
+
+
+# ── FY-column verification (wrong-column class, gold v0.2) ────────
+_FY_TOKEN = re.compile(r"\bfy\s*'?\s*(?:20)?(\d{2})\b", re.I)
+
+
+def _cell_num(cell: str):
+    plain = cell.strip().replace(",", "")
+    if not plain or plain in ("-", "–"):
+        return None
+    try:
+        return float(plain)
+    except ValueError:
+        return None
+
+
+def fix_fy_column(claim: ExtractedClaim, markdown: str) -> None:
+    """Row label names one FY but the value came from another FY's column →
+    replace it with the labeled FY's cell (flag: fy_column_fixed).
+
+    Walks the page markdown keeping the most recent header's column→FY map, so
+    multi-table pages work. Only acts when the label names exactly one FY, the
+    value is found under a different FY's column, and the labeled FY's cell in
+    the same row parses to a number.
+    """
+    if claim.metric is None or claim.metric.value is None or not markdown:
+        return
+    fys = {m.group(1) for m in _FY_TOKEN.finditer(_sentence(claim))}
+    if len(fys) != 1:
+        return
+    target = next(iter(fys))
+    try:
+        value = float(claim.metric.value)
+    except (TypeError, ValueError):
+        return
+
+    colmap: dict = {}
+    for line in markdown.splitlines():
+        if "|" not in line:
+            continue
+        cells = line.split("|")
+        fy_cells = {i: ms[0] for i, c in enumerate(cells)
+                    for ms in [_FY_TOKEN.findall(c)] if len(ms) == 1}
+        if len(fy_cells) >= 2:
+            colmap = fy_cells
+            continue
+        if not colmap:
+            continue
+        target_cols = [i for i, fy in colmap.items() if fy == target]
+        if not target_cols:
+            continue
+        nums = {i: _cell_num(c) for i, c in enumerate(cells)}
+        # value already sits under the labeled FY somewhere on the page → correct
+        if any(i < len(cells) and nums.get(i) == value for i in target_cols):
+            return
+        for i, fy in colmap.items():
+            if fy == target or nums.get(i) != value:
+                continue
+            fixed = next((nums.get(t) for t in target_cols if nums.get(t) is not None), None)
+            if fixed is None:
+                return
+            same = claim.metric.normalized_value == claim.metric.value
+            claim.metric.value = fixed
+            if same:
+                claim.metric.normalized_value = fixed
+            claim.quality_flags.append("fy_column_fixed")
+            return
+
+
 # ── entry points ──────────────────────────────────────────────────
 def apply_gate(claim: ExtractedClaim) -> ExtractedClaim:
     """Run all corrections + suspicions on one claim (mutates and returns it)."""
@@ -148,11 +357,18 @@ def apply_gate(claim: ExtractedClaim) -> ExtractedClaim:
 
 
 def gate_claims(claims: List[ExtractedClaim]) -> Tuple[List[ExtractedClaim], dict]:
-    """Gate a batch; returns (claims, stats) where stats counts each flag."""
+    """Gate a batch; returns (kept_claims, stats) where stats counts each flag.
+    Furniture candidates (form questions / bare labels with invented numbers) are
+    DROPPED — they are not claims at all, and they poison candidate precision."""
     stats: dict = {}
+    kept: List[ExtractedClaim] = []
     for c in claims:
+        if is_furniture(c):
+            stats["furniture_dropped"] = stats.get("furniture_dropped", 0) + 1
+            continue
         before = len(c.quality_flags)
         apply_gate(c)
         for f in c.quality_flags[before:]:
             stats[f] = stats.get(f, 0) + 1
-    return claims, stats
+        kept.append(c)
+    return kept, stats

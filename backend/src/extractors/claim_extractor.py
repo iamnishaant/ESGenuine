@@ -808,7 +808,10 @@ class ClaimExtractor:
                     # Fabrication guard for tables: the row-label source_sentence has
                     # no numbers, so verify the value against the page's markdown.
                     if claim.metric is not None and claim.metric.value is not None:
-                        from .quality_gate import _value_in_source
+                        from .quality_gate import _value_in_source, fix_fy_column
+                        # wrong-FY-column repair first, so the verify below sees
+                        # the corrected value
+                        fix_fy_column(claim, t["markdown"])
                         if not _value_in_source(float(claim.metric.value), t["markdown"]):
                             claim.quality_flags.append("value_not_in_table")
                     if self._is_meaningful_claim(claim):

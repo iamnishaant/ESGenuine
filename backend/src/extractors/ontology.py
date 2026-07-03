@@ -25,10 +25,18 @@ class ESGOntology:
         "emissions.scope2": ["scope 2", "indirect emissions", "purchased electricity", "purchased energy"],
         "emissions.scope3": ["scope 3", "value chain emissions", "supply chain emissions", "indirect ghg"],
         "emissions.total": ["total emissions", "ghg emissions", "carbon footprint", "co2e"],
+        # NOTE: no bare-"emissions"-containing keyword here — the B-rule (raw inside
+        # keyword) would otherwise steal generic raw "emissions" from emissions.total.
+        "emissions.air_pollutants": ["sox", "nox", "particulate matter", "air pollutant",
+                                     "air pollutants", "air quality"],
         "energy.renewable": ["renewable energy", "solar", "wind power", "clean energy", "green power"],
-        "energy.total": ["energy consumption", "total energy", "power usage"],
+        "energy.total": ["energy consumption", "total energy", "power usage",
+                         "fuel consumption", "energy consumed", "electricity consumption"],
+        "energy.efficiency": ["energy efficiency", "heat rate", "net heat rate",
+                              "specific energy consumption"],
         "water.consumption": ["water consumption", "water usage", "freshwater used", "water use", "water withdrawal"],
         "water.recycled": ["recycled water", "water reused", "wastewater treated"],
+        "water.discharge": ["water discharge", "water discharged", "effluent discharge", "effluent"],
         "waste.total": ["total waste", "solid waste", "hazardous waste", "waste generated", "plastic waste", "e-waste", "waste management"],
         "waste.recycled": ["recycled waste", "waste diverted", "circular economy", "waste recycling"],
         "biodiversity.conservation": ["biodiversity", "reforestation", "habitat protection", "tree planting"],
@@ -40,7 +48,15 @@ class ESGOntology:
         "social.health_safety.fatalities": ["fatalities", "workplace deaths"],
         "social.workforce.total": ["total employees", "workforce size", "employment"],
         "social.training.hours": ["training hours", "learning and development", "employee training"],
-        
+        "social.human_rights": ["human rights", "human rights due diligence"],
+        "social.community": ["csr", "corporate social responsibility", "community development",
+                             "community investment", "beneficiaries"],
+        "social.labor_relations": ["union membership", "collective bargaining",
+                                   "freedom of association", "labor relations", "industrial relations"],
+        "social.posh_complaints": ["posh", "sexual harassment"],
+        "social.supply_chain.training": ["value chain partners", "value chain awareness"],
+        "social.accessibility": ["accessibility", "differently abled", "assistive technologies"],
+
         # Governance
         "governance.board.diversity": ["board diversity", "independent directors", "women on board"],
         "governance.ethics.incidents": ["ethics incidents", "whistleblower", "corruption cases", "anti-bribery"],
@@ -230,6 +246,9 @@ class SignatureGenerator:
         "social.health_safety": {"rate", "count", "fatalities", "injuries", "incidents", "headcount", "percent"},
         "social.workforce": {"count", "headcount", "percent"},
         "social.training": {"count", "headcount", "rate"},
+        "social.community": {"currency", "count", "headcount", "percent"},
+        "social.posh_complaints": {"count", "incidents", "percent"},
+        "social.labor_relations": {"percent", "count", "headcount"},
         "governance": {"count", "incidents", "percent"},
     }
 
