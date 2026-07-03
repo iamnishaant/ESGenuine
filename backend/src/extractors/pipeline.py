@@ -183,13 +183,15 @@ class ExtractionPipeline:
         with_location = sum(1 for c in enriched if c.location is not None)
 
         print(f"\n{'='*60}")
-        print(f"Extraction Complete ✓")
+        # ASCII-only: a cp1252-redirected console (Windows log files) can't encode
+        # the check/>= glyphs and a crash HERE would discard the whole merged run.
+        print("Extraction Complete [OK]")
         print(f"  Total claims:           {len(enriched)}")
         print(f"  From text:              {text_count}")
         print(f"  From tables (NL):       {table_count}")
         print(f"  With location data:     {with_location}")
-        print(f"  Groundable (≥0.75):     {groundable_high}")
-        print(f"  Groundable (≥0.50):     {groundable_mid}")
+        print(f"  Groundable (>=0.75):    {groundable_high}")
+        print(f"  Groundable (>=0.50):    {groundable_mid}")
         print(f"  Non-groundable (<0.50): {len(enriched) - groundable_high - groundable_mid}")
         print(f"{'='*60}\n")
 
