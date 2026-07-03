@@ -805,6 +805,12 @@ class ClaimExtractor:
                 claim = self._validate_and_enrich(raw, chunk, document_id)
                 if claim:
                     claim.source_type = "table"
+                    # Fabrication guard for tables: the row-label source_sentence has
+                    # no numbers, so verify the value against the page's markdown.
+                    if claim.metric is not None and claim.metric.value is not None:
+                        from .quality_gate import _value_in_source
+                        if not _value_in_source(float(claim.metric.value), t["markdown"]):
+                            claim.quality_flags.append("value_not_in_table")
                     if self._is_meaningful_claim(claim):
                         out.append(claim)
             if cp is not None:

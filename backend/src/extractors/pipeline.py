@@ -153,6 +153,13 @@ class ExtractionPipeline:
         # Merge
         all_claims = text_claims + table_claims
 
+        # Deterministic quality gate: sentence-signal label corrections (scope/gender/
+        # waste), table claim_type, fabricated-value + implausible-unit suspicion flags.
+        from .quality_gate import gate_claims
+        all_claims, gate_stats = gate_claims(all_claims)
+        if gate_stats:
+            print(f"  [QualityGate] {gate_stats}")
+
         # Deduplicate (same aspect + metric + page = duplicate)
         deduplicated = self._deduplicate(all_claims)
         print(f"  After dedup: {len(deduplicated)} claims")
