@@ -1,9 +1,9 @@
 {
   "_meta": {
-    "note": "Pluggable external evidence corpus. Replace these illustrative reference figures with verified values from CDP, official filings, or audited prior reports. Records are matched to claims by (company_id, metric_key, year).",
+    "note": "Pluggable external evidence corpus. Records are matched to claims by (company_id, metric_key, year). Curated via scripts/build_evidence_corpus.py (template -> validate -> merge; trusted tiers must cite document + page/table). 2026-07-03: illustrative placeholders replaced with real page-cited figures read from the on-disk filings via Docling (Shell SR 2023 p.79/81, Tata Power BRSR 2023-24 p.30).",
     "quality_values": {
       "verified": "Sourced from a verified third-party filing/dataset (CDP, audited report). Counts as production-grade ground truth.",
-      "self_reported": "From the company's own other filings (assigned automatically to cross-report evidence, not stored here).",
+      "self_reported": "From the company's own filings (page-cited). Stored records of this tier check cross-document consistency; cross-report evidence found at runtime is also tagged this tier.",
       "illustrative": "Placeholder value for demos — NOT a real figure. Must not be presented as verified.",
       "unverified": "Default when a record omits quality."
     },
@@ -24,34 +24,122 @@
       "company_id": "shell",
       "metric_key": "emissions.scope1.co2e",
       "year": 2022,
-      "value": 58000000,
+      "value": 51000000.0,
       "unit": "tCO2e",
-      "statement": "Shell Group operated Scope 1 emissions, 2022.",
-      "source": "Reference figure (illustrative sample — replace with CDP/official filing)",
-      "url": "",
-      "quality": "illustrative"
+      "statement": "Direct GHG emissions (Scope 1), operational control: 51 million tonnes CO2e (2022, restated in the 2023 report).",
+      "source": "Shell Sustainability Report 2023, p.79, GHG data table (GRI 305-1)",
+      "url": "https://reports.shell.com/sustainability-report/2023/",
+      "quality": "self_reported"
     },
     {
       "company_id": "shell",
       "metric_key": "emissions.scope1.co2e",
       "year": 2023,
-      "value": 55000000,
+      "value": 50000000.0,
       "unit": "tCO2e",
-      "statement": "Shell Group operated Scope 1 emissions, 2023.",
-      "source": "Reference figure (illustrative sample — replace with CDP/official filing)",
-      "url": "",
-      "quality": "illustrative"
+      "statement": "Direct GHG emissions (Scope 1), operational control: 50 million tonnes CO2e (2023).",
+      "source": "Shell Sustainability Report 2023, p.79, GHG data table (GRI 305-1)",
+      "url": "https://reports.shell.com/sustainability-report/2023/",
+      "quality": "self_reported"
     },
     {
       "company_id": "tata_power",
       "metric_key": "emissions.scope1.co2e",
       "year": 2024,
-      "value": 30000000,
+      "value": 38671851.0,
       "unit": "tCO2e",
-      "statement": "Tata Power Scope 1 emissions, FY2024.",
-      "source": "Reference figure (illustrative sample — replace with BRSR/CDP)",
+      "statement": "Total Scope 1 emissions: 3,86,71,851 metric tonnes CO2e (FY24).",
+      "source": "Tata Power BRSR 2023-24 report, p.30, GHG emissions table (Principle 6 Q7)",
       "url": "",
-      "quality": "illustrative"
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "emissions.scope1.co2e",
+      "year": 2021,
+      "value": 60000000.0,
+      "unit": "tCO2e",
+      "statement": "Direct GHG emissions (Scope 1), operational control: 60 million tonnes CO2e (2021).",
+      "source": "Shell Sustainability Report 2023, p.79, GHG data table (GRI 305-1)",
+      "url": "https://reports.shell.com/sustainability-report/2023/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "emissions.scope2.co2e",
+      "year": 2023,
+      "value": 7000000.0,
+      "unit": "tCO2e",
+      "statement": "Energy indirect GHG emissions (Scope 2), market-based, operational control: 7 million tonnes CO2e (2023).",
+      "source": "Shell Sustainability Report 2023, p.81, GHG data table (GRI 305-2)",
+      "url": "https://reports.shell.com/sustainability-report/2023/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "emissions.scope2.co2e",
+      "year": 2022,
+      "value": 7000000.0,
+      "unit": "tCO2e",
+      "statement": "Energy indirect GHG emissions (Scope 2), market-based, operational control: 7 million tonnes CO2e (2022).",
+      "source": "Shell Sustainability Report 2023, p.81, GHG data table (GRI 305-2)",
+      "url": "https://reports.shell.com/sustainability-report/2023/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "tata_power",
+      "metric_key": "emissions.scope1.co2e",
+      "year": 2023,
+      "value": 28312137.0,
+      "unit": "tCO2e",
+      "statement": "Total Scope 1 emissions: 2,83,12,137 metric tonnes CO2e (FY23).",
+      "source": "Tata Power BRSR 2023-24 report, p.30, GHG emissions table (Principle 6 Q7)",
+      "url": "",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "tata_power",
+      "metric_key": "emissions.scope2.co2e",
+      "year": 2024,
+      "value": 2886646.0,
+      "unit": "tCO2e",
+      "statement": "Total Scope 2 emissions: 28,86,646 metric tonnes CO2e (FY24).",
+      "source": "Tata Power BRSR 2023-24 report, p.30, GHG emissions table (Principle 6 Q7)",
+      "url": "",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "tata_power",
+      "metric_key": "emissions.scope2.co2e",
+      "year": 2023,
+      "value": 2362899.0,
+      "unit": "tCO2e",
+      "statement": "Total Scope 2 emissions: 23,62,899 metric tonnes CO2e (FY23).",
+      "source": "Tata Power BRSR 2023-24 report, p.30, GHG emissions table (Principle 6 Q7)",
+      "url": "",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "tata_power",
+      "metric_key": "waste.total.tonnes",
+      "year": 2024,
+      "value": 6733693.0,
+      "unit": "tonnes",
+      "statement": "Total waste generated (A+B+C+D+E+F+G+H): 67,33,693 metric tonnes (FY24).",
+      "source": "Tata Power BRSR 2023-24 report, p.30, waste table (Principle 6 Q9)",
+      "url": "",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "tata_power",
+      "metric_key": "waste.total.tonnes",
+      "year": 2023,
+      "value": 5963730.0,
+      "unit": "tonnes",
+      "statement": "Total waste generated: 59,63,730 metric tonnes (FY23).",
+      "source": "Tata Power BRSR 2023-24 report, p.30, waste table (Principle 6 Q9)",
+      "url": "",
+      "quality": "self_reported"
     }
   ]
 }
