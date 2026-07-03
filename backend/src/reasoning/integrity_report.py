@@ -28,7 +28,17 @@ _STRUCTURAL_PREVALENCE = 0.5
 # Bump when the scoring formula / flag set changes so a stored score's provenance is clear.
 # 2.0: flat per-flag-type penalty → count-weighted (penalty × prevalence). Shifts every score.
 # 2.1: honor human reviews — 'dismissed' flags drop out of the score; raw score still reported.
-_REPORT_VERSION = "2.1"
+# 2.2: optional fact-check integration (external-contradiction penalty + survival bonus)
+#      when a factcheck result is passed; without it, identical to 2.1.
+_REPORT_VERSION = "2.2"
+
+# Fact-check → score coupling (self_improvement.md "Product Synergies"; improve_rating A3).
+# Bonus: claims that survived external scrutiny earn back points, proportional to how much
+# was actually checked AND how well it survived: min(CAP, CAP × coverage × weighted_cred),
+# gated so a trivially-checked report can't buy points.
+_FC_BONUS_CAP = 10.0
+_FC_BONUS_MIN_CRED = 0.7
+_FC_BONUS_MIN_COVERAGE = 0.15
 
 
 # Mirror of frontend verificationMethod() (lib/api.ts) — keep the two in sync.
@@ -85,9 +95,63 @@ def _score_flags(flags, total):
     return score, breakdown
 
 
+def _apply_factcheck(score, breakdown, flag_dicts, flag_counts, factcheck, total):
+    """Fold a fact_check_document() result into the score (additive integration).
+
+    - CONTRADICTED verdicts against reference evidence become an EXTERNAL_CONTRADICTION
+      flag: Critical when any is backed by *verified* third-party evidence, High when
+      only self_reported (the company's own other filings). Strongest greenwash signal.
+    - A report whose checked claims survive external scrutiny earns a bonus (recorded
+      as NEGATIVE points_deducted so `score == 100 − Σ(points)` stays invariant).
+    Returns (score, fact_check_block)."""
+    results = factcheck.get("results") or []
+    contradicted = [r for r in results if r.get("verdict") == "CONTRADICTED"]
+    block = {"checked": factcheck.get("checked"), "coverage": factcheck.get("coverage"),
+             "weighted_credibility": factcheck.get("weighted_credibility"),
+             "external_contradictions": len(contradicted), "bonus": 0.0, "severity": None}
+
+    if contradicted:
+        sev = "Critical" if any(r.get("evidence_quality") == "verified" for r in contradicted) else "High"
+        pts = round(_SEV_WEIGHT[sev] * min(1.0, len(contradicted) / total), 1)
+        score -= pts
+        block["severity"] = sev
+        entry = {"type": "EXTERNAL_CONTRADICTION",
+                 "title": "Contradicted by reference evidence",
+                 "severity": sev, "count": len(contradicted),
+                 "prevalence": round(min(1.0, len(contradicted) / total), 3),
+                 "points_deducted": pts}
+        breakdown.append(entry)
+        flag_counts[sev] += 1
+        flag_dicts.append({
+            **{k: entry[k] for k in ("type", "title", "severity", "count")},
+            "description": "Claims contradicted by external/cross-filing reference figures.",
+            "evidence": [{"statement": r.get("statement"), "reason": r.get("reason")}
+                         for r in contradicted[:5]],
+            "recommendation": "Reconcile the contradicted figures with the cited reference "
+                              "sources; restate or explain methodology differences.",
+            "regulation": "EU Green Claims Directive (substantiation); GHG Protocol restatement guidance",
+        })
+
+    cov = factcheck.get("coverage") or 0.0
+    cred = factcheck.get("weighted_credibility")
+    if cred is not None and cred >= _FC_BONUS_MIN_CRED and cov >= _FC_BONUS_MIN_COVERAGE:
+        bonus = round(min(_FC_BONUS_CAP, _FC_BONUS_CAP * cov * cred,
+                          max(0.0, 100.0 - score)), 1)   # never lifts past 100
+        if bonus:
+            score += bonus
+            block["bonus"] = bonus
+            breakdown.append({"type": "FACT_CHECK_BONUS",
+                              "title": "Externally consistent claims (bonus)",
+                              "severity": "None", "count": factcheck.get("checked") or 0,
+                              "prevalence": round(cov, 3), "points_deducted": -bonus})
+
+    return max(0.0, min(100.0, score)), block
+
+
 def build_report(claims: List[Dict[str, Any]],
                  contradictions: Optional[List[Dict[str, Any]]] = None,
-                 reviews: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+                 reviews: Optional[List[Dict[str, Any]]] = None,
+                 factcheck: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     contradictions = contradictions or []
     reviews = reviews or []
     total = len(claims)
@@ -137,6 +201,16 @@ def build_report(claims: List[Dict[str, Any]],
     flag_counts = collections.Counter(f.severity for f in flags)
 
     score, penalty_breakdown = _score_flags(flags, total)
+
+    # ── optional fact-check integration (v2.2) ──────────────────────────────────
+    # External contradictions penalize; externally-consistent claims earn a bonus.
+    # factcheck=None (all legacy callers) leaves the score identical to v2.1.
+    fact_check_block = None
+    if factcheck and factcheck.get("checked"):
+        score, fact_check_block = _apply_factcheck(
+            score, penalty_breakdown, flag_dicts, flag_counts, factcheck, total)
+        penalty_breakdown.sort(key=lambda p: p["points_deducted"], reverse=True)
+
     grade = _grade(score)
 
     # Raw (pre-review) score: always recomputed so the UI can show "raw → adjusted" and a
@@ -179,10 +253,12 @@ def build_report(claims: List[Dict[str, Any]],
         "greenwashing_risk": risk,
         "summary": summary,
         "statistics": stats,
-        "flag_summary": {"total": len(flags), "by_severity": dict(flag_counts)},
+        "flag_summary": {"total": len(flag_dicts), "by_severity": dict(flag_counts)},
         "penalty_breakdown": penalty_breakdown,
         "flags": flag_dicts,
         "recommendations": recs,
+        # v2.2: how the fact-check moved this score (None when no factcheck passed).
+        "fact_check": fact_check_block,
         # Provenance: when/with-which-formula this score was computed (auditability).
         "computed_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "report_version": _REPORT_VERSION,

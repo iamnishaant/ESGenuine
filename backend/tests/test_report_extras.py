@@ -31,7 +31,7 @@ def test_build_report_penalty_breakdown_and_provenance():
     rep = build_report(claims, contradictions=[])
     assert rep["status"] == "ok"
     # provenance present
-    assert rep["report_version"] == "2.1"
+    assert rep["report_version"] == "2.2"
     assert isinstance(rep["computed_at"], str) and "T" in rep["computed_at"]
     # decomposition present and well-formed
     bd = rep["penalty_breakdown"]

@@ -13,6 +13,7 @@ optional LLM layer (`llm_verdict`) handles narrative claims where numbers don't 
 """
 
 import json
+from collections import Counter
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
@@ -237,6 +238,10 @@ def fact_check_document(doc_claims: List[Dict[str, Any]], peer_claims: List[Dict
         # true the credibility % is backed by placeholders, not verified figures — the UI
         # must caveat it rather than present it as production ground truth.
         "corpus_quality": corpus_quality(external),
+        # Which metric families have reference evidence vs. blind spots (A4): tells the
+        # user exactly where the corpus needs records to lift coverage.
+        "corpus_coverage_by_metric": dict(Counter(
+            str(e.get("metric_key", "")).split(".")[0] or "unknown" for e in external)),
         "llm_assisted": llm_assisted,
         "results": sorted(results, key=lambda r: {"CONTRADICTED": 0, "UNVERIFIED": 1, "SUPPORTED": 2}[r["verdict"]]),
     }

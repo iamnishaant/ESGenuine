@@ -207,6 +207,19 @@ async def get_greenwashing_flags(doc_id: str):
     }
 
 
+def _factcheck_for(claims):
+    """Deterministic fact-check (no LLM) for score integration (v2.2). Same corpus the
+    fact-check endpoint uses, so the integrity score moves consistently on every page.
+    Failure degrades to None → build_report scores exactly as v2.1."""
+    try:
+        company_id = claims[0].get("company_id") if claims else None
+        peers = _fetch_company_claims(company_id) if company_id else []
+        return fact_check_document(claims, peers, load_external_corpus(), limit=50)
+    except Exception as e:
+        print(f"[integrity] fact-check integration skipped: {e}")
+        return None
+
+
 @router.get("/{doc_id}/integrity-report")
 async def get_integrity_report(doc_id: str):
     """Full ESG Integrity Report: score, grade, greenwashing flags, contradictions,
@@ -218,7 +231,8 @@ async def get_integrity_report(doc_id: str):
         contradictions = (await get_contradictions(doc_id)).get("conflicts", [])
     except HTTPException:
         contradictions = []
-    return build_report(claims, contradictions, _fetch_reviews(doc_id))
+    return build_report(claims, contradictions, _fetch_reviews(doc_id),
+                        factcheck=_factcheck_for(claims))
 
 
 @router.get("/{doc_id}/review-queue")
@@ -306,8 +320,10 @@ async def portfolio_integrity():
         scored = [c for c in claims if c.get("report_year") == latest] if latest is not None else claims
         doc_id = scored[0].get("doc_id") if scored else None
         # Apply reviewer dismissals so the portfolio grade reflects human review app-wide
-        # (consistent with the Integrity Audit page's adjusted score).
-        report = build_report(scored, _numeric_contradictions(scored)[0], _fetch_reviews(doc_id))
+        # (consistent with the Integrity Audit page's adjusted score). Fact-check is
+        # folded in too (v2.2) so Portfolio and Integrity Audit stay in agreement.
+        report = build_report(scored, _numeric_contradictions(scored)[0], _fetch_reviews(doc_id),
+                              factcheck=_factcheck_for(scored))
         out.append({
             "company_id": cid,
             "company_name": (scored[0].get("company_name") if scored else None) or cid,
@@ -378,10 +394,11 @@ async def audit_summary(doc_id: str):
     if not claims:
         raise HTTPException(status_code=404, detail="No claims found for this document.")
     contradictions, contradictions_truncated = _numeric_contradictions(claims)
-    report = build_report(claims, contradictions)
     company_id = claims[0].get("company_id")
     factcheck = fact_check_document(claims, _fetch_company_claims(company_id) if company_id else [],
                                     load_external_corpus(), limit=50, llm=_optional_llm())
+    # Same factcheck feeds the score (v2.2) and the executive summary — one computation.
+    report = build_report(claims, contradictions, factcheck=factcheck)
     scorecard = company_scorecard(_fetch_all_claims(), company_id) if company_id else {"metrics": []}
     audit = synthesize_audit(report, factcheck, scorecard)
     # Surface that the numeric contradiction scan was capped, so the summary's
