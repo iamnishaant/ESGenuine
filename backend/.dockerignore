@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.venv-docling/
+.docling_cache/
+ESG_Reports/
+uploads/
+parsed/
+test_results/
+tests/
+.pytest_cache/
+*.log

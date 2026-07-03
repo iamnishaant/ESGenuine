@@ -48,6 +48,44 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# ── structured request logging (B5, scoped) ─────────────────────────────────────
+# One JSON line per request: request_id, method, path, status, duration_ms. Enough
+# to debug production latency/errors without a logging-framework migration; the
+# request_id is echoed in the X-Request-ID header so a user report can be matched
+# to its log line.
+import logging
+import time as _time
+
+_req_log = logging.getLogger("esgenuine.request")
+if not _req_log.handlers:
+    _h = logging.StreamHandler()
+    _h.setFormatter(logging.Formatter("%(message)s"))
+    _req_log.addHandler(_h)
+    _req_log.setLevel(logging.INFO)
+
+
+@app.middleware("http")
+async def _log_requests(request, call_next):
+    rid = uuid.uuid4().hex[:12]
+    t0 = _time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception:
+        _req_log.info(json.dumps({
+            "request_id": rid, "method": request.method, "path": request.url.path,
+            "status": 500, "duration_ms": round((_time.perf_counter() - t0) * 1000, 1),
+            "error": True,
+        }))
+        raise
+    response.headers["X-Request-ID"] = rid
+    _req_log.info(json.dumps({
+        "request_id": rid, "method": request.method, "path": request.url.path,
+        "status": response.status_code,
+        "duration_ms": round((_time.perf_counter() - t0) * 1000, 1),
+    }))
+    return response
+
 UPLOAD_DIR = Path(__file__).parent.parent.parent / "uploads"
 PARSED_DIR = Path(__file__).parent.parent.parent / "parsed"
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -373,7 +411,41 @@ async def get_job(job_id: str):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "esgenuine-api", "version": app.version}
+    """Liveness + readiness (B6). `ready` aggregates the checks an orchestrator
+    (Docker healthcheck / Railway / Render) needs before routing traffic:
+    DB reachable, upload disk headroom, embedding model importable. Each check is
+    reported individually so a degradation is diagnosable, not just a red light."""
+    checks = {}
+
+    # Database connectivity (Supabase) — the one hard dependency.
+    try:
+        sb = _get_sb()
+        sb.table("reports").select("report_id").limit(1).execute()
+        checks["database"] = "ok"
+    except Exception as e:
+        checks["database"] = f"error: {str(e)[:120]}"
+
+    # Disk headroom for uploads/parsed artifacts (fail under 500 MB free).
+    try:
+        free_mb = shutil.disk_usage(str(UPLOAD_DIR)).free // (1024 * 1024)
+        checks["disk"] = "ok" if free_mb >= 500 else f"low: {free_mb}MB free"
+        checks["disk_free_mb"] = free_mb
+    except OSError as e:
+        checks["disk"] = f"error: {e}"
+
+    # Embedding model availability — import only (loading weights here would make
+    # every probe pay a model spin-up; the NLI model is lazy-loaded by design).
+    try:
+        import sentence_transformers  # noqa: F401
+        checks["embedding_model"] = "ok"
+    except Exception as e:
+        checks["embedding_model"] = f"error: {str(e)[:120]}"
+
+    ready = (checks.get("database") == "ok"
+             and checks.get("disk") == "ok"
+             and checks.get("embedding_model") == "ok")
+    return {"status": "ok" if ready else "degraded", "ready": ready,
+            "service": "esgenuine-api", "version": app.version, "checks": checks}
 
 
 if __name__ == "__main__":

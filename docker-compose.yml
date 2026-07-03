@@ -1,0 +1,40 @@
+# ESGenuine — one-command local/prod-like stack (improve_rating B2).
+# Backend (FastAPI, 2 workers) + frontend (built + served by nginx).
+# Database is hosted Supabase (production-first; deliberately NO local Postgres —
+# a dual-DB dev setup adds drift risk for zero product value at this scale).
+#
+#   docker compose up --build
+#   backend  -> http://localhost:8000   (health: /health)
+#   frontend -> http://localhost:8080
+#
+# Env comes from the repo-root .env (NVIDIA/GROQ keys, Supabase URL+key, JWT_SECRET).
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads:/app/uploads
+      - parsed:/app/parsed
+      # heavyweight model weights (embedder / NER / NLI) download once, persist here
+      - model-cache:/root/.cache
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  uploads:
+  parsed:
+  model-cache:
