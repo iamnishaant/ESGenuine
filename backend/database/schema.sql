@@ -107,6 +107,13 @@ ALTER TABLE claims ADD COLUMN IF NOT EXISTS report_id     TEXT;
 -- The frontend reads this instead of re-deriving routing from a duplicated keyword list.
 ALTER TABLE claims ADD COLUMN IF NOT EXISTS observability_type TEXT;
 
+-- 5c. Per-claim regulatory framework tags + quality-gate flags (2026-07-03).
+-- framework_tags: disclosure clause IDs (e.g. {GRI 305-1, ESRS E1-6}) — deterministic,
+-- from extractors/frameworks.py. quality_flags: gate corrections/suspicions
+-- (e.g. {scope_fixed, value_not_in_source}) — from extractors/quality_gate.py.
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS framework_tags TEXT[] DEFAULT '{}';
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS quality_flags  TEXT[] DEFAULT '{}';
+
 -- 6. Cross-report compound index  (company + year + signature for fast bucketing)
 CREATE INDEX IF NOT EXISTS claims_cross_report_idx
 ON claims (company_id, report_year, claim_signature);

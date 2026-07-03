@@ -157,6 +157,10 @@ def _row(claim, doc_id: str, emb: list, meta: Dict[str, Any]) -> dict:
         "vagueness_score": claim.vagueness_score,
         "groundability_score": claim.groundability_score,
         "observability_type": getattr(claim, "observability_type", None) or "not_observable",
+        # Regulatory clause IDs + quality-gate flags (migration 2026-07-03). _insert
+        # retries without these when the DB predates the migration.
+        "framework_tags": getattr(claim, "framework_tags", None) or [],
+        "quality_flags": getattr(claim, "quality_flags", None) or [],
         "claim_signature": claim.claim_signature,
         "embedding": emb,
         "company_id": meta.get("company_id"),
@@ -171,6 +175,21 @@ def _insert(sb: Client, rows: list) -> int:
         r = sb.table("claims").insert(rows).execute()
         return len(r.data) if r.data else 0
     except Exception as e:
+        # DB predates the 2026-07-03 migration (framework_tags/quality_flags columns
+        # missing): retry once without the new fields so ingest keeps working; the
+        # tags land after the idempotent migration is applied.
+        msg = str(e)
+        if "framework_tags" in msg or "quality_flags" in msg:
+            print("[ingest] framework_tags/quality_flags columns missing — retrying without "
+                  "(apply backend/database/2026-07-03_framework_tags_quality_flags.sql).")
+            slim = [{k: v for k, v in row.items()
+                     if k not in ("framework_tags", "quality_flags")} for row in rows]
+            try:
+                r = sb.table("claims").insert(slim).execute()
+                return len(r.data) if r.data else 0
+            except Exception as e2:
+                print(f"[ingest] batch insert failed: {e2}")
+                return 0
         print(f"[ingest] batch insert failed: {e}")
         return 0
 

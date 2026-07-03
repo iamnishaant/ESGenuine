@@ -141,6 +141,9 @@ def apply_gate(claim: ExtractedClaim) -> ExtractedClaim:
     _fix_aspect(claim, sent)
     _fix_type(claim, sent)
     _flag_suspicions(claim, sent)
+    # Regulatory framework tags LAST — the aspect label is final by here.
+    from .frameworks import framework_tags
+    claim.framework_tags = framework_tags(claim.normalized_aspect, sent)
     return claim
 
 

@@ -76,6 +76,11 @@ class ExtractedClaim(BaseModel):
     # suspicions raised, e.g. "scope_fixed", "value_not_in_source". Additive —
     # ingest maps explicit columns, so this never leaks to the DB uninvited.
     quality_flags: List[str] = Field(default_factory=list)
+
+    # Regulatory framework clause IDs this claim reports against (frameworks.py):
+    # e.g. ["GRI 305-1", "ESRS E1-6", "TCFD Metrics & Targets"]. Deterministic,
+    # assigned by the quality gate after the aspect label is final.
+    framework_tags: List[str] = Field(default_factory=list)
     
     # Week 4: Cross-Report Entity Tracking
     company_id: Optional[str] = None
