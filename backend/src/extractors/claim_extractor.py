@@ -179,12 +179,16 @@ Return the JSON object now:"""
 class LLMClient:
     """Unified LLM client supporting OpenAI, Anthropic, or mock fallback."""
 
+    # a key that just failed (timeout / 429 / 5xx) sits out this long before being retried
+    COOLDOWN_S = 60
+
     def __init__(self):
         # Round-robin pool of OpenAI-compatible endpoints (NVIDIA + Groq, multi-key).
         # Concurrent workers spread across all keys/providers -> faster, fewer stalls.
         self.endpoints = self._build_pool()
         self._rr = itertools.count()
         self._rr_lock = threading.Lock()
+        self._cooldown_until: dict = {}   # endpoint index -> monotonic ts it may be used again
         if self.endpoints:
             counts = {}
             for e in self.endpoints:
@@ -222,10 +226,27 @@ class LLMClient:
                         "url": "https://router.huggingface.co/v1/chat/completions"})
         return eps
 
-    def _next_endpoint(self) -> dict:
+    def _next_endpoint(self) -> tuple:
+        """Next endpoint by round-robin, SKIPPING keys in failure cooldown.
+
+        A key that just timed out / 429'd sits out COOLDOWN_S so the load shifts to
+        healthy keys instead of blindly re-hitting a stalling one. If every endpoint
+        is cooling down, the least-recently-failed one is used anyway (never deadlock).
+        Returns (index, endpoint)."""
+        n = len(self.endpoints)
+        now = time.monotonic()
         with self._rr_lock:
-            i = next(self._rr)
-        return self.endpoints[i % len(self.endpoints)]
+            for _ in range(n):
+                i = next(self._rr) % n
+                if self._cooldown_until.get(i, 0) <= now:
+                    return i, self.endpoints[i]
+            # all cooling down -> pick the one whose cooldown expires soonest
+            i = min(range(n), key=lambda j: self._cooldown_until.get(j, 0))
+            return i, self.endpoints[i]
+
+    def _mark_cooldown(self, idx: int) -> None:
+        with self._rr_lock:
+            self._cooldown_until[idx] = time.monotonic() + self.COOLDOWN_S
 
     def _call_endpoint(self, ep: dict, prompt: str) -> str:
         """Call any OpenAI-compatible chat endpoint (NVIDIA / Groq) with JSON mode."""
@@ -260,10 +281,19 @@ class LLMClient:
         print("[LLM] No API key found. Using rule-based fallback extractor.")
         return "fallback"
 
+    def pool_size(self) -> int:
+        return len(self.endpoints)
+
     def extract(self, prompt: str) -> str:
-        # Pool path: round-robin across all configured NVIDIA/Groq keys.
+        # Pool path: round-robin across all configured NVIDIA/Groq keys, with
+        # failure cooldown so a stalling key sheds its load onto healthy ones.
         if self.endpoints:
-            return self._call_endpoint(self._next_endpoint(), prompt)
+            idx, ep = self._next_endpoint()
+            try:
+                return self._call_endpoint(ep, prompt)
+            except Exception:
+                self._mark_cooldown(idx)   # retry (in _call_with_retry) rotates to another key
+                raise
         # Legacy single-provider fallback (openai/anthropic/rule-based).
         if self.provider == "openai":
             return self._call_openai(prompt)
@@ -474,6 +504,10 @@ class ClaimExtractor:
         self.llm = LLMClient()
         self.normalizer = UnitNormalizer()
         self.classifier = GroundabilityClassifier()
+        # LLM units (section-windows / table-pages) that failed all retries in the
+        # last extract_* call. Callers use this to decide whether a run was complete
+        # (e.g. keep the resume checkpoint instead of clearing it).
+        self.failed_units = 0
 
     def _is_meaningful_claim(self, claim: ExtractedClaim) -> bool:
         """
@@ -595,11 +629,22 @@ class ClaimExtractor:
                 best, best_ratio = s, r
         return best if best_ratio >= 0.5 else None
 
+    def _default_workers(self, fallback: int) -> int:
+        """Concurrency default scaled to the key pool. NVIDIA_CONCURRENCY (env) wins;
+        otherwise run ~one worker per pooled key (capped at 12) so all keys pull load
+        concurrently — 5 NVIDIA keys behind 4 workers left keys idle."""
+        env = os.environ.get("NVIDIA_CONCURRENCY")
+        if env:
+            return int(env)
+        pool = getattr(self.llm, "pool_size", lambda: 0)()
+        return max(fallback, min(pool, 12)) if pool else fallback
+
     def extract_from_sections(
         self,
         sections: List[Dict[str, Any]],
         document_id: str = "",
         max_workers: Optional[int] = None,
+        checkpoint_path: Optional[str] = None,
     ) -> List[ExtractedClaim]:
         """
         SOTA extraction path: ONE LLM call per (windowed) section instead of per
@@ -608,11 +653,17 @@ class ClaimExtractor:
 
         `sections` = [{"section_title": str,
                        "sentences": [{"text","page_number","sentence_id","bbox"}]}]
+
+        If `checkpoint_path` is set, each completed window is recorded and a re-run
+        resumes instead of re-paying for finished windows (see checkpoint.py).
         """
         if max_workers is None:
-            max_workers = int(os.environ.get("NVIDIA_CONCURRENCY", "6"))
+            max_workers = self._default_workers(fallback=6)
+        self.failed_units = 0
 
         # 1) Build the work list (one item per windowed section that passes the pre-filter).
+        #    Order is deterministic for a given input, so the enumerate index is a stable
+        #    checkpoint key across re-runs.
         work: List[tuple] = []
         for sec in sections:
             title = sec.get("section_title", "Unknown")
@@ -624,11 +675,23 @@ class ClaimExtractor:
             for window in self._window_sentences(sentences):
                 work.append((title, window))
 
-        print(f"[Extractor] Section mode: {len(work)} windows over {len(sections)} sections, "
-              f"{max_workers}-way concurrent...")
+        # 1b) Resume from checkpoint: skip windows already done, keep their claims.
+        cp = None
+        resumed: List[ExtractedClaim] = []
+        done_units: set = set()
+        if checkpoint_path:
+            from .checkpoint import ClaimCheckpoint
+            cp = ClaimCheckpoint(checkpoint_path)
+            done_units, resumed = cp.load()
+        todo = [(i, item) for i, item in enumerate(work) if f"sec::{i}" not in done_units]
 
-        # 2) One window -> one LLM call -> validated claims.
-        def process(item) -> List[ExtractedClaim]:
+        resume_note = f" (resuming: {len(work) - len(todo)} done, {len(resumed)} claims loaded)" if done_units else ""
+        print(f"[Extractor] Section mode: {len(work)} windows over {len(sections)} sections, "
+              f"{max_workers}-way concurrent{resume_note}...")
+
+        # 2) One window -> one LLM call -> validated claims (recorded to checkpoint).
+        def process(idx_item) -> List[ExtractedClaim]:
+            i, item = idx_item
             title, window = item
             wtext = "\n".join(s.get("text", "") for s in window)
             prompt = SECTION_EXTRACTION_PROMPT.format(section_title=title, section_text=wtext)
@@ -637,6 +700,7 @@ class ClaimExtractor:
                 raws = self._call_with_retry(prompt)
             except RuntimeError as e:
                 print(f"  [Failed] section '{title}': {e}")
+                self.failed_units += 1   # unit NOT checkpointed -> a resume retries it
                 return out
             for raw in raws:
                 if not isinstance(raw, dict):
@@ -654,17 +718,19 @@ class ClaimExtractor:
                 claim = self._validate_and_enrich(raw, chunk, document_id)
                 if claim and self._is_meaningful_claim(claim):
                     out.append(claim)
+            if cp is not None:
+                cp.record(f"sec::{i}", out)
             return out
 
         # 3) Fan out concurrently, with a live progress bar.
-        all_claims: List[ExtractedClaim] = []
-        total = len(work)
+        all_claims: List[ExtractedClaim] = list(resumed)
+        total = len(todo)
         if total:
             is_tty = sys.stdout.isatty()
             done = 0
             t0 = time.time()
             with ThreadPoolExecutor(max_workers=max_workers) as ex:
-                futures = [ex.submit(process, item) for item in work]
+                futures = [ex.submit(process, item) for item in todo]
                 for fut in as_completed(futures):
                     all_claims.extend(fut.result())
                     done += 1
@@ -689,15 +755,31 @@ class ClaimExtractor:
         tables: List[Dict[str, Any]],
         document_id: str = "",
         max_workers: Optional[int] = None,
+        checkpoint_path: Optional[str] = None,
     ) -> List[ExtractedClaim]:
         """
-        Phase 2: turn VLM-extracted markdown tables into structured claims.
-        `tables` = [{"page_number": int, "markdown": str}] (from VLMTableExtractor).
+        Phase 2: turn VLM/Docling-extracted markdown tables into structured claims.
+        `tables` = [{"page_number": int, "markdown": str}].
+
+        If `checkpoint_path` is set, each completed table page is recorded (keyed by
+        page number) so a re-run resumes instead of re-paying for finished pages.
         """
         if max_workers is None:
-            max_workers = int(os.environ.get("NVIDIA_CONCURRENCY", "4"))
+            max_workers = self._default_workers(fallback=4)
+        self.failed_units = 0
         work = [t for t in tables if (t.get("markdown") or "").strip()]
-        print(f"[Extractor] Table mode: {len(work)} table pages, {max_workers}-way concurrent...")
+
+        cp = None
+        resumed: List[ExtractedClaim] = []
+        done_units: set = set()
+        if checkpoint_path:
+            from .checkpoint import ClaimCheckpoint
+            cp = ClaimCheckpoint(checkpoint_path)
+            done_units, resumed = cp.load()
+        todo = [t for t in work if f"tbl::{t['page_number']}" not in done_units]
+
+        resume_note = f" (resuming: {len(work) - len(todo)} done, {len(resumed)} claims loaded)" if done_units else ""
+        print(f"[Extractor] Table mode: {len(work)} table pages, {max_workers}-way concurrent{resume_note}...")
 
         def process(t) -> List[ExtractedClaim]:
             prompt = TABLE_CLAIMS_PROMPT.format(page=t["page_number"], tables=t["markdown"][:8000])
@@ -706,6 +788,7 @@ class ClaimExtractor:
                 raws = self._call_with_retry(prompt)
             except RuntimeError as e:
                 print(f"  [Failed] table page {t['page_number']}: {e}")
+                self.failed_units += 1   # unit NOT checkpointed -> a resume retries it
                 return out
             for raw in raws:
                 if not isinstance(raw, dict):
@@ -724,14 +807,16 @@ class ClaimExtractor:
                     claim.source_type = "table"
                     if self._is_meaningful_claim(claim):
                         out.append(claim)
+            if cp is not None:
+                cp.record(f"tbl::{t['page_number']}", out)
             return out
 
-        all_claims: List[ExtractedClaim] = []
-        if work:
+        all_claims: List[ExtractedClaim] = list(resumed)
+        if todo:
             with ThreadPoolExecutor(max_workers=max_workers) as ex:
-                for res in ex.map(process, work):
+                for res in ex.map(process, todo):
                     all_claims.extend(res)
-        print(f"[Extractor] Table mode done: {len(work)} calls -> {len(all_claims)} claims.")
+        print(f"[Extractor] Table mode done: {len(todo)} calls -> {len(all_claims)} claims.")
         return all_claims
 
     def _build_context(self, chunk: Dict[str, Any]) -> str:

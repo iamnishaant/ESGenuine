@@ -82,6 +82,7 @@ class ExtractionPipeline:
         document_id: str = "",
         report_metadata: Optional[Dict[str, Any]] = None,
         sentences: Optional[List[Dict[str, Any]]] = None,   # SOTA: section-level extraction
+        checkpoint_path: Optional[str] = None,              # resumable per-LLM-unit save
     ) -> List[ExtractedClaim]:
         """
         Run both extraction pipelines and merge results.
@@ -103,7 +104,8 @@ class ExtractionPipeline:
         if sentences:
             section_blocks = build_section_windows(sentences)
             print(f"  Text pipeline (section mode): {len(section_blocks)} windows from {len(sentences)} sentences")
-            text_claims = self.text_extractor.extract_from_sections(section_blocks, document_id)
+            text_claims = self.text_extractor.extract_from_sections(
+                section_blocks, document_id, checkpoint_path=checkpoint_path)
         else:
             text_claims = self.text_extractor.extract_from_chunks(chunks or [], document_id)
         print(f"  Text pipeline: {len(text_claims)} claims")
@@ -113,10 +115,30 @@ class ExtractionPipeline:
         # structured claims (existing_issues #5). Falls back to pdfplumber/legacy.
         import os as _os
         table_claims: List[ExtractedClaim] = []
-        if pdf_path and _os.environ.get("USE_VLM_TABLES") == "1":
+        if pdf_path and _os.environ.get("USE_DOCLING_TABLES") == "1":
+            # SOTA path: Docling (layout model + TableFormer) reads tables as clean
+            # markdown with headers/row-labels/units preserved — fixes the pdfplumber
+            # flattening that drives scope confusion + hallucinated values. Runs in an
+            # isolated venv via subprocess. Fail-safe: any Docling error degrades to the
+            # structured pdfplumber path so table trouble never discards text claims.
+            md_tables = []
+            try:
+                from parsers.docling_tables import DoclingTableExtractor
+                md_tables = DoclingTableExtractor().extract(pdf_path)
+            except Exception as e:
+                print(f"  Table pipeline (Docling) errored: {e}; falling back to structured.")
+            if md_tables:
+                table_claims = self.text_extractor.extract_from_table_markdown(
+                    md_tables, document_id, checkpoint_path=checkpoint_path)
+                print(f"  Table pipeline (Docling): {len(table_claims)} claims")
+            else:
+                table_claims = self.table_parser.parse(pdf_path, document_id)
+                print(f"  Table pipeline (structured fallback): {len(table_claims)} claims")
+        elif pdf_path and _os.environ.get("USE_VLM_TABLES") == "1":
             from .vlm_tables import VLMTableExtractor
             md_tables = VLMTableExtractor().extract(pdf_path)
-            table_claims = self.text_extractor.extract_from_table_markdown(md_tables, document_id)
+            table_claims = self.text_extractor.extract_from_table_markdown(
+                md_tables, document_id, checkpoint_path=checkpoint_path)
             print(f"  Table pipeline (VLM): {len(table_claims)} claims")
         elif pdf_path:
             table_claims = self.table_parser.parse(pdf_path, document_id)

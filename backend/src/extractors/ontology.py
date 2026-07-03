@@ -27,14 +27,15 @@ class ESGOntology:
         "emissions.total": ["total emissions", "ghg emissions", "carbon footprint", "co2e"],
         "energy.renewable": ["renewable energy", "solar", "wind power", "clean energy", "green power"],
         "energy.total": ["energy consumption", "total energy", "power usage"],
-        "water.consumption": ["water consumption", "water usage", "freshwater used"],
+        "water.consumption": ["water consumption", "water usage", "freshwater used", "water use", "water withdrawal"],
         "water.recycled": ["recycled water", "water reused", "wastewater treated"],
-        "waste.total": ["total waste", "solid waste", "hazardous waste"],
-        "waste.recycled": ["recycled waste", "waste diverted", "circular economy"],
+        "waste.total": ["total waste", "solid waste", "hazardous waste", "waste generated", "plastic waste", "e-waste", "waste management"],
+        "waste.recycled": ["recycled waste", "waste diverted", "circular economy", "waste recycling"],
         "biodiversity.conservation": ["biodiversity", "reforestation", "habitat protection", "tree planting"],
 
         # Social
-        "social.diversity.gender": ["gender diversity", "women in management", "female employees", "female representation"],
+        "social.diversity.gender": ["gender diversity", "women in management", "female employees", "female representation",
+                                    "diversity", "workforce diversity", "diversity in workforce", "employee diversity"],
         "social.health_safety.ltifr": ["ltifr", "lost time injury", "safety incident rate", "work-related injuries"],
         "social.health_safety.fatalities": ["fatalities", "workplace deaths"],
         "social.workforce.total": ["total employees", "workforce size", "employment"],
@@ -47,23 +48,48 @@ class ESGOntology:
 
     @classmethod
     def normalize_aspect(cls, raw_aspect: str) -> str:
-        """Finds the best matching canonical node for a raw aspect."""
+        """Finds the best matching canonical node for a raw aspect.
+
+        Matching is WORD-BOUNDARY based, not raw substring. The old substring rule
+        (`raw_lower in kw`) made raw "diversity" match keyword "biodiversity" —
+        the #19 diversity→biodiversity mislabel that poisoned workforce-diversity
+        claims. `\\b` matching kills that class: "diversity" has no word boundary
+        inside "biodiversity".
+
+        Tie-breaking:
+          A) keyword phrase found INSIDE the raw aspect → raw is specific; the
+             LONGEST matching keyword wins ("gender diversity" beats "diversity").
+          B) raw aspect found INSIDE a keyword → raw is generic; the SHORTEST
+             containing keyword wins (raw "emissions" → "total emissions" /
+             emissions.total, not "value chain emissions" / scope3).
+          A beats B (a full keyword inside the raw text is stronger evidence).
+        """
         if not raw_aspect:
             return "uncategorized"
-            
-        raw_lower = raw_aspect.lower()
-        
+
+        raw_lower = raw_aspect.lower().strip()
+
         # 1. Direct hit
         for node, keywords in cls.TAXONOMY.items():
             if raw_lower in keywords:
                 return node
-                
-        # 2. Substring match
+
+        # 2. Word-boundary match with specificity tie-breaking
+        best_a = None   # (kw_len, node) — longest wins
+        best_b = None   # (kw_len, node) — shortest wins
         for node, keywords in cls.TAXONOMY.items():
             for kw in keywords:
-                if kw in raw_lower or raw_lower in kw:
-                    return node
-                    
+                if re.search(rf"\b{re.escape(kw)}\b", raw_lower):
+                    if best_a is None or len(kw) > best_a[0]:
+                        best_a = (len(kw), node)
+                elif re.search(rf"\b{re.escape(raw_lower)}\b", kw):
+                    if best_b is None or len(kw) < best_b[0]:
+                        best_b = (len(kw), node)
+        if best_a:
+            return best_a[1]
+        if best_b:
+            return best_b[1]
+
         # 3. Fallback
         return "uncategorized"
 

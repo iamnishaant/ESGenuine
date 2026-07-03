@@ -21,6 +21,7 @@ dist-ssr
 .venv/
 .venv-docling/
 venv/
+backend/.docling_cache/
 __pycache__/
 *.py[cod]
 *.egg-info/
