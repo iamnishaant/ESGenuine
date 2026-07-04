@@ -86,6 +86,7 @@ Return a JSON array. Each claim must have these fields:
 10. Return at most 5 claims per text excerpt to avoid over-extraction from data tables.
 11. CRITICAL: Numbers over 999 must NOT contain commas or decimal points for thousands. 22,372 must be 22372.0.
 12. CRITICAL: Do NOT leave metric.unit as null if there is a number. Infer the unit from context (e.g., "employees", "INR", "%", "hours").
+13. Output MINIFIED JSON: single line, no indentation, no spaces after ':' or ',', no markdown fences.
 
 ## Text to Analyze
 
@@ -131,6 +132,7 @@ Return a JSON object: {{"claims": [ ... ]}}. Each claim object:
 8. If a number has no explicit unit, infer it from context (employees, INR, %, hours, tCO2e, MWh, etc.).
 9. Return at most 25 claims for this section; prefer the most specific and measurable.
 10. If the section has no factual ESG claims, return {{"claims": []}}.
+11. Output MINIFIED JSON: single line, no indentation, no spaces after ':' or ',', no markdown fences. (Whitespace wastes output tokens and slows the response.)
 
 ## Section title: {section_title}
 
@@ -165,6 +167,7 @@ Return {{"claims": [ ... ]}}. Each claim:
 5. time: infer the year from the column header (calendar year unless the table states a fiscal year).
 6. Skip non-numeric / explanatory rows. baseline_year must be an integer or null.
 7. If the tables contain no quantified ESG metrics, return {{"claims": []}}.
+8. Output MINIFIED JSON: single line, no indentation, no spaces after ':' or ',', no markdown fences. (Whitespace wastes output tokens and slows the response.)
 
 ## Page {page} tables
 {tables}
@@ -249,7 +252,15 @@ class LLMClient:
             self._cooldown_until[idx] = time.monotonic() + self.COOLDOWN_S
 
     def _call_endpoint(self, ep: dict, prompt: str) -> str:
-        """Call any OpenAI-compatible chat endpoint (NVIDIA / Groq) with JSON mode."""
+        """Call any OpenAI-compatible chat endpoint (NVIDIA / Groq) with JSON mode.
+
+        Streams the response: with stream=True the read timeout applies to the gap
+        BETWEEN chunks, not the whole generation, so a slow-but-flowing 70B call on a
+        congested endpoint survives (non-streaming required the full 3000-token body
+        inside one read window and timed out wholesale), while a genuinely stalled
+        connection still fails bounded (LLM_STALL_TIMEOUT of silence — also covers
+        time-to-first-byte, and NVIDIA queues requests for minutes under load, so
+        the default is generous)."""
         import requests
         resp = requests.post(
             ep["url"],
@@ -260,11 +271,27 @@ class LLMClient:
                 "temperature": 0.1,
                 "max_tokens": int(os.environ.get("LLM_MAX_TOKENS", "3000")),
                 "response_format": {"type": "json_object"},
+                "stream": True,
             },
-            timeout=(15, 300),
+            timeout=(15, int(os.environ.get("LLM_STALL_TIMEOUT", "180"))),
+            stream=True,
         )
         resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"]
+        parts = []
+        for line in resp.iter_lines(decode_unicode=True):
+            if not line or not line.startswith("data:"):
+                continue
+            data = line[5:].strip()
+            if data == "[DONE]":
+                break
+            try:
+                delta = json.loads(data)["choices"][0].get("delta", {})
+            except (json.JSONDecodeError, KeyError, IndexError):
+                continue
+            content = delta.get("content")
+            if content:
+                parts.append(content)
+        return "".join(parts)
 
     def _detect_provider(self) -> str:
         # NVIDIA NIM is preferred when configured (larger/stronger models, no Groq

@@ -1,0 +1,629 @@
+[
+ {
+  "claim_id": "d3faf144-bec",
+  "src": "Waste intensity in terms of physical output",
+  "page": 30,
+  "pred_aspect": "waste.total",
+  "pred_value": 0.0001143,
+  "pred_unit": "metric tonnes / kWh",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed",
+   "implausible_unit"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "952ad59b-1ab",
+  "src": "Total fuel consumption (E) (GJ) FY 23",
+  "page": 27,
+  "pred_aspect": "energy.renewable",
+  "pred_value": 408727250.0,
+  "pred_unit": "GJ",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "a22d7638-bb3",
+  "src": "Lost Time Injury Frequency Rate (LTIFR) Employees FY24",
+  "page": 18,
+  "pred_aspect": "social.health_safety.ltifr",
+  "pred_value": 0.06,
+  "pred_unit": "per one million-person hours worked",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "b21dea72-e63",
+  "src": "Water withdrawal by source (in kilolitres) - Third party water - FY23",
+  "page": 32,
+  "pred_aspect": "water.consumption",
+  "pred_value": 9117850.0,
+  "pred_unit": "kilotlitres",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "fd0c4e56-2e3",
+  "src": "R&D as % of turnover FY24",
+  "page": 13,
+  "pred_aspect": "uncategorized",
+  "pred_value": 0.02,
+  "pred_unit": "%",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "9310029a-c2b",
+  "src": "Particulate matter (PM)",
+  "page": 29,
+  "pred_aspect": "emissions.total",
+  "pred_value": 5603.0,
+  "pred_unit": "tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "ff14e47c-3d5",
+  "src": "Notified Target (Kcal/kwh) (FY15) Conventional Generation II",
+  "page": 27,
+  "pred_aspect": "energy.renewable",
+  "pred_value": 2460.0,
+  "pred_unit": "Kcal/kwh",
+  "pred_type": "target",
+  "flags": [],
+  "stype": "table"
+ },
+ {
+  "claim_id": "b19e1867-972",
+  "src": "Energy intensity in terms of physical output (Total energy consumed (GJ)/ Total Power Generation Units (kWh)) FY 24",
+  "page": 27,
+  "pred_aspect": "energy.renewable",
+  "pred_value": 0.00795,
+  "pred_unit": "GJ/kWh",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "2ccc040e-4e0",
+  "src": "Total Scope 2 emissions",
+  "page": 30,
+  "pred_aspect": "emissions.scope2",
+  "pred_value": 2886646.0,
+  "pred_unit": "metric tonnes of CO2 equivalent",
+  "pred_type": "performance",
+  "flags": [
+   "scope_fixed",
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "1b159503-659",
+  "src": "Total energy consumed from non-renewable sources (D+E+F) (GJ) FY 24",
+  "page": 27,
+  "pred_aspect": "energy.renewable",
+  "pred_value": 505276706.0,
+  "pred_unit": "GJ",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "a1c4b56a-089",
+  "src": "Battery waste",
+  "page": 30,
+  "pred_aspect": "waste.total",
+  "pred_value": 177.0,
+  "pred_unit": "metric tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "30c141b7-c99",
+  "src": "Male FY24 %(B/A)",
+  "page": 17,
+  "pred_aspect": "social.workforce.total",
+  "pred_value": 46.0,
+  "pred_unit": "%",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "16c1fdd7-33a",
+  "src": "Lost Time Injury Frequency Rate (LTIFR) Workers FY24",
+  "page": 18,
+  "pred_aspect": "social.health_safety.ltifr",
+  "pred_value": 0.31,
+  "pred_unit": "per one million-person hours worked",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "9d703d0b-508",
+  "src": "Lost Time Injury Frequency Rate (LTIFR) Employees FY23",
+  "page": 18,
+  "pred_aspect": "social.health_safety.ltifr",
+  "pred_value": 0.26,
+  "pred_unit": "per one million-person hours worked",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "6ebc707c-642",
+  "src": "Total energy consumed (A+B+C+D+E+F) (GJ) FY 24",
+  "page": 27,
+  "pred_aspect": "energy.renewable",
+  "pred_value": 505440434.0,
+  "pred_unit": "GJ",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "6f5c2b86-cf2",
+  "src": "SOx",
+  "page": 29,
+  "pred_aspect": "emissions.total",
+  "pred_value": 110962.0,
+  "pred_unit": "tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "85dece47-684",
+  "src": "%age of value chain partners covered",
+  "page": 13,
+  "pred_aspect": "social.diversity.gender",
+  "pred_value": 25.0,
+  "pred_unit": "%",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "c8da11f6-abd",
+  "src": "Conventional Generation VII (2022-23 to 2024-25) Jojobera Power Plant (TATA Power Co) Target Net Heat Rate (Kcal/kwh) (FY25)",
+  "page": 28,
+  "pred_aspect": "emissions.total",
+  "pred_value": 2817.0,
+  "pred_unit": "Kcal/kwh",
+  "pred_type": "target",
+  "flags": [],
+  "stype": "table"
+ },
+ {
+  "claim_id": "c1daca10-4ac",
+  "src": "Other Non-hazardous waste generated",
+  "page": 30,
+  "pred_aspect": "waste.total",
+  "pred_value": 6727744.0,
+  "pred_unit": "metric tonnes",
+  "pred_type": "performance",
+  "flags": [],
+  "stype": "table"
+ },
+ {
+  "claim_id": "ec689e2f-ee9",
+  "src": "Total waste disposed FY 23",
+  "page": 31,
+  "pred_aspect": "waste.total",
+  "pred_value": 7594749.0,
+  "pred_unit": "metric tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "155cddf8-d54",
+  "src": "Total Scope 1 and Scope 2 emission intensity per rupee of turnover adjusted for Purchasing Power Parity (PPP)",
+  "page": 30,
+  "pred_aspect": "emissions.total",
+  "pred_value": 1.86e-05,
+  "pred_unit": "metric tonnes of CO2 equivalent / Revenue (PPP)",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "44d0044d-605",
+  "src": "Total water discharged",
+  "page": 29,
+  "pred_aspect": "water.consumption",
+  "pred_value": 578568991.0,
+  "pred_unit": "kL",
+  "pred_type": "performance",
+  "flags": [
+   "value_not_in_table",
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "0434a20c-416",
+  "src": "Other disposal operations FY 23",
+  "page": 31,
+  "pred_aspect": "waste.total",
+  "pred_value": 5545589.0,
+  "pred_unit": "metric tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "76474519-f7e",
+  "src": "Female FY23",
+  "page": 17,
+  "pred_aspect": "social.workforce.total",
+  "pred_value": 1901.0,
+  "pred_unit": "number",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "b15ffaa4-0bd",
+  "src": "Particulate matter (PM)",
+  "page": 29,
+  "pred_aspect": "emissions.total",
+  "pred_value": 6908.0,
+  "pred_unit": "tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ],
+  "stype": "table"
+ },
+ {
+  "claim_id": "9a7b5441-e7c",
+  "src": "These facilities include wheelchairs and ramps for \nthe mobility-impaired, assistive technologies for visual and Hearing-Speech impaired and Braille instructions for the visually \nimpaired.",
+  "page": 16,
+  "pred_aspect": "social.training.hours",
+  "pred_value": 59.0,
+  "pred_unit": "%",
+  "pred_type": "performance",
+  "flags": [
+   "value_not_in_source",
+   "implausible_unit"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "d039d72e-97f",
+  "src": "Other (including \ncontract \nworkers, \nanonymous, \ntrainees, etc)",
+  "page": 5,
+  "pred_aspect": "uncategorized",
+  "pred_value": 51.0,
+  "pred_unit": "complaints",
+  "pred_type": "narrative",
+  "flags": [
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "f971072b-324",
+  "src": "Since 1972, Tata Power have been arranging mega afforestation drive of native plants in the Hydro which is situated in the \nnorthern western Ghats area with an intent on increasing survival rate of plantation.",
+  "page": 33,
+  "pred_aspect": "uncategorized",
+  "pred_value": null,
+  "pred_unit": null,
+  "pred_type": "target",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "72dc8ac8-295",
+  "src": "Key Managerial Personnel \n('KMPs')\n8\n100",
+  "page": 11,
+  "pred_aspect": "social.diversity.gender",
+  "pred_value": 100.0,
+  "pred_unit": "%",
+  "pred_type": "narrative",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "5b15575c-53c",
+  "src": "Please specify, if any.",
+  "page": 30,
+  "pred_aspect": "waste.total",
+  "pred_value": 5963380.0,
+  "pred_unit": "metric tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "ace5b28c-37f",
+  "src": "No. of employees/workers that are \nrehabilitated and placed in suitable \nemployment or whose family \nmembers have been placed in suitable \nemployment",
+  "page": 20,
+  "pred_aspect": "social.health_safety.ltifr",
+  "pred_value": 0.0,
+  "pred_unit": "cases",
+  "pred_type": "narrative",
+  "flags": [
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "2c3ae42c-454",
+  "src": "Permanent Employees",
+  "page": 16,
+  "pred_aspect": "social.diversity.gender",
+  "pred_value": 22372.0,
+  "pred_unit": "employees",
+  "pred_type": "narrative",
+  "flags": [
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "29a9ff47-92e",
+  "src": "To Surface water\n1,24,89,82,509\n1,23,19,41,000",
+  "page": 29,
+  "pred_aspect": "water.consumption",
+  "pred_value": 1231941000.0,
+  "pred_unit": "litres",
+  "pred_type": "narrative",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "cc3420bc-f76",
+  "src": "5.\t\nJob creation in smaller towns – Disclose wages paid to persons employed (including employees or workers employed \non a permanent or non-permanent / on contract basis) in the following locations, as % of total wage cost",
+  "page": 36,
+  "pred_aspect": "uncategorized",
+  "pred_value": 72.0,
+  "pred_unit": "%",
+  "pred_type": "narrative",
+  "flags": [
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "13ce46e9-8ef",
+  "src": "Please specify, if any.",
+  "page": 30,
+  "pred_aspect": "waste.total",
+  "pred_value": 6727744.0,
+  "pred_unit": "metric tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "23c90edc-d8f",
+  "src": "Human Rights due-diligence was completed for Standalone entities of Tata Power in the FY24",
+  "page": 26,
+  "pred_aspect": "uncategorized",
+  "pred_value": null,
+  "pred_unit": null,
+  "pred_type": "narrative",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "4e18c9e6-7c7",
+  "src": "To Surface water\n1,24,89,82,509\n1,23,19,41,000",
+  "page": 29,
+  "pred_aspect": "water.consumption",
+  "pred_value": 1248982509.0,
+  "pred_unit": "litres",
+  "pred_type": "narrative",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "8f04fbe6-bda",
+  "src": "Complaints on POSH as a % of female employees / workers\n0.08%\n0.09%",
+  "page": 25,
+  "pred_aspect": "social.health_safety.ltifr",
+  "pred_value": 0.08,
+  "pred_unit": "%",
+  "pred_type": "narrative",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "8bc01d03-1be",
+  "src": "National\nConventional Generation (Thermal + Hydro) – 11\nOffice Locations - 9*\n136\nWind - 23\nSolar - 64\nTransmission and Distribution - 27\nSolar cells and modules manufacturing - 2\nTotal - 127\nInternational\nConventional Generation (Thermal + Hydro) – 4\nRepresentative Offices - 3\n7",
+  "page": 3,
+  "pred_aspect": "energy.renewable",
+  "pred_value": 11.0,
+  "pred_unit": "plants",
+  "pred_type": "narrative",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "5ded4ff9-145",
+  "src": "Total Scope 2 emissions (Break-up of the GHG into CO2, CH4, N2O, \nHFCs, PFCs, SF6, NF3, if available)",
+  "page": 30,
+  "pred_aspect": "emissions.scope2",
+  "pred_value": 2886646.0,
+  "pred_unit": "tCO2e",
+  "pred_type": "performance",
+  "flags": [
+   "scope_fixed",
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "77c09368-fec",
+  "src": "National\nConventional Generation (Thermal + Hydro) – 11\nOffice Locations - 9*\n136\nWind - 23\nSolar - 64\nTransmission and Distribution - 27\nSolar cells and modules manufacturing - 2\nTotal - 127\nInternational\nConventional Generation (Thermal + Hydro) – 4\nRepresentative Offices - 3\n7",
+  "page": 3,
+  "pred_aspect": "energy.renewable",
+  "pred_value": 23.0,
+  "pred_unit": "plants",
+  "pred_type": "narrative",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "d35f4781-313",
+  "src": "The Company's major thermal power plants has Zero-Liquid Discharge (ZLD) wherein the waste water is treated and reused.",
+  "page": 29,
+  "pred_aspect": "water.consumption",
+  "pred_value": null,
+  "pred_unit": null,
+  "pred_type": "target",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "338c617f-61a",
+  "src": "To Seawater\n4,53,60,99,593\n3,07,11,07,000",
+  "page": 29,
+  "pred_aspect": "water.consumption",
+  "pred_value": 4536099593.0,
+  "pred_unit": "litres",
+  "pred_type": "narrative",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "d7f25237-551",
+  "src": "Male\nFemale",
+  "page": 24,
+  "pred_aspect": "social.health_safety.ltifr",
+  "pred_value": 2117.0,
+  "pred_unit": "employees",
+  "pred_type": "narrative",
+  "flags": [
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "721fe9f3-23d",
+  "src": "Total Scope 3 emissions (Break-up of the GHG into CO2, CH4, \nN2O, HFCs, PFCs, SF6, NF3, if available)",
+  "page": 33,
+  "pred_aspect": "emissions.scope3",
+  "pred_value": 24787344.0,
+  "pred_unit": "Metric tonnes of CO2 equivalent",
+  "pred_type": "narrative",
+  "flags": [
+   "scope_fixed",
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "dae8b94d-0ca",
+  "src": "Male\n 20,255 \n 20,255 \n100\n 20,255 \n100\n NA \nNA\n 20,255 \n100\n NA \nNA",
+  "page": 15,
+  "pred_aspect": "social.diversity.gender",
+  "pred_value": 100.0,
+  "pred_unit": "%",
+  "pred_type": "narrative",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "540b6683-2c1",
+  "src": "c. \t\nPurchases from top 10 trading houses as % of total purchases \nfrom trading houses",
+  "page": 12,
+  "pred_aspect": "uncategorized",
+  "pred_value": 7.0,
+  "pred_unit": "%",
+  "pred_type": "performance",
+  "flags": [
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "8954d957-e2d",
+  "src": "Tata Power has covered \n42.17 lakh direct beneficiaries in 85+ operating sites across 18 states utilizing ₹ 58.00 crore CSR funds.",
+  "page": 4,
+  "pred_aspect": "uncategorized",
+  "pred_value": 5800.0,
+  "pred_unit": "INR lakhs",
+  "pred_type": "narrative",
+  "flags": [
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ },
+ {
+  "claim_id": "29da62cd-dcc",
+  "src": "Action taken – 1 case\n2.  Conciliation – 2 cases",
+  "page": 25,
+  "pred_aspect": "social.health_safety.ltifr",
+  "pred_value": 2.0,
+  "pred_unit": "cases",
+  "pred_type": "narrative",
+  "flags": [],
+  "stype": "text"
+ },
+ {
+  "claim_id": "3599aa7f-c98",
+  "src": "Total Scope 1 emissions (Break-up of the GHG into CO2, CH4, N2O, \nHFCs, PFCs, SF6, NF3, if available)",
+  "page": 30,
+  "pred_aspect": "emissions.scope1",
+  "pred_value": 28312137.0,
+  "pred_unit": "tCO2e",
+  "pred_type": "performance",
+  "flags": [
+   "scope_fixed",
+   "value_not_in_source"
+  ],
+  "stype": "text"
+ }
+]

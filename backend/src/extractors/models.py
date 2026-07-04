@@ -39,6 +39,16 @@ class TimeField(BaseModel):
     end_date: Optional[str] = None
     baseline_year: Optional[int] = None
 
+    @field_validator("baseline_year", mode="before")
+    @classmethod
+    def coerce_baseline_year(cls, v):
+        # LLMs sometimes emit a date ("2022-04-01") or "FY2022" here; salvage the
+        # year instead of discarding the whole claim as malformed.
+        if isinstance(v, str):
+            m = re.search(r"(19|20)\d{2}", v)
+            return int(m.group(0)) if m else None
+        return v
+
 class ProvenanceField(BaseModel):
     source_sentence: str
     page_number: int

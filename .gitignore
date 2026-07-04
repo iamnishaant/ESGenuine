@@ -40,3 +40,7 @@ _upgrade_inspect/
 *.njsproj
 *.sln
 *.sw?
+
+# extraction/ingest run artifacts (checkpoints, per-run JSONL)
+backend/test_results/reingest/
+/test_results/

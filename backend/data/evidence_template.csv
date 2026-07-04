@@ -1,0 +1,16 @@
+company_id,metric_key,year,value,unit,statement,source,url,quality,claimed_value_context
+unknown,social.diversity.gender.count,2024,,,,,,,22 claim(s); e.g. 2294.0 unspecified
+unknown,emissions.scope2.energy,2024,,,,,,,21 claim(s); e.g. 5000.0 MWh
+unknown,energy.renewable.percent,2024,,,,,,,15 claim(s); e.g. 40.0 %
+unknown,water.consumption.litres,2024,,,,,,,14 claim(s); e.g. 1234.0 litres
+unknown,water.recycled.tonnes,2024,,,,,,,13 claim(s); e.g. 2000.0 tonnes
+unknown,water.recycled.metrictonnes,2024,,,,,,,13 claim(s); e.g. 0.0 metric tonnes
+unknown,water.consumption.millionlitres,2023,,,,,,,11 claim(s); e.g. 118.0 Million Litres
+unknown,water.consumption.percent,2024,,,,,,,9 claim(s); e.g. 40.0 %
+unknown,emissions.scope1.count,2024,,,,,,,9 claim(s); e.g. 19.0 unspecified
+unknown,water.consumption.millionlitres,2024,,,,,,,9 claim(s); e.g. 144291.0 million litres
+unknown,emissions.scope1.count,2023,,,,,,,8 claim(s); e.g. 19.0 unspecified
+unknown,emissions.scope2.pj,2024,,,,,,,8 claim(s); e.g. 630000000.0 PJ
+unknown,energy.renewable.unspecified,2024,,,,,,,8 claim(s); e.g. 14707.0 MW
+unknown,water.consumption.m,2024,,,,,,,7 claim(s); e.g. 1234.0 m³
+unknown,emissions.scope1.milliontonnescoe,2024,,,,,,,7 claim(s); e.g. 77.0 Million tonnes CO2e
