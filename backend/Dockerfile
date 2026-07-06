@@ -14,9 +14,15 @@
 FROM python:3.11-slim AS builder
 WORKDIR /build
 COPY requirements.txt .
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt \
- && pip install --no-cache-dir --prefix=/install \
-      https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+# Single resolver pass: a second `pip install --prefix` can't see the first one's
+# packages, so it re-resolved the model wheel's old spacy pin and overwrote numpy 2.x
+# with 1.26 under numpy-2-built scipy/sklearn (ImportError: numpy._core.multiarray).
+# Model wheel 3.8.0 matches requirements' spacy==3.8.11 (same as the host venv).
+# Generous network settings: the torch stack pulls multi-hundred-MB wheels and a
+# single PyPI read-timeout otherwise kills the whole layer.
+RUN PIP_DEFAULT_TIMEOUT=180 pip install --no-cache-dir --prefix=/install --retries 10 \
+      -r requirements.txt \
+      https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 
 # ── runtime: slim image, no build toolchain ─────────────────────────────────────
 FROM python:3.11-slim

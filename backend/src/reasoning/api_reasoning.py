@@ -17,14 +17,24 @@ import itertools
 import collections
 
 # In a full production setup these would be imported from the DB layer
-from src.reasoning.retrieval import find_candidate_pairs, get_supabase
-from src.reasoning.nli_engine import ContradictionEngine
-from src.reasoning.contradiction_scan import scan_contradictions
-from src.reasoning.greenwash_taxonomy import GreenwashTaxonomy
-from src.reasoning.integrity_report import build_report
-from src.reasoning.benchmark import cross_company, company_scorecard, trajectory
-from src.reasoning.fact_check import fact_check_document, load_external_corpus
-from src.reasoning.agent import ask as agent_ask, synthesize_audit, suggest_questions, _get_llm, _has_llm
+try:
+    from reasoning.retrieval import find_candidate_pairs, get_supabase
+    from reasoning.nli_engine import ContradictionEngine
+    from reasoning.contradiction_scan import scan_contradictions
+    from reasoning.greenwash_taxonomy import GreenwashTaxonomy
+    from reasoning.integrity_report import build_report
+    from reasoning.benchmark import cross_company, company_scorecard, trajectory
+    from reasoning.fact_check import fact_check_document, load_external_corpus
+    from reasoning.agent import ask as agent_ask, synthesize_audit, suggest_questions, _get_llm, _has_llm
+except ImportError:  # pragma: no cover - path-setup fallback (repo root on sys.path)
+    from src.reasoning.retrieval import find_candidate_pairs, get_supabase
+    from src.reasoning.nli_engine import ContradictionEngine
+    from src.reasoning.contradiction_scan import scan_contradictions
+    from src.reasoning.greenwash_taxonomy import GreenwashTaxonomy
+    from src.reasoning.integrity_report import build_report
+    from src.reasoning.benchmark import cross_company, company_scorecard, trajectory
+    from src.reasoning.fact_check import fact_check_document, load_external_corpus
+    from src.reasoning.agent import ask as agent_ask, synthesize_audit, suggest_questions, _get_llm, _has_llm
 
 
 def _optional_llm():
