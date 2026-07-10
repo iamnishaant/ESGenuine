@@ -76,6 +76,9 @@ class DoclingTableExtractor:
             proc = subprocess.run(
                 cmd,
                 capture_output=True, text=True, timeout=self.timeout,
+                # Windows decodes child streams as cp1252 by default; docling logs
+                # UTF-8 (report glyphs) and a stray byte kills the reader thread.
+                encoding="utf-8", errors="replace",
             )
             # Surface the worker's own log lines even on success — silent per-page
             # preprocess failures inside docling are only visible there.
