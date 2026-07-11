@@ -29,6 +29,18 @@ class ESGOntology:
         # keyword) would otherwise steal generic raw "emissions" from emissions.total.
         "emissions.air_pollutants": ["sox", "nox", "particulate matter", "air pollutant",
                                      "air pollutants", "air quality"],
+        # Round 2 (gold v0.3 / Shell taxonomy-gap classes)
+        "emissions.offsets": ["carbon credits", "carbon offsets", "carbon offset",
+                              "emissions offset", "carbon-compensated", "carbon compensated"],
+        "emissions.ccs": ["carbon capture", "ccs", "ccus", "carbon capture and storage"],
+        "emissions.intensity": ["carbon intensity", "net carbon intensity",
+                                "emission intensity", "emissions intensity"],
+        "emissions.methane": ["methane", "methane emissions", "ogmp"],
+        "energy.supply": ["lng", "liquefied natural gas", "gas supply", "energy security"],
+        "energy.ev_charging": ["charge points", "charging points", "ev charging",
+                               "electric vehicle charging", "charging stations"],
+        "energy.investment": ["low-carbon investment", "investment in low-carbon",
+                              "low-carbon energy solutions"],
         "energy.renewable": ["renewable energy", "solar", "wind power", "clean energy", "green power"],
         "energy.total": ["energy consumption", "total energy", "power usage",
                          "fuel consumption", "energy consumed", "electricity consumption"],
@@ -56,10 +68,21 @@ class ESGOntology:
         "social.posh_complaints": ["posh", "sexual harassment"],
         "social.supply_chain.training": ["value chain partners", "value chain awareness"],
         "social.accessibility": ["accessibility", "differently abled", "assistive technologies"],
+        # Round 2
+        "social.supply_chain": ["suppliers", "supplier", "supply chain"],
+        "social.health_safety": ["health and safety", "process safety", "safety assessment",
+                                 "exposure hours", "occupational safety"],
+        "social.health_safety.sif": ["serious injuries and fatalities", "sif rate"],
 
         # Governance
         "governance.board.diversity": ["board diversity", "independent directors", "women on board"],
         "governance.ethics.incidents": ["ethics incidents", "whistleblower", "corruption cases", "anti-bribery"],
+        # Round 2
+        "governance.stakeholder_engagement": ["stakeholder engagement", "materiality survey",
+                                              "materiality assessment", "stakeholder consultation"],
+        "governance.payments_to_governments": ["payments to governments", "production entitlements"],
+        "governance.compliance": ["administrative penalty", "regulatory penalty", "penalties paid"],
+        "governance.lobbying": ["lobbying", "transparency register"],
     }
 
     @classmethod

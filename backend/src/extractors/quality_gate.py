@@ -37,6 +37,10 @@ _GENDER = re.compile(r"\b(male|female|women|men|gender)\b", re.I)
 _WASTE = re.compile(r"\b(waste|e-waste)\b", re.I)
 _WATER = re.compile(r"\b(water|effluent|wastewater)\b", re.I)
 _FUTURE = re.compile(r"\b(target|aim|aspire|commit|pledge|goal|will|by\s+20[2-9]\d)\b", re.I)
+# Strong commitment phrasing only — promotes text performance/narrative -> target.
+_FUTURE_STRONG = re.compile(
+    r"\b(we (have )?set a target|we pledged?|pledged|we aim to|we are committed to|"
+    r"we will \w+|expected to be \w+ed)\b|\bby\s+20[2-9]\d,?\s+we will\b", re.I)
 
 # Aspect backstops (gold v0.2 taxonomy-gap classes). Each maps an unmistakable
 # sentence signal to the node the taxonomy now has for it.
@@ -57,6 +61,25 @@ _UNION = re.compile(r"\b(union|collective bargaining|freedom of association)\b",
 _CSR = re.compile(r"\b(csr|corporate social responsibility|beneficiaries)\b", re.I)
 _VALUE_CHAIN = re.compile(r"\bvalue chain partners\b", re.I)
 _ACCESS = re.compile(r"\b(wheelchair|assistive technolog|braille|differently.abled)\b", re.I)
+
+# Round 2 backstops (gold v0.3 / Shell taxonomy-gap classes)
+_SCOPE12 = re.compile(r"\bscope\s*1\s*and\s*(scope\s*)?2\b", re.I)
+_OFFSET = re.compile(r"\b(carbon.?compensated|carbon credits?|carbon offsets?|emissions? offset)\b", re.I)
+_CCS = re.compile(r"\b(carbon capture|ccus|ccs)\b|\bco2\b[^.]*\bcaptured\b|\bcaptured\b[^.]*\bco2\b", re.I)
+_INTENSITY = re.compile(r"\b(net carbon intensity|carbon intensity|emissions? intensity)\b|gco2e\s*/\s*mj", re.I)
+_METHANE = re.compile(r"\b(ogmp|methane)\b", re.I)
+_LNG = re.compile(r"\b(lng|liquefied natural gas)\b", re.I)
+_EVCHARGE = re.compile(r"\b(charge points|charging points|ev charging|charging stations)\b", re.I)
+_INVEST_LC = re.compile(r"\binvest\w*\b[^.]*\b(low.carbon|non.energy)|\b(low.carbon|non.energy)[^.]*\binvest\w*\b", re.I)
+_PAY_GOV = re.compile(r"\b(payments? to governments?|production entitlements)\b", re.I)
+_LOBBY = re.compile(r"\b(lobbying|transparency register)\b", re.I)
+_PENALTY = re.compile(r"\b(administrative penalty|penalty of|fined)\b", re.I)
+_SIF = re.compile(r"\bserious injuries and fatalities\b", re.I)
+_LTIFR = re.compile(r"\b(ltifr|lost time injury)\b", re.I)
+_SAFETY_GENERIC = re.compile(r"\b(exposure hours|safety principles|process safety|"
+                             r"assessments of assets|change impact assessments)\b", re.I)
+_SUPPLIERS = re.compile(r"\bsuppliers\b", re.I)
+_EMISSION_WORD = re.compile(r"\bemissions?\b", re.I)
 
 
 def _sentence(claim: ExtractedClaim) -> str:
@@ -79,18 +102,21 @@ def _fix_aspect(claim: ExtractedClaim, sent: str) -> None:
     if asp.startswith("emissions") or asp == "uncategorized":
         s1, s2, s3 = bool(_SCOPE1.search(sent)), bool(_SCOPE2.search(sent)), bool(_SCOPE3.search(sent))
         want = None
-        if s1 and s2:
-            want = "emissions.total"        # combined "Scope 1 and Scope 2" rows
+        if (s1 and s2) or _SCOPE12.search(sent):
+            want = "emissions.total"        # combined "Scope 1 and 2" rows/sentences
         elif s1:
             want = "emissions.scope1"
         elif s2:
             want = "emissions.scope2"
         elif s3:
             want = "emissions.scope3"
-        if want and want != asp:
-            claim.normalized_aspect = want
-            claim.quality_flags.append("scope_fixed")
-            _refresh_keys(claim)
+        if want:
+            if want != asp:
+                claim.normalized_aspect = want
+                claim.quality_flags.append("scope_fixed")
+                _refresh_keys(claim)
+            # Scope-confirmed either way: later backstops (e.g. intensity) must not
+            # override an explicit "Scope 1 and 2" label.
             return
 
     def _set(node: str) -> None:
@@ -103,6 +129,82 @@ def _fix_aspect(claim: ExtractedClaim, sent: str) -> None:
         if asp != "emissions.air_pollutants":
             _set("emissions.air_pollutants")
         return
+
+    # Round 2 (gold v0.3): offsets/CCS/intensity/methane are their own concepts,
+    # not emissions.total. Offsets checked FIRST — "carbon-compensated LNG" is an
+    # offset claim, not an energy-supply one.
+    if asp.startswith(("emissions", "energy")) or asp == "uncategorized":
+        if _OFFSET.search(sent):
+            if asp != "emissions.offsets":
+                _set("emissions.offsets")
+            return
+        if _CCS.search(sent):
+            if asp != "emissions.ccs":
+                _set("emissions.ccs")
+            return
+    if (asp.startswith("emissions") or asp == "uncategorized") and _INTENSITY.search(sent):
+        if asp != "emissions.intensity":
+            _set("emissions.intensity")
+        return
+    if asp == "uncategorized" and _METHANE.search(sent):
+        _set("emissions.methane")
+        return
+
+    # LNG/gas supply force-fits to energy.renewable; EV charging is infrastructure,
+    # not renewable generation. Low-carbon investment routinely lands on
+    # social.community — the invest+low-carbon signal overrides any pillar.
+    if asp.startswith("energy") or asp == "uncategorized":
+        if _LNG.search(sent):
+            if asp != "energy.supply":
+                _set("energy.supply")
+            return
+        if _EVCHARGE.search(sent):
+            if asp != "energy.ev_charging":
+                _set("energy.ev_charging")
+            return
+    if _INVEST_LC.search(sent):
+        if asp != "energy.investment":
+            _set("energy.investment")
+        return
+
+    # Governance taxonomy-gap classes (Shell IR-style disclosures).
+    if _PAY_GOV.search(sent):
+        if asp != "governance.payments_to_governments":
+            _set("governance.payments_to_governments")
+        return
+    if _LOBBY.search(sent):
+        if asp != "governance.lobbying":
+            _set("governance.lobbying")
+        return
+    if (asp == "uncategorized" or asp.startswith("governance")) and _PENALTY.search(sent):
+        if asp != "governance.compliance":
+            _set("governance.compliance")
+        return
+
+    # Supplier-count rows mislabel as scope3 ("24,000 suppliers worldwide" has no
+    # emissions content). Requires the emissions word to be ABSENT.
+    if (asp.startswith(("emissions", "social")) or asp == "uncategorized") \
+            and _SUPPLIERS.search(sent) and not _EMISSION_WORD.search(sent):
+        if asp not in ("social.supply_chain", "social.supply_chain.training"):
+            _set("social.supply_chain")
+        return
+
+    # SIF-rate and generic safety-programme sentences force-fit to ltifr.
+    # LTIFR checked FIRST — the parent health_safety node's keywords otherwise
+    # steal explicit "Lost Time Injury Frequency Rate" rows via normalization.
+    if asp.startswith(("social.health_safety", "social")) or asp == "uncategorized":
+        if _LTIFR.search(sent):
+            if asp != "social.health_safety.ltifr":
+                _set("social.health_safety.ltifr")
+            return
+        if _SIF.search(sent):
+            if asp != "social.health_safety.sif":
+                _set("social.health_safety.sif")
+            return
+        if _SAFETY_GENERIC.search(sent):
+            if asp != "social.health_safety":
+                _set("social.health_safety")
+            return
 
     # Heat-rate (Kcal/kWh) efficiency rows land on energy.renewable AND on
     # emissions.* (PAT-scheme tables mention CO2 goals) — override both.
@@ -193,6 +295,13 @@ def _fix_type(claim: ExtractedClaim, sent: str) -> None:
     # ("Since 1972 ... arranging afforestation", ZLD descriptions)...
     if claim.claim_type == "target" and not _FUTURE.search(sent):
         claim.claim_type = "narrative"
+        claim.quality_flags.append("type_fixed")
+        return
+    # (gold v0.3): commitments mistyped 'performance'/'narrative'. Only STRONG,
+    # unambiguous commitment phrasing promotes — bare "will"/"by 2030" appears in
+    # too many mixed reporting sentences to be safe.
+    if claim.claim_type in ("performance", "narrative") and _FUTURE_STRONG.search(sent):
+        claim.claim_type = "target"
         claim.quality_flags.append("type_fixed")
         return
     # ...and reported numbers mistyped 'narrative' (row-label leaks like
