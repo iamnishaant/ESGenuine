@@ -38,6 +38,26 @@
 - [ ] Dedup table vs text claims; sub-dimension split for co2e absolute-vs-intensity
 
 ### Phase 3 — Verification layer  `[ ]` 🟠
+- [ ] **Satellite Evidence v2** 🟠 — replace the mocked `fetch_satellite` step
+      (`pipeline/workflow_dag.py`) with real imagery verification. **Scope locked
+      2026-07-11** (per the VeriGreen→CellPass split in
+      `E:\Completed_Less_Looked_at_Projects\Sustainability-BlockChain\DECISIONS.md`:
+      the satellite CV front-half was explicitly sized as a feature FOR THIS REPO;
+      the crypto/chain back-half went to CellPass — do NOT let it creep back in).
+      - Pipeline: `optical_possible` claims (95 live) ∩ geocodable place name →
+        geocode (Nominatim) → Sentinel-2 L2A before/after composites (free:
+        Copernicus / Planetary Computer STAC) → NDVI delta + z-score → verdict
+        `supported / not_supported / inconclusive` + `SATELLITE_*` flag into the
+        integrity report.
+      - Evidence commitment (cheap VeriGreen carry-over, no blockchain): store
+        SHA-256 bundle per check (tile IDs+hashes, date windows, cloud mask %,
+        params, verdict) in a `satellite_evidence` table → reproducible verdicts.
+      - Expected surface: ~20–40 verifiable claims (reforestation / solar build-out);
+        cloud cover fallback = widen compositing window, mark `inconclusive`.
+      - OUT (rejected for this repo): geospatial FM fine-tuning (Prithvi/Clay),
+        on-chain anchoring, VCs/DIDs, challenge contracts, carbon/biomass MRV.
+      - Prereq: corpus re-ingest done (location fields only trustworthy on the
+        96.1 pipeline) + gold v0.3 sanity on extraction.
 - [ ] Self-consistency (sample extraction 2×, keep agreeing fields)
 - [ ] LLM-judge pass for the greenwashing verdict + calibrated confidence
 - [ ] Symbolic sanity checks (unit/temporal plausibility; Scope1+2 vs total)
