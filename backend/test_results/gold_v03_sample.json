@@ -1,0 +1,634 @@
+[
+ {
+  "claim_id": "b51cdef8-66d",
+  "src": "Mulanur, Tamil Nadu",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 300.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "79f9498a-305",
+  "src": "Khageshree, Gujarat",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 197.5,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "26bd6103-d5d",
+  "src": "Whitewater Hill, CA",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 62.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "c9f178ab-048",
+  "src": "Cabazon Pass, CA",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 41.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "dced3115-8e2",
+  "src": "Blauwwind",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 732.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "cc0f0dbc-cb0",
+  "src": "NoordzeeWind",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 108.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "3c32b71d-ec3",
+  "src": "TetraSpar",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 4.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "e1c09137-94b",
+  "src": "Brazos Repower [A]",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 182.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "05d9a723-ce3",
+  "src": "Pottendijk (wind)",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 50.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "965e7c80-e2a",
+  "src": "Atlantic Shores - Project 1",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 1509.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "dd0069e8-11d",
+  "src": "SouthCoast Wind",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 1200.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "92a1ba83-ed4",
+  "src": "CrossWind",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 759.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "9f5c8eb4-bcd",
+  "src": "Ecowende",
+  "page": 34,
+  "stype": "table",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 760.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "c613ca14-f1d",
+  "src": "We received more than 300 responses.",
+  "page": 55,
+  "stype": "text",
+  "pred_aspect": "uncategorized",
+  "pred_value": 300.0,
+  "pred_unit": "responses",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "5afb5710-c11",
+  "src": "In 2022, our total combined Scope 1 and 2 absolute greenhouse gas emissions (from assets and activities under our operational control) were\n58 million tonnes on a CO2 equivalent basis, a 15% reduction compared with 2021, and a 30% reduction compared with 2016, the base year.",
+  "page": 26,
+  "stype": "text",
+  "pred_aspect": "emissions.scope1",
+  "pred_value": 15.0,
+  "pred_unit": "%",
+  "pred_type": "performance",
+  "flags": [
+   "scope_fixed"
+  ]
+ },
+ {
+  "claim_id": "4a1c848d-d16",
+  "src": "Shell has around 24,000 suppliers worldwide (see Supply chain).",
+  "page": 14,
+  "stype": "text",
+  "pred_aspect": "emissions.scope3",
+  "pred_value": 24000.0,
+  "pred_unit": "suppliers",
+  "pred_type": "performance",
+  "flags": []
+ },
+ {
+  "claim_id": "cb619003-d7d",
+  "src": "2021: 6.9\nserious injuries and\nfatalities per 100 million\nworking hours.",
+  "page": 8,
+  "stype": "text",
+  "pred_aspect": "social.health_safety.ltifr",
+  "pred_value": 6.9,
+  "pred_unit": "per 100 million working hours",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "3a6197b8-470",
+  "src": "At the end of 2022, Shell's share of total installed capacity from onshore and offshore wind was 307 megawatts alternating current (MWac),\nwith a further Shell share of 789 MWac under construction.",
+  "page": 34,
+  "stype": "text",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 307.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "580c4837-da7",
+  "src": "In 2022, Shell's net carbon intensity was 76 gCO2e/MJ, a 1.3% decrease from the previous year and a 3.8% reduction compared with 2016,\nthe reference year.",
+  "page": 26,
+  "stype": "text",
+  "pred_aspect": "emissions.total",
+  "pred_value": 3.8,
+  "pred_unit": "%",
+  "pred_type": "performance",
+  "flags": []
+ },
+ {
+  "claim_id": "aff300b1-f24",
+  "src": "Of that, we invested $4.3 billion in low-carbon energy solutions, an increase of 89% compared with the previous year.",
+  "page": 26,
+  "stype": "text",
+  "pred_aspect": "social.community",
+  "pred_value": 4300000000.0,
+  "pred_unit": "INR",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed",
+   "value_not_in_source"
+  ]
+ },
+ {
+  "claim_id": "0ce797c2-21d",
+  "src": "In October 2021, in support of our 2050 net-zero emissions target, we set a target to reduce Scope 1 and 2 absolute emissions from assets and\nactivities under our operational control (including divestments) by 50% by 2030, compared with 2016 levels on a net basis (including carbon\ncredits).",
+  "page": 24,
+  "stype": "text",
+  "pred_aspect": "emissions.scope1",
+  "pred_value": 50.0,
+  "pred_unit": "%",
+  "pred_type": "performance",
+  "flags": [
+   "scope_fixed"
+  ]
+ },
+ {
+  "claim_id": "b5c12197-fd4",
+  "src": "This element, vested at 180% of target based on performance to the end of 2022, reflects our progress in\ntransitioning towards a lower-carbon future.",
+  "page": 9,
+  "stype": "text",
+  "pred_aspect": "emissions.total",
+  "pred_value": 180.0,
+  "pred_unit": "%",
+  "pred_type": "target",
+  "flags": []
+ },
+ {
+  "claim_id": "d9e3ffc6-c07",
+  "src": "Our 2022 net carbon intensity includes 4.1 million tonnes of emissions offset\nthrough the use of carbon credits, compared with 5.1 million tonnes that were included in our 2021 net carbon intensity.",
+  "page": 26,
+  "stype": "text",
+  "pred_aspect": "emissions.total",
+  "pred_value": 5.1,
+  "pred_unit": "million tonnes",
+  "pred_type": "performance",
+  "flags": []
+ },
+ {
+  "claim_id": "5f778e17-cab",
+  "src": "By the end of 2022, about 460 Shell staff had completed the human rights training course launched in 2021, which is mandatory for selected\nstaff working in high-risk focus areas, such as social performance, human resources and contracting and procurement.",
+  "page": 56,
+  "stype": "text",
+  "pred_aspect": "social.human_rights",
+  "pred_value": 460.0,
+  "pred_unit": "staff",
+  "pred_type": "performance",
+  "flags": [
+   "aspect_fixed",
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "bac3a89b-0e7",
+  "src": "We also made other payments to governments, including $15.1 billion in production entitlements, $2.6 billion in fees and $221 million in\nbonuses.",
+  "page": 16,
+  "stype": "text",
+  "pred_aspect": "uncategorized",
+  "pred_value": 221.0,
+  "pred_unit": "million USD",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "1b1d699a-f2a",
+  "src": "At our QGC natural gas project in Australia, we are helping\nTraditional Owners develop a centralised database that enables them to document and manage their rich cultural heritage and increase\nunderstanding of its depth and sensitivities.",
+  "page": 59,
+  "stype": "text",
+  "pred_aspect": "uncategorized",
+  "pred_value": null,
+  "pred_unit": null,
+  "pred_type": "narrative",
+  "flags": []
+ },
+ {
+  "claim_id": "b35d3874-e7b",
+  "src": "In 2022, as part of this\napproach, we focused on conducting detailed change impact assessments across the Shell Group to assess the extent to which our new safety\nprinciples are being integrated.",
+  "page": 17,
+  "stype": "text",
+  "pred_aspect": "social.health_safety.ltifr",
+  "pred_value": null,
+  "pred_unit": null,
+  "pred_type": "narrative",
+  "flags": []
+ },
+ {
+  "claim_id": "9feb9b63-ef2",
+  "src": "Carbon dioxide (CO2)\nMillion tonnes\n49\n58\n61\n67\n69\nCCE-4\nEM-EP-110a.1\n305-1",
+  "page": 74,
+  "stype": "text",
+  "pred_aspect": "emissions.total",
+  "pred_value": 69.0,
+  "pred_unit": "Million tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "05561dbc-d93",
+  "src": "In 2022, the combined total of hydrocarbons discharged to surface water across all our facilities decreased to 0.9 thousand tonnes, compared\nwith 1.0 thousand tonnes in 2021.",
+  "page": 45,
+  "stype": "text",
+  "pred_aspect": "water.discharge",
+  "pred_value": 0.9,
+  "pred_unit": "thousand tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "aspect_fixed"
+  ]
+ },
+ {
+  "claim_id": "ff5be554-9ba",
+  "src": "The incident resulted in Shell Turkey paying an\nadministrative penalty in 2022 of around €13,000 to the Turkish data protection authority.",
+  "page": 15,
+  "stype": "text",
+  "pred_aspect": "uncategorized",
+  "pred_value": 13000.0,
+  "pred_unit": "EUR",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "9494861a-c6f",
+  "src": "In 2022, we offered training to 503 third-party companies in 23 countries.",
+  "page": 14,
+  "stype": "text",
+  "pred_aspect": "social.training.hours",
+  "pred_value": 503.0,
+  "pred_unit": "companies",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "6ae04fc1-5db",
+  "src": "We completed 49 of 52 assessments of assets, projects, functions and businesses within Shell (we aim to\ncomplete the remaining assessments in 2023).",
+  "page": 17,
+  "stype": "text",
+  "pred_aspect": "social.health_safety.ltifr",
+  "pred_value": 49.0,
+  "pred_unit": "assessments",
+  "pred_type": "target",
+  "flags": []
+ },
+ {
+  "claim_id": "4340b6da-e07",
+  "src": "As of 2024, some 800,000 tonnes of CO2 per year are expected to be captured,\ncompressed and liquefied at a Yara ammonia and fertiliser plant in the Netherlands.",
+  "page": 33,
+  "stype": "text",
+  "pred_aspect": "emissions.total",
+  "pred_value": 800000.0,
+  "pred_unit": "tonnes per year",
+  "pred_type": "narrative",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "d5d4b65a-3fc",
+  "src": "Our investment in non-energy products decreased by 9% compared with 2021.",
+  "page": 26,
+  "stype": "text",
+  "pred_aspect": "social.community",
+  "pred_value": 9.0,
+  "pred_unit": "%",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "806d50f1-d96",
+  "src": "In 2022, Shell UK pledged £100 million to help communities in the UK develop\nskills and find jobs linked to the energy transition.",
+  "page": 52,
+  "stype": "text",
+  "pred_aspect": "social.community",
+  "pred_value": 100.0,
+  "pred_unit": "million GBP",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "51b21b32-7cf",
+  "src": "In 2022, more than 3,500 staff were trained in 20 countries.",
+  "page": 40,
+  "stype": "text",
+  "pred_aspect": "uncategorized",
+  "pred_value": 3500.0,
+  "pred_unit": "staff",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "8a8f0aa4-777",
+  "src": "During the year, we were awarded Gold Standard status\nfor our OGMP 2.0 reporting for the second consecutive year.",
+  "page": 64,
+  "stype": "text",
+  "pred_aspect": "uncategorized",
+  "pred_value": 2.0,
+  "pred_unit": "years",
+  "pred_type": "performance",
+  "flags": []
+ },
+ {
+  "claim_id": "57a4171a-bb1",
+  "src": "Carbon dioxide (CO2)\nMillion tonnes\n49\n58\n61\n67\n69\nCCE-4\nEM-EP-110a.1\n305-1",
+  "page": 74,
+  "stype": "text",
+  "pred_aspect": "emissions.total",
+  "pred_value": 49.0,
+  "pred_unit": "Million tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "e6366eec-af9",
+  "src": "In 2022, we delivered 11 carbon-compensated liquefied natural gas\n(LNG) cargoes to customers across the globe, and for the first time, a greenhouse gas--neutral LNG cargo in line with the framework of the\nInternational Group of Liquefied Natural Gas Importers (GIIGNL).",
+  "page": 32,
+  "stype": "text",
+  "pred_aspect": "emissions.total",
+  "pred_value": 11.0,
+  "pred_unit": "cargoes",
+  "pred_type": "performance",
+  "flags": []
+ },
+ {
+  "claim_id": "3efc1b56-202",
+  "src": "In 2022, we completed construction of the Shell Polymers\nMonaca polyethylene production facility in Pennsylvania, USA, with more than 67 million exposure hours without fatality or serious injury.",
+  "page": 17,
+  "stype": "text",
+  "pred_aspect": "social.health_safety.ltifr",
+  "pred_value": 67.0,
+  "pred_unit": "million hours",
+  "pred_type": "performance",
+  "flags": []
+ },
+ {
+  "claim_id": "f8c8e3a3-b13",
+  "src": "In 2022, we took a final investment decision to start building Europe's largest renewable hydrogen plant in the Netherlands.",
+  "page": 63,
+  "stype": "text",
+  "pred_aspect": "energy.renewable",
+  "pred_value": null,
+  "pred_unit": null,
+  "pred_type": "narrative",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "e3129e0c-dee",
+  "src": "By 2030, we will increase the amount of recycled plastic in Shell-branded packaging to 30% and ensure that the packaging we use for\nour products is reusable or recyclable.",
+  "page": 68,
+  "stype": "text",
+  "pred_aspect": "waste.total",
+  "pred_value": 30.0,
+  "pred_unit": "%",
+  "pred_type": "performance",
+  "flags": []
+ },
+ {
+  "claim_id": "622d71b9-9c7",
+  "src": "In the EU, Shell's reported estimated annual costs related to activities covered by the register were €5,500,000 to €5,999,999 in 2022.",
+  "page": 15,
+  "stype": "text",
+  "pred_aspect": "uncategorized",
+  "pred_value": 5500000.0,
+  "pred_unit": "EUR",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "5e0978f6-cbb",
+  "src": "The rest was taken from surface water, such as\nrivers and lakes (54%) and groundwater (around 15%).",
+  "page": 45,
+  "stype": "text",
+  "pred_aspect": "water.consumption",
+  "pred_value": 15.0,
+  "pred_unit": "%",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "762ce80b-3a8",
+  "src": "In 2022, we invested $8.2 billion in low-carbon energy and non-energy products, around a third of our total cash capital expenditure",
+  "page": 26,
+  "stype": "text",
+  "pred_aspect": "social.community",
+  "pred_value": 8200000000.0,
+  "pred_unit": "INR",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed",
+   "value_not_in_source"
+  ]
+ },
+ {
+  "claim_id": "f03abaf9-1c4",
+  "src": "Our nitrogen oxide (NOx) emissions decreased from 105 thousand tonnes in 2021 to 93 thousand tonnes in 2022, because of, in part, the\nhandover of operations in OML 11 in Nigeria, the divestment of Permian assets in the USA and fewer ships operated by Shell.",
+  "page": 46,
+  "stype": "text",
+  "pred_aspect": "emissions.air_pollutants",
+  "pred_value": 12.0,
+  "pred_unit": "thousand tonnes",
+  "pred_type": "performance",
+  "flags": [
+   "aspect_fixed",
+   "type_fixed",
+   "value_not_in_source"
+  ]
+ },
+ {
+  "claim_id": "e50f6d22-d69",
+  "src": "Direct GHG emissions (Scope 1)\nMillion tonnes CO2e\n51\n60\n63\n70\n71\nCCE-4\nEM-EP-110a.1\n305-1",
+  "page": 74,
+  "stype": "text",
+  "pred_aspect": "emissions.scope1",
+  "pred_value": 71.0,
+  "pred_unit": "Million tonnes CO2e",
+  "pred_type": "performance",
+  "flags": [
+   "scope_fixed",
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "ff2de84a-282",
+  "src": "At the end of 2022, Shell's share of total installed capacity from onshore and offshore wind was 307 megawatts alternating current (MWac),\nwith a further Shell share of 789 MWac under construction.",
+  "page": 34,
+  "stype": "text",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 789.0,
+  "pred_unit": "MWac",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ },
+ {
+  "claim_id": "bc9164c4-dfa",
+  "src": "This included delivering a record 194 cargoes of liquefied natural gas (LNG) to Europe in 2022 – almost five times our\nusual average.",
+  "page": 4,
+  "stype": "text",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 194.0,
+  "pred_unit": "cargoes",
+  "pred_type": "performance",
+  "flags": []
+ },
+ {
+  "claim_id": "978c5915-8a7",
+  "src": "2021: 87,000\npublic and private electric\nvehicle charge points\noperated by Shell.",
+  "page": 8,
+  "stype": "text",
+  "pred_aspect": "energy.renewable",
+  "pred_value": 87000.0,
+  "pred_unit": "charge points",
+  "pred_type": "performance",
+  "flags": [
+   "type_fixed"
+  ]
+ }
+]
