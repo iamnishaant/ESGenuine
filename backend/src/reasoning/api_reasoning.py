@@ -230,6 +230,24 @@ def _factcheck_for(claims):
         return None
 
 
+def _satellite_for(doc_id):
+    """Latest satellite_evidence row per claim for this report (v2.3). The table is
+    an append-only log, so keep only the newest check per claim_id. Failure degrades
+    to None → build_report scores exactly as v2.2."""
+    try:
+        res = (get_supabase().table("satellite_evidence")
+               .select("claim_id,verdict,reason,ndvi_delta,z_score,bundle_sha256,checked_at")
+               .eq("report_id", doc_id)
+               .order("checked_at", desc=True).limit(1000).execute())
+        latest = {}
+        for r in (res.data or []):          # newest first — first wins per claim
+            latest.setdefault(r["claim_id"], r)
+        return list(latest.values()) or None
+    except Exception as e:
+        print(f"[integrity] satellite integration skipped: {e}")
+        return None
+
+
 @router.get("/{doc_id}/integrity-report")
 async def get_integrity_report(doc_id: str):
     """Full ESG Integrity Report: score, grade, greenwashing flags, contradictions,
@@ -242,7 +260,7 @@ async def get_integrity_report(doc_id: str):
     except HTTPException:
         contradictions = []
     return build_report(claims, contradictions, _fetch_reviews(doc_id),
-                        factcheck=_factcheck_for(claims))
+                        factcheck=_factcheck_for(claims), satellite=_satellite_for(doc_id))
 
 
 @router.get("/{doc_id}/review-queue")

@@ -42,15 +42,19 @@ def ndvi_composite(lon: float, lat: float, date_from: str, date_to: str,
 
     Returns {ndvi_mean, ndvi_std, n_scenes, scenes:[{id, datetime, cloud_cover,
     b04_sha256, b08_sha256}], error?}. Never raises on 'no data' — reports it."""
-    catalog = pystac_client.Client.open(STAC_URL, modifier=planetary_computer.sign_inplace)
-    search = catalog.search(
-        collections=["sentinel-2-l2a"],
-        intersects={"type": "Point", "coordinates": [lon, lat]},
-        datetime=f"{date_from}/{date_to}",
-        query={"eo:cloud_cover": {"lt": MAX_CLOUD}},
-    )
-    items = sorted(search.item_collection(),
-                   key=lambda it: it.properties.get("eo:cloud_cover", 100.0))[:MAX_SCENES]
+    try:
+        catalog = pystac_client.Client.open(STAC_URL, modifier=planetary_computer.sign_inplace)
+        search = catalog.search(
+            collections=["sentinel-2-l2a"],
+            intersects={"type": "Point", "coordinates": [lon, lat]},
+            datetime=f"{date_from}/{date_to}",
+            query={"eo:cloud_cover": {"lt": MAX_CLOUD}},
+        )
+        items = sorted(search.item_collection(),
+                       key=lambda it: it.properties.get("eo:cloud_cover", 100.0))[:MAX_SCENES]
+    except Exception as e:  # STAC 4xx/5xx or network — one claim must not kill a sweep
+        return {"ndvi_mean": None, "ndvi_std": None, "n_scenes": 0, "scenes": [],
+                "error": f"stac_search_failed: {str(e)[:140]}"}
     if not items:
         return {"ndvi_mean": None, "ndvi_std": None, "n_scenes": 0, "scenes": [],
                 "error": f"no scenes < {MAX_CLOUD}% cloud in {date_from}/{date_to}"}

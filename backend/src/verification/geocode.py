@@ -15,7 +15,9 @@ from typing import Optional, Dict, Any
 
 import requests
 
-_CACHE_PATH = Path(__file__).resolve().parents[2] / ".geocode_cache.json"
+# v2 suffix: bump whenever _candidates() changes — cached misses from an older
+# ladder must not mask queries the new ladder could resolve.
+_CACHE_PATH = Path(__file__).resolve().parents[2] / ".geocode_cache_v2.json"
 _UA = {"User-Agent": "ESGenuine-satellite-evidence/1.0 (open-source ESG audit tool)"}
 _LAST_CALL = [0.0]
 
@@ -64,6 +66,10 @@ _DESCRIPTOR = re.compile(
 def _candidates(text: str) -> list:
     t = re.sub(r"\s+", " ", text.strip())
     cands = [t]
+    m = re.match(r"^([A-Z][\w ]+?)'s (.+)$", t)
+    if m:
+        cands.append(f"{m.group(2)}, {m.group(1)}")   # "Madrid's Jarama riverbed" -> "Jarama riverbed, Madrid"
+        cands.append(f"{_DESCRIPTOR.sub('', m.group(2)).strip()}, {m.group(1)}")
     if " at " in t:
         cands.append(t.split(" at ", 1)[1])          # "Heber Park at Hebersham" -> "Hebersham"
     stripped = _DESCRIPTOR.sub("", t)

@@ -55,13 +55,19 @@ def _expectation(claim: Dict[str, Any]) -> Optional[str]:
 
 def _windows(claim: Dict[str, Any]) -> Optional[Dict[str, str]]:
     """Before = calendar year preceding the claim year; after = claim year
-    (clamped to today). Sentinel-2 coverage starts mid-2015."""
-    year = claim.get("report_year")
+    (clamped to today). The claim's own time_bucket wins over report_year —
+    reports describe the PRIOR fiscal year, and a planting dated FY23 inside a
+    2024 report would otherwise land in the 'before' window. Sentinel-2
+    coverage starts mid-2015."""
+    tb = str(claim.get("time_bucket") or "")
+    year = tb if tb.isdigit() else claim.get("report_year")
     try:
         year = int(year)
     except (TypeError, ValueError):
         return None
     if year < 2017:  # need a full 'before' year of S2 coverage
+        return None
+    if year > date.today().year:  # "by 2028" targets: outcome not observable yet
         return None
     today = date.today().isoformat()
     after_end = min(f"{year}-12-31", today)

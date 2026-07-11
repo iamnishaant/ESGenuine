@@ -30,7 +30,7 @@ _STRUCTURAL_PREVALENCE = 0.5
 # 2.1: honor human reviews — 'dismissed' flags drop out of the score; raw score still reported.
 # 2.2: optional fact-check integration (external-contradiction penalty + survival bonus)
 #      when a factcheck result is passed; without it, identical to 2.1.
-_REPORT_VERSION = "2.2"
+_REPORT_VERSION = "2.3"  # 2.3 = optional satellite-evidence integration
 
 # Fact-check → score coupling (self_improvement.md "Product Synergies"; improve_rating A3).
 # Bonus: claims that survived external scrutiny earn back points, proportional to how much
@@ -148,10 +148,68 @@ def _apply_factcheck(score, breakdown, flag_dicts, flag_counts, factcheck, total
     return max(0.0, min(100.0, score)), block
 
 
+_SAT_BONUS_PER_CLAIM = 2.0
+_SAT_BONUS_CAP = 5.0
+
+
+def _apply_satellite(score, breakdown, flag_dicts, flag_counts, satellite, total):
+    """Fold satellite_evidence rows (verification.satellite_evidence pipeline) in.
+
+    - not_supported -> SATELLITE_CONTRADICTION, Critical: an INDEPENDENT observation
+      channel (Sentinel-2) moved against the claim — the claimant cannot influence it,
+      so it outranks self-reported cross-filing contradictions.
+    - supported -> small additive bonus (negative points_deducted, same invariant
+      trick as FACT_CHECK_BONUS), capped: optics confirm, they don't prove magnitude.
+    - inconclusive -> reported in the block, no score effect.
+    Returns (score, satellite_block)."""
+    rows = satellite or []
+    sup = [r for r in rows if r.get("verdict") == "supported"]
+    con = [r for r in rows if r.get("verdict") == "not_supported"]
+    block = {"checked": len(rows), "supported": len(sup), "not_supported": len(con),
+             "inconclusive": len(rows) - len(sup) - len(con), "bonus": 0.0}
+    if not rows:
+        return score, block
+
+    if con:
+        pts = round(_SEV_WEIGHT["Critical"] * min(1.0, len(con) / total), 1)
+        score -= pts
+        entry = {"type": "SATELLITE_CONTRADICTION",
+                 "title": "Contradicted by satellite observation",
+                 "severity": "Critical", "count": len(con),
+                 "prevalence": round(min(1.0, len(con) / total), 3),
+                 "points_deducted": pts}
+        breakdown.append(entry)
+        flag_counts["Critical"] += 1
+        flag_dicts.append({
+            **{k: entry[k] for k in ("type", "title", "severity", "count")},
+            "description": "Sentinel-2 NDVI change at the claimed site moved against the claim.",
+            "evidence": [{"statement": r.get("reason"),
+                          "bundle_sha256": r.get("bundle_sha256")} for r in con[:5]],
+            "recommendation": "Provide site coordinates and ground evidence for the claimed "
+                              "activity; the committed imagery bundle is independently reproducible.",
+            "regulation": "EU Green Claims Directive (substantiation with independent evidence)",
+        })
+
+    if sup:
+        bonus = round(min(_SAT_BONUS_CAP, _SAT_BONUS_PER_CLAIM * len(sup),
+                          max(0.0, 100.0 - score)), 1)
+        if bonus:
+            score += bonus
+            block["bonus"] = bonus
+            breakdown.append({"type": "SATELLITE_VERIFIED",
+                              "title": "Verified by satellite observation (bonus)",
+                              "severity": "None", "count": len(sup),
+                              "prevalence": round(len(sup) / total, 3),
+                              "points_deducted": -bonus})
+
+    return max(0.0, min(100.0, score)), block
+
+
 def build_report(claims: List[Dict[str, Any]],
                  contradictions: Optional[List[Dict[str, Any]]] = None,
                  reviews: Optional[List[Dict[str, Any]]] = None,
-                 factcheck: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                 factcheck: Optional[Dict[str, Any]] = None,
+                 satellite: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     contradictions = contradictions or []
     reviews = reviews or []
     total = len(claims)
@@ -211,6 +269,15 @@ def build_report(claims: List[Dict[str, Any]],
             score, penalty_breakdown, flag_dicts, flag_counts, factcheck, total)
         penalty_breakdown.sort(key=lambda p: p["points_deducted"], reverse=True)
 
+    # ── optional satellite-evidence integration (v2.3) ──────────────────────────
+    # Independent-observation channel: contradictions penalize (Critical), supported
+    # claims earn a capped bonus. satellite=None leaves the score identical to v2.2.
+    satellite_block = None
+    if satellite:
+        score, satellite_block = _apply_satellite(
+            score, penalty_breakdown, flag_dicts, flag_counts, satellite, total)
+        penalty_breakdown.sort(key=lambda p: p["points_deducted"], reverse=True)
+
     grade = _grade(score)
 
     # Raw (pre-review) score: always recomputed so the UI can show "raw → adjusted" and a
@@ -259,6 +326,7 @@ def build_report(claims: List[Dict[str, Any]],
         "recommendations": recs,
         # v2.2: how the fact-check moved this score (None when no factcheck passed).
         "fact_check": fact_check_block,
+        "satellite": satellite_block,
         # Provenance: when/with-which-formula this score was computed (auditability).
         "computed_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "report_version": _REPORT_VERSION,
