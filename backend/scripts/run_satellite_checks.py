@@ -43,8 +43,8 @@ def main():
     page = 0
     while True:  # REST caps at 1000 rows/request — page through
         r = (sb.table("claims")
-             .select("claim_id,report_id,report_year,company_name,location_text,"
-                     "normalized_aspect,source_sentence")
+             .select("claim_id,report_id,report_year,time_bucket,company_name,"
+                     "location_text,normalized_aspect,source_sentence")
              .eq("observability_type", "optical_possible")
              .order("report_id").order("claim_id")
              .range(page * 1000, page * 1000 + 999).execute())
