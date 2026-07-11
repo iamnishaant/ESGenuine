@@ -117,6 +117,7 @@ _DIM_CLASSES = (
     {"mass", "unspecified"},           # waste absolutes
     {"count", "unspecified"},
     {"energy", "unspecified"},
+    {"power", "unspecified"},          # capacity (MW/MWac) — never merged with energy
 )
 
 

@@ -140,6 +140,149 @@
       "source": "Tata Power BRSR 2023-24 report, p.30, waste table (Principle 6 Q9)",
       "url": "",
       "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 300.0,
+      "unit": "MWac",
+      "statement": "Wind project Mulanur, Tamil Nadu: total capacity (100%) 300.0 MWac, in operation at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 197.5,
+      "unit": "MWac",
+      "statement": "Wind project Khageshree, Gujarat: total capacity (100%) 197.5 MWac, in operation at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 62.0,
+      "unit": "MWac",
+      "statement": "Wind project Whitewater Hill, CA: total capacity (100%) 62.0 MWac, in operation at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 41.0,
+      "unit": "MWac",
+      "statement": "Wind project Cabazon Pass, CA: total capacity (100%) 41.0 MWac, in operation at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 732.0,
+      "unit": "MWac",
+      "statement": "Wind project Blauwwind: total capacity (100%) 732.0 MWac, in operation at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 108.0,
+      "unit": "MWac",
+      "statement": "Wind project NoordzeeWind: total capacity (100%) 108.0 MWac, in operation at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 4.0,
+      "unit": "MWac",
+      "statement": "Wind project TetraSpar: total capacity (100%) 4.0 MWac, in operation at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 182.0,
+      "unit": "MWac",
+      "statement": "Wind project Brazos Repower: total capacity (100%) 182.0 MWac, under construction at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 50.0,
+      "unit": "MWac",
+      "statement": "Wind project Pottendijk (wind): total capacity (100%) 50.0 MWac, under construction at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 1509.0,
+      "unit": "MWac",
+      "statement": "Wind project Atlantic Shores - Project 1: total capacity (100%) 1509.0 MWac, under construction at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 1200.0,
+      "unit": "MWac",
+      "statement": "Wind project SouthCoast Wind: total capacity (100%) 1200.0 MWac, under construction at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 759.0,
+      "unit": "MWac",
+      "statement": "Wind project CrossWind: total capacity (100%) 759.0 MWac, under construction at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
+    },
+    {
+      "company_id": "shell",
+      "metric_key": "energy.renewable.power",
+      "year": 2022,
+      "value": 760.0,
+      "unit": "MWac",
+      "statement": "Wind project Ecowende: total capacity (100%) 760.0 MWac, under construction at end-2022.",
+      "source": "Shell Sustainability Report 2022, p.34, principal wind projects table (Docling-verified cells; gold set v0.3)",
+      "url": "https://reports.shell.com/sustainability-report/2022/",
+      "quality": "self_reported"
     }
   ]
 }

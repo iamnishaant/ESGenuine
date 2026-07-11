@@ -239,8 +239,12 @@ class SignatureGenerator:
                        "/inr", "/usd", "/tonne", "/m2", "/m²", "uedctm",
                        "per inr", "per boe", "per kwh", "per mwh", "per tonne", "per unit")),
         ("co2e",      ("co2e", "co2", "tco2", "mtco2", "ktco2", "ghg")),
-        ("energy",    ("kwh", "mwh", "gwh", "twh", "mwac", "wac", "kva", "gj", "tj",
-                       "joule", "megawatt", "gigawatt", "watt")),
+        ("energy",    ("kwh", "mwh", "gwh", "twh", "kva", "gj", "tj", "joule")),
+        # Power CAPACITY (MW/MWac/MWp) is not energy (MWh) — a 300 MWac wind farm
+        # must never cross-match a 300 MWh generation figure. Checked after energy
+        # so "mwh"/"gwh" have already matched; bare "mw"/"gw"/"watt" are then safe.
+        ("power",     ("mwac", "wac", "mwp", "kwp", "gwp", "mw", "gw", "kw",
+                       "megawatt", "gigawatt", "watt")),
         ("volume",    ("litre", "liter", "cubic met", "m3", "m³", "kilolitre",
                        "megalitre", "gallon", "barrel", "bbl")),
         ("area",      ("hectare", "acre", "km2", "km²", "sq km", "square", "m2", "m²")),
@@ -261,7 +265,7 @@ class SignatureGenerator:
     # dimensions are added per family so they are not collapsed to '.unspecified'.
     _PLAUSIBLE = {
         "emissions": {"co2e", "mass", "intensity", "percent"},
-        "energy": {"energy", "intensity", "percent"},
+        "energy": {"energy", "power", "intensity", "percent", "count"},
         "water": {"volume", "mass", "intensity", "percent"},
         "waste": {"mass", "volume", "percent"},
         "biodiversity": {"area", "count", "headcount", "incidents", "percent"},
