@@ -101,6 +101,47 @@ def _real_year(tb) -> Optional[str]:
     return s if s.isdigit() else None
 
 
+# ── metric-key equivalence (the fact-check coverage bottleneck) ──────────────────
+# Live claim keys and corpus keys disagree on the DIMENSION suffix for the same
+# physical quantity: a scope-1 tonnes figure lands as .co2e, .mass or .unspecified
+# depending on how the unit string was written; hand-written corpus keys used
+# legacy dims (.tonnes). Exact-string matching threw all of that away (e.g. 23
+# scope2 .unspecified claims vs a .co2e corpus record = zero evidence found).
+# Equivalence is deliberately narrow: same aspect node, and both dims inside ONE
+# equivalence class for that family. Ratios (.percent/.intensity/.rate) never
+# match absolutes — different quantities.
+_LEGACY_DIMS = {"tonnes": "mass", "tonne": "mass", "kilolitres": "volume", "kl": "volume"}
+_DIM_CLASSES = (
+    {"co2e", "mass", "unspecified"},   # emissions absolutes: tonnes CO2e vs bare tonnes
+    {"volume", "unspecified"},         # water absolutes
+    {"mass", "unspecified"},           # waste absolutes
+    {"count", "unspecified"},
+    {"energy", "unspecified"},
+)
+
+
+def _split_key(mk: str) -> tuple:
+    parts = str(mk or "").rsplit(".", 1)
+    if len(parts) == 2:
+        return parts[0], _LEGACY_DIMS.get(parts[1], parts[1])
+    return str(mk or ""), ""
+
+
+def keys_match(a, b) -> bool:
+    """True when two metric_keys denote the same physical metric."""
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    asp_a, dim_a = _split_key(a)
+    asp_b, dim_b = _split_key(b)
+    if asp_a != asp_b:
+        return False
+    if dim_a == dim_b:
+        return True
+    return any(dim_a in cls and dim_b in cls for cls in _DIM_CLASSES)
+
+
 def find_evidence(claim: Dict[str, Any], peer_claims: List[Dict[str, Any]],
                   external: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Evidence about the same (company, metric_key, reference-year) from a *different*
@@ -112,12 +153,12 @@ def find_evidence(claim: Dict[str, Any], peer_claims: List[Dict[str, Any]],
         return []
     out: List[Dict[str, Any]] = []
     for e in external:
-        if e.get("metric_key") == mk and str(e.get("year")) == yr and e.get("company_id") == comp:
+        if keys_match(e.get("metric_key"), mk) and str(e.get("year")) == yr and e.get("company_id") == comp:
             out.append({**e, "kind": "external", "quality": _norm_quality(e.get("quality"))})
     for c in peer_claims:
         if c.get("report_id") == claim.get("report_id") or c.get("company_id") != comp:
             continue
-        if c.get("metric_key") == mk and _real_year(c.get("time_bucket")) == yr and c.get("metric_value") is not None:
+        if keys_match(c.get("metric_key"), mk) and _real_year(c.get("time_bucket")) == yr and c.get("metric_value") is not None:
             out.append({
                 "company_id": comp, "metric_key": mk, "year": yr,
                 "value": c.get("metric_value"), "unit": c.get("metric_unit"),
