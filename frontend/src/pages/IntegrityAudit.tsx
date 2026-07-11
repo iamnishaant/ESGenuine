@@ -268,6 +268,43 @@ const IntegrityAudit = () => {
           </Card>
         </div>
 
+        {/* Satellite evidence (v2.3): independent Sentinel-2 observation channel */}
+        {(report.data?.satellite?.checked ?? 0) > 0 && (
+          <Card className="glass-panel">
+            <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><Satellite className="w-4 h-4" /> Satellite Evidence (Sentinel-2 NDVI, hash-committed)</CardTitle></CardHeader>
+            <CardContent>
+              <div className="flex gap-6 items-center flex-wrap">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-400" />
+                  <span className="text-2xl font-bold">{report.data?.satellite?.supported}</span>
+                  <span className="text-xs text-muted-foreground">supported</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <XCircle className="w-4 h-4 text-destructive" />
+                  <span className="text-2xl font-bold">{report.data?.satellite?.not_supported}</span>
+                  <span className="text-xs text-muted-foreground">contradicted</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-2xl font-bold">{report.data?.satellite?.inconclusive}</span>
+                  <span className="text-xs text-muted-foreground">inconclusive</span>
+                </div>
+                <div className="ml-auto text-right">
+                  <div className="text-xs text-muted-foreground">score effect</div>
+                  <div className="text-2xl font-bold">
+                    {(report.data?.satellite?.bonus ?? 0) > 0 ? `+${report.data?.satellite?.bonus}` : '—'}
+                  </div>
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-2">
+                Independent observation: verdicts are a deterministic function of before/after NDVI
+                composites at the claimed site; every check ships a SHA-256 evidence bundle
+                (scene IDs, pixel hashes, parameters) that reproduces the verdict.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Score breakdown + verification profile */}
         {report.data?.status === 'ok' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

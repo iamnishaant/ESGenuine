@@ -48,10 +48,15 @@ export interface IntegrityStatistics {
   avg_groundability?: number | null; contradictions?: number;
   verification_profile?: VerificationProfile;
 }
+export interface SatelliteBlock {
+  checked: number; supported: number; not_supported: number; inconclusive: number; bonus: number;
+}
 export interface IntegrityReport {
   status: string;
   meta?: { company_name?: string; report_year?: number; doc_id?: string; total_claims?: number };
   integrity_score?: number; grade?: string; greenwashing_risk?: string; summary?: string;
+  // v2.3: independent satellite-observation channel (Sentinel-2 NDVI, hash-committed)
+  satellite?: SatelliteBlock | null;
   // Pre-review machine score + how many reviewer dismissals moved it (raw == adjusted when 0).
   integrity_score_raw?: number; grade_raw?: string; reviews_applied?: number;
   statistics?: IntegrityStatistics;
