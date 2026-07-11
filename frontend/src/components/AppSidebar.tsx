@@ -11,7 +11,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  FilePlus
+  FilePlus,
+  BarChart3
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -52,6 +53,12 @@ const navItems = [
     label: 'Integrity Audit',
     icon: Gavel,
     description: 'Flags · fact-check · benchmark · AI'
+  },
+  {
+    path: '/benchmark',
+    label: 'Benchmark',
+    icon: BarChart3,
+    description: 'Cross-company · year-over-year'
   },
   { 
     path: '/transparency', 

@@ -146,6 +146,25 @@ export const getScorecard = (companyId: string) => get<Scorecard>(`/benchmark/co
 // Integrity Audit page uses, so Portfolio and Integrity Audit never disagree.
 export const getPortfolioIntegrity = () =>
   get<{ count: number; companies: PortfolioIntegrity[] }>(`/reports/portfolio/integrity`);
+// ── cross-company benchmark ──────────────────────────────────────────────────
+export interface BenchmarkEntry { company: string; year: number; value: number; unit: string | null; rank?: number }
+export interface CrossCompany {
+  metric_key: string; polarity: string; entries: BenchmarkEntry[]; n: number;
+  unit?: string | null; median?: number; best?: BenchmarkEntry; worst?: BenchmarkEntry;
+  dropped_units?: number;
+}
+export const getCrossCompany = (metricKey: string, year?: number) =>
+  get<CrossCompany>(`/benchmark/metric/${metricKey}${year ? `?year=${year}` : ''}`);
+
+export interface TrajectoryPoint { year: number; value: number; unit: string | null }
+export interface Trajectory {
+  company: string; metric_key: string; polarity: string;
+  series: TrajectoryPoint[]; points: number;
+  change?: number; change_pct?: number | null; trend?: string;
+}
+export const getTrajectory2 = (companyId: string, metricKey: string) =>
+  get<Trajectory>(`/benchmark/trajectory/${companyId}/${metricKey}`);
+
 export const getTrajectory = (companyId: string, metricKey: string, targetValue?: number, targetYear?: number) => {
   const q = new URLSearchParams();
   if (targetValue != null) q.set('target_value', String(targetValue));
