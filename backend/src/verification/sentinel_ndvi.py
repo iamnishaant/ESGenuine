@@ -85,4 +85,8 @@ def ndvi_composite(lon: float, lat: float, date_from: str, date_to: str,
         "ndvi_std": round(float(np.nanstd(median)), 4),
         "n_scenes": len(ndvis),
         "scenes": scenes,
+        # Committed digest of the composite itself + the raw array for paired
+        # per-pixel differencing upstream (stripped before JSON serialization).
+        "median_sha256": hashlib.sha256(np.nan_to_num(median).tobytes()).hexdigest(),
+        "_median_array": median,
     }

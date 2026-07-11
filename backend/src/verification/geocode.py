@@ -22,7 +22,12 @@ _LAST_CALL = [0.0]
 # Not places: company names, vague scopes, corporate boilerplate.
 _JUNK = re.compile(
     r"^(global|globally|worldwide|various|multiple|company|the entire planet|earth|"
-    r"n/?a|shell|tata|infosys|microsoft|group|all (our )?(sites|facilities|locations))\b",
+    r"planet|n/?a|shell|tata|infosys|microsoft|group|"
+    r"all (our )?(sites|facilities|locations))\b|"
+    # generic concepts that geocode to SOMETHING but denote no specific place
+    r"^(world heritage|marine environment|critical habitats?|offshore|onshore|"
+    r"communities|protected areas?|high.risk (areas|countries))\b|"
+    r"(facilities|operations)$",
     re.I)
 # Coarser than a city: whole countries/regions give a meaningless NDVI point sample.
 _TOO_COARSE = {"india", "china", "usa", "united states", "uk", "united kingdom",

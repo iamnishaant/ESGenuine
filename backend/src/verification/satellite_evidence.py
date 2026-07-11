@@ -25,10 +25,15 @@ from .geocode import geocode, geocodable
 from .sentinel_ndvi import ndvi_composite
 
 PARAMS = {
-    "version": "sat-ev-2.0",
+    "version": "sat-ev-2.1",
     "buffer_m": 250,
     "min_abs_delta": 0.05,   # NDVI units — below this the signal is noise
-    "min_z": 1.0,            # |delta| / pooled composite std
+    "min_z": 2.0,            # paired-pixel z (see _paired_stats)
+    "method": "paired_pixel",  # v2.0 used whole-composite means vs spatial std —
+                               # spatial heterogeneity (river+urban in one AOI)
+                               # drowned real change; pairing removes it.
+    "n_eff_divisor": 16,     # spatial autocorrelation discount: ~4px correlation
+                             # length -> one independent sample per 4x4 block
     "collection": "sentinel-2-l2a",
 }
 
@@ -112,20 +117,21 @@ def verify_claim(claim: Dict[str, Any]) -> Dict[str, Any]:
     after = ndvi_composite(geo["lon"], geo["lat"], win["after_from"], win["after_to"],
                            buffer_m=PARAMS["buffer_m"])
 
+    before_arr = before.pop("_median_array", None)
+    after_arr = after.pop("_median_array", None)
     result: Dict[str, Any] = {
         "claim_id": claim.get("claim_id"), "report_id": claim.get("report_id"),
         "location_text": loc, "geocoded": geo, "windows": win,
         "expectation": expectation, "before": before, "after": after, "params": PARAMS,
     }
-    if before.get("ndvi_mean") is None or after.get("ndvi_mean") is None:
+    if before.get("ndvi_mean") is None or after.get("ndvi_mean") is None \
+            or before_arr is None or after_arr is None:
         result["verdict"] = "inconclusive"
         result["reason"] = "insufficient_cloud_free_scenes"
     else:
-        delta = round(after["ndvi_mean"] - before["ndvi_mean"], 4)
-        pooled = max(1e-6, ((before["ndvi_std"] or 0) ** 2 + (after["ndvi_std"] or 0) ** 2) ** 0.5)
-        z = round(delta / pooled, 2)
-        result["ndvi_delta"] = delta
-        result["z_score"] = z
+        stats = _paired_stats(before_arr, after_arr)
+        result.update(stats)
+        delta, z = stats["ndvi_delta"], stats["z_score"]
         moved = abs(delta) >= PARAMS["min_abs_delta"] and abs(z) >= PARAMS["min_z"]
         if not moved:
             result["verdict"] = "inconclusive"
@@ -138,3 +144,24 @@ def verify_claim(claim: Dict[str, Any]) -> Dict[str, Any]:
             result["reason"] = f"ndvi_moved_against_expectation_{expectation}"
     result["bundle_sha256"] = _commit(result)
     return result
+
+
+def _paired_stats(before_arr, after_arr) -> Dict[str, Any]:
+    """Per-pixel paired differencing: the same ground cell compared with itself
+    across time, so spatial heterogeneity (river+urban+field inside one AOI)
+    cancels out of the noise term. z = mean(delta) / (std(delta)/sqrt(n_eff)),
+    with n_eff discounted for spatial autocorrelation (PARAMS.n_eff_divisor).
+    S2 L2A geolocation accuracy (~1 px) is adequate for 250 m vegetation AOIs."""
+    import numpy as np
+    h = min(before_arr.shape[0], after_arr.shape[0])
+    w = min(before_arr.shape[1], after_arr.shape[1])
+    d = after_arr[:h, :w] - before_arr[:h, :w]
+    valid = d[~np.isnan(d)]
+    if valid.size < 32:
+        return {"ndvi_delta": 0.0, "z_score": 0.0, "n_pixels": int(valid.size)}
+    n_eff = max(1.0, valid.size / PARAMS["n_eff_divisor"])
+    mean = float(np.mean(valid))
+    sd = float(np.std(valid)) or 1e-6
+    return {"ndvi_delta": round(mean, 4),
+            "z_score": round(mean / (sd / n_eff ** 0.5), 2),
+            "n_pixels": int(valid.size)}
