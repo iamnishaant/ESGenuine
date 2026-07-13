@@ -9,6 +9,16 @@
 
 ## ▶ Active now — SOTA program (extraction-first, full program)
 
+> **Reconciliation 2026-07-13** — this file had drifted behind the code. Since the
+> Phase-3 write, the 7-step improvement program shipped (eval harness → Docling tables
+> → quality gate → evidence corpus → fact-check score v2.2 → framework tags → prod
+> Docker), ontology **round 2** landed (gold v0.3: **89.7 OOS / 96.1 in-sample**),
+> **Satellite Evidence v2.3** went live, and the Benchmark page + YoY drift shipped.
+> Checkboxes below flipped to match. **In flight now:** corpus re-ingest on the round-2
+> pipeline (tata/shell_2022/infosys_2023 done; infosys_2025/microsoft/shell_2023
+> extracting) + the ⑥ regate sweep (re-apply round-2 gate to batch-written JSONLs).
+> See memory `pharos-improvement-roadmap` / `pharos-corpus-scoring` for the live detail.
+
 ### Phase 1 — SOTA extraction redesign  `[~]`
 - [x] Fix mojibake at source (`ftfy` in `pdf_parser.py` Step 1) 🔴
 - [x] `SECTION_EXTRACTION_PROMPT` + `ClaimExtractor.extract_from_sections()` (1 call per section-window, full context) 🟠
@@ -37,8 +47,14 @@
 - [ ] **Better table-page detection** — pdfplumber `find_tables` misses borderless perf tables (only 2/91 pages on Shell). Use digit-density or VLM page-classify so we don't under-select.
 - [ ] Dedup table vs text claims; sub-dimension split for co2e absolute-vs-intensity
 
-### Phase 3 — Verification layer  `[ ]` 🟠
-- [ ] **Satellite Evidence v2** 🟠 — replace the mocked `fetch_satellite` step
+### Phase 3 — Verification layer  `[~]` 🟠
+- [x] **Satellite Evidence v2 — ✅ SHIPPED (v2.3 live, commits →`68accff`, 2026-07-12).**
+      Real Sentinel-2 NDVI verification wired into the integrity report: paired-pixel
+      z-score verdicts, **Jarama reforestation SUPPORTED (z=12.8)**, Microsoft
+      **North-Holland datacenter NOT_SUPPORTED** (score 48.2→50.1 + `SATELLITE_CONTRADICTION`
+      flag), SHA-256 evidence bundles in a `satellite_evidence` table, REST-based runner
+      (IPv4, survives IPv6 drop), Benchmark-page satellite panel. Original scope (delivered):
+- [x] ~~replace the mocked `fetch_satellite` step~~
       (`pipeline/workflow_dag.py`) with real imagery verification. **Scope locked
       2026-07-11** (per the VeriGreen→CellPass split in
       `E:\Completed_Less_Looked_at_Projects\Sustainability-BlockChain\DECISIONS.md`:
@@ -62,53 +78,53 @@
 - [ ] LLM-judge pass for the greenwashing verdict + calibrated confidence
 - [ ] Symbolic sanity checks (unit/temporal plausibility; Scope1+2 vs total)
 
-### Phase 4 — Fix retrieval & reasoning  `[ ]` 🔴
-- [ ] Apply `database/match_claims_rpc.sql` to live DB (RPC currently missing → contradictions silently 0) — existing_issues #1
-- [ ] Remove the silent `except Exception: return []` in `retrieval.py` (surface failures) — existing_issues #1
-- [ ] Fix `doc_id` = chunk-id bug; use a real per-report document id — existing_issues #3
+### Phase 4 — Fix retrieval & reasoning  `[~]` 🔴
+- [x] Apply `database/match_claims_rpc.sql` to live DB — DONE 2026-06-25 (was PGRST202; RPC now callable, returns the full field set) — existing_issues #1
+- [ ] Remove the silent `except Exception: return []` in `retrieval.py` (still swallows → `[]`; now prints the error but the swallow remains at `retrieval.py:85-87`) — existing_issues #1
+- [x] Fix `doc_id` = chunk-id bug; use a real per-report document id — DONE (all ingest paths write real `report_id`; live rows relabeled) — existing_issues #3
 - [ ] Fix NLI input format (`</s></body>` hack → proper premise/hypothesis pair) — existing_issues #3/#7
-- [ ] Make numeric contradiction unit/metric_key-aware (stop cross-metric false positives) — existing_issues #7
+- [x] Make numeric contradiction unit/metric_key-aware — DONE (`_numeric_conflict` compares same `metric_key`+canonical unit; cross-year series no longer flagged; unit-canonicalizer) — existing_issues #7/#18/#19
 - [ ] (optional) Swap embeddings to NVIDIA `llama-nemotron-embed` for SOTA retrieval
 
-### Phase 5 — Evaluation harness  `[ ]` 🟠
-- [ ] Hand-label a gold set (~100–300 claims across 3–5 reports)
-- [ ] Precision/Recall/F1 for extraction fields, ontology mapping, contradictions
-- [ ] Regression gate (fail CI if F1 drops); track per model/prompt version
+### Phase 5 — Evaluation harness  `[~]` 🟠
+- [x] Hand-label a gold set — DONE: v0.1 (46 claims, 4 companies), v0.2 (`gold_set_docling_tata.json`, 50 table-verified), v0.3 (Shell 2022, 50, out-of-sample) — `backend/tests/eval/`
+- [x] Precision/Recall/F1 for extraction fields + ontology mapping — DONE (`run_evaluation.py` → EXTRACTION_SCORE: precision/value/pillar/node/type). **63.6 → 96.1 in-sample, 89.7 OOS.** (contradiction-eval still TODO)
+- [~] Regression gate — manual protocol proven (re-score BOTH golds after any gate/taxonomy change; caught 2 round-2 regressions); **not yet CI-enforced**
 
 ---
 
-## 🔴 Critical runtime defects (from existing_issues.md)
-- [ ] #1/#2 reasoning endpoints always return 0 (missing RPC + silent except) → Phase 4
-- [ ] #3 `claims.doc_id` holds chunk IDs → Phase 4
-- [x] #4 mojibake in parsed text → fixed in parser (NOTE: existing DB rows still dirty — re-ingest to clean)
-- [ ] #5 table rows ~45% noise → Phase 2
-- [ ] #6 company mislabeled "Business" (it's Tata Power) — fix metadata inference in `populate_reports.py`
-- [ ] #7 noisy/false contradictions → Phase 3/4
-- [ ] #8 on-disk `08dbf8224013_claims.json` empty → re-run extraction/ingest
-- [ ] #9 `"null"` strings + 28% null `time_start` in DB → re-ingest after fixes
-- [x] #10 `/v1/documents/{id}/sections` now returns `total` (API contract fixed)
-- [x] #11 `/health` version now reads `app.version` (no longer stale)
-- [ ] #12 in-memory `document_registry` loses filename on restart → persist
-- [ ] #13 `reports` table stale (claim_count 214 vs 181; 3/4 empty; F: paths)
+## 🔴 Critical runtime defects (from existing_issues.md) — **all #1–#13 resolved & verified 2026-06-26**
+- [x] #1/#2 reasoning endpoints return real conflicts (RPC applied) — residual: `retrieval.py` still swallows RPC errors → `[]` (tracked in Phase 4)
+- [x] #3 `claims.doc_id` holds a real per-report id (was chunk IDs)
+- [x] #4 mojibake — parser runs `ftfy`; live corpus **0/2385** mojibake markers (DB re-ingested clean)
+- [x] #5 table rows ~45% noise — Step5 drops empty-header/short rows (Docling tables now primary path)
+- [x] #6 company mislabel — all rows relabeled Tata Power; prod path takes explicit `company_name`
+- [x] #7 noisy/false contradictions — engine unit/metric_key-aware, cross-year series dropped
+- [x] #8 empty on-disk claims artifact — `/v1/claims/{id}` falls back to Supabase
+- [x] #9 `"null"` strings / null `time_start` — cleaned + write-path guards; null-time gated in reasoning
+- [x] #10 `/v1/documents/{id}/sections` now returns `total`
+- [x] #11 `/health` version now reads `app.version`
+- [x] #12 document filename persisted across restart (read back from parse artifact)
+- [x] #13 `reports` table refreshed (accurate `claim_count`, dead `F:` paths nulled)
 
 ---
 
 ## 🟠 Production hardening (from take_step_forward.md, Tier 1)
 - [ ] Async job/run model + workers → **real production ingest path** (today ingest is a manual script)
 - [ ] Pin deps / lockfile + `pyproject.toml`; seed RNG; pin model revisions
-- [ ] Dockerfile + docker-compose (backend + worker + local pg+pgvector + frontend)
+- [x] Dockerfile + docker-compose — DONE + verified live 2026-07-06 (`a09691c`): backend multi-stage + frontend nginx + compose (Supabase-only by design, no local PG); container healthy. 3 deploy-blocking bugs fixed.
 - [ ] CI (lint, typecheck, pytest, frontend build)
-- [ ] Structured logging + metrics + per-run lineage (replace `print()`)
+- [~] Structured logging — JSON request-log middleware shipped (`981a13f`, request_id/status/duration); full `print()`→structlog sweep still TODO
 - [ ] Security: enable Supabase RLS, service-role for writes, restrict CORS
 - [ ] Versioned Supabase migrations (stop `setup_db.py` DROP TABLE); fix dead LIST partitioning
 
 ## 🟡 Data / corpus
 - [x] Shell 2022 + 2023 downloaded & validated → `backend/ESG_Reports/`
 - [ ] Coca-Cola / Nestlé / Shein reports — sites are JS/WAF-gated; **user to drop PDFs into `backend/ESG_Reports/`**, then run `scripts/run_company_analysis.py`
-- [ ] Re-ingest a clean corpus once Phase 1–4 land (fixes mojibake/company/doc_id in DB)
+- [~] Re-ingest a clean corpus on the round-2 (96.1) pipeline — IN PROGRESS: tata/shell_2022/infosys_2023 done; infosys_2025/microsoft/shell_2023 extracting (`reingest_corpus.py`); ⑥ regate sweep re-applies round-2 gate to batch JSONLs (`regate_ingest.py`)
 
 ## 🟡 Housekeeping / decisions
-- [ ] Commit the uncommitted stack (de-fiction, restructure, NVIDIA, rename, Phase 1) — suggest split commits
+- [x] Commit the uncommitted stack — DONE (repo fully committed; the whole 7-step program + round-2 + satellite + benchmark landed as split commits through `68accff`)
 - [ ] Rotate exposed keys when convenient (GROQ, NVIDIA, DB password) — all in gitignored `.env`; deferred by user
 - [ ] Optional: rename the top-level folder to `ESGenuine` (manual; breaks IDE/cwd if done mid-session)
 - [ ] Repoint frontend `analyze-claims` edge function off Lovable AI → NVIDIA (needs Supabase secret + redeploy)
@@ -123,3 +139,7 @@
 - [x] Backend portability (relative paths), date-null sanitize, 3 TS errors fixed
 - [x] Audit docs written: `take_step_forward.md`, `existing_issues.md`
 - [x] git init at root + hardened `.gitignore`
+- [x] **7-step improvement program** (2026-07-03, `9917b69`→`981a13f`): eval harness + gold set → Docling layout-aware tables → quality gate → evidence corpus → fact-check integrity score v2.2 → framework tags (GRI/ESRS/TCFD) → prod Docker
+- [x] **Extraction score 63.6 → 96.1** (in-sample) via Docling + quality gate + ontology **round 2**; **89.7 out-of-sample** (Shell 2022, gold v0.3)
+- [x] **Count-weighted integrity score** (v2.0→2.3) + human-in-the-loop flag review; **Satellite Evidence v2.3** (Sentinel-2 NDVI); **Benchmark page** + YoY drift + satellite panel
+- [x] **Resumable metered extraction** (`ClaimCheckpoint`) + `reingest_corpus.py` / `regate_claims.py` / `regate_ingest.py` corpus-refresh tooling

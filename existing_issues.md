@@ -22,7 +22,8 @@ All 🔴 Critical and 🟠 major data defects are **resolved & verified on live 
 
 **Still open — externally blocked / accepted ceiling (the remaining gap):**
 - **LLM extraction ceiling** (residual of #7/#19): aspect/scope *mislabels* (diversity claims tagged `biodiversity`; 58Mt vs 305Mt both tagged `scope1` same year). Not deterministically fixable — needs 70B re-extraction with tighter aspect derivation. The product's standing data-quality remainder.
-- **Evidence-corpus depth** (fact-check coverage 4–46%): needs *sourced* real reference figures (no-fabricate rule) — not an engine defect; blocked on external data.
+  - **Being closed (2026-07-13, in progress):** the 96.1/round-2 pipeline (Docling tables + quality gate + ontology round 2 + FY-column repair) is re-extracting the full corpus on 70B — this directly attacks the mislabel residual. tata/shell_2022/infosys_2023 landed; infosys_2025/microsoft/shell_2023 extracting. Fresh extraction score is the honest re-measure once the batch completes.
+- **Evidence-corpus depth** (fact-check coverage 4–46%): needs *sourced* real reference figures (no-fabricate rule) — not an engine defect; blocked on external data. *(Partially addressed: corpus grew 4→24 page-cited records with the power/energy dimension split.)*
 
 ---
 
