@@ -81,6 +81,23 @@ _SAFETY_GENERIC = re.compile(r"\b(exposure hours|safety principles|process safet
 _SUPPLIERS = re.compile(r"\bsuppliers\b", re.I)
 _EMISSION_WORD = re.compile(r"\bemissions?\b", re.I)
 
+# Round 3 backstops (#20 root fix: subgroup rows sharing one metric_key).
+# Waste disposal routes (BRSR "Re-used waste" / "Landfilling waste" / "Incineration" rows).
+_W_LANDFILL = re.compile(r"\blandfill", re.I)
+_W_INCIN = re.compile(r"\bincinerat", re.I)
+_W_REUSE = re.compile(r"\b(re-?used?|recycl\w*|recover\w*)\b", re.I)
+# Per-pollutant (PM/SOx/NOx/VOC are different substances, not one metric).
+_PM = re.compile(r"\b(particulate matter|pm\s?10|pm\s?2\.5)\b", re.I)
+_SOX = re.compile(r"\b(sox|so2|sulph?ur oxides?|oxides of sulph?ur)\b", re.I)
+_NOX = re.compile(r"\b(nox|nitrogen oxides?|oxides of nitrogen)\b", re.I)
+_VOC = re.compile(r"\b(vocs?|volatile organic)\b", re.I)
+# Gender / employment-type cohorts (\b keeps "male" from matching inside "female").
+_FEMALE = re.compile(r"\b(female|women)\b", re.I)
+_MALE = re.compile(r"\b(male|men)\b", re.I)
+_PERM_EMP = re.compile(r"\bpermanent\b", re.I)
+_CONTRACT_EMP = re.compile(r"\b(contractual|other than permanent|contract workers?)\b", re.I)
+_EMP_WORD = re.compile(r"\b(employees?|workers?|workforce|headcount)\b", re.I)
+
 
 def _sentence(claim: ExtractedClaim) -> str:
     return (claim.provenance.source_sentence or "") if claim.provenance else ""
@@ -124,10 +141,19 @@ def _fix_aspect(claim: ExtractedClaim, sent: str) -> None:
         claim.quality_flags.append("aspect_fixed")
         _refresh_keys(claim)
 
-    # Air pollutants (PM/SOx/NOx) are mass emissions, not GHG totals.
-    if (asp.startswith("emissions") or asp == "uncategorized") and _AIRPOLL.search(sent):
-        if asp != "emissions.air_pollutants":
-            _set("emissions.air_pollutants")
+    # Air pollutants (PM/SOx/NOx) are mass emissions, not GHG totals. Round 3 (#20):
+    # exactly one pollutant named → its child node; multi-pollutant summary rows and
+    # generic "air pollutants" rows keep the parent.
+    if (asp.startswith("emissions") or asp == "uncategorized") \
+            and (_AIRPOLL.search(sent) or _PM.search(sent) or _SOX.search(sent)
+                 or _NOX.search(sent) or _VOC.search(sent)):
+        hits = [node for node, rx in (("emissions.air_pollutants.pm", _PM),
+                                      ("emissions.air_pollutants.sox", _SOX),
+                                      ("emissions.air_pollutants.nox", _NOX),
+                                      ("emissions.air_pollutants.voc", _VOC)) if rx.search(sent)]
+        want = hits[0] if len(hits) == 1 else "emissions.air_pollutants"
+        if asp != want:
+            _set(want)
         return
 
     # Round 2 (gold v0.3): offsets/CCS/intensity/methane are their own concepts,
@@ -264,12 +290,35 @@ def _fix_aspect(claim: ExtractedClaim, sent: str) -> None:
 
     # Gender/workforce rows can never be biodiversity; rescue uncategorized ones too.
     # A workforce stat split by male/female ("Female FY23" headcount) is a
-    # gender-diversity disclosure, not a plain headcount.
-    if asp in ("uncategorized",) or asp.startswith(("biodiversity", "social.workforce")):
+    # gender-diversity disclosure, not a plain headcount. Round 3 (#20): exactly one
+    # cohort named → its child node; mixed/summary rows keep the parent.
+    if asp in ("uncategorized",) or asp.startswith(("biodiversity", "social.workforce",
+                                                    "social.diversity.gender")):
         if _GENDER.search(sent):
-            claim.normalized_aspect = "social.diversity.gender"
-            claim.quality_flags.append("gender_fixed")
-            _refresh_keys(claim)
+            f, m = bool(_FEMALE.search(sent)), bool(_MALE.search(sent))
+            want = ("social.diversity.gender.female" if f and not m
+                    else "social.diversity.gender.male" if m and not f
+                    else "social.diversity.gender")
+            if asp != want:
+                claim.normalized_aspect = want
+                claim.quality_flags.append("gender_fixed")
+                _refresh_keys(claim)
+            return
+
+    # Round 3 (#20): employment-type cohorts — permanent vs contractual workforce
+    # rows are different populations, not restatements of one headcount.
+    # Contractual checked FIRST: "other than permanent" contains the word
+    # "permanent" but names the contractual cohort. Uncategorized rows qualify
+    # only when the sentence is unmistakably a workforce stat (employee word).
+    if asp.startswith("social.workforce") \
+            or (asp == "uncategorized" and _EMP_WORD.search(sent)):
+        want = None
+        if _CONTRACT_EMP.search(sent):
+            want = "social.workforce.contractual"
+        elif _PERM_EMP.search(sent):
+            want = "social.workforce.permanent"
+        if want and asp != want:
+            _set(want)
             return
 
     # Waste rows mislabeled as water (the swap class): waste words, no water words.
@@ -277,6 +326,17 @@ def _fix_aspect(claim: ExtractedClaim, sent: str) -> None:
         claim.normalized_aspect = "waste.total"
         claim.quality_flags.append("waste_water_fixed")
         _refresh_keys(claim)
+
+    # Round 3 (#20): waste disposal routes — re-used vs landfilled vs incinerated
+    # tonnages are different quantities. Applies after the water→waste swap so a
+    # rescued row is also routed. Exactly one route named wins; mixed rows keep asp.
+    asp = claim.normalized_aspect or "uncategorized"   # may have changed above
+    if asp.startswith("waste"):
+        hits = [node for node, rx in (("waste.landfilled", _W_LANDFILL),
+                                      ("waste.incinerated", _W_INCIN),
+                                      ("waste.recycled", _W_REUSE)) if rx.search(sent)]
+        if len(hits) == 1 and asp != hits[0]:
+            _set(hits[0])
 
 
 def _fix_type(claim: ExtractedClaim, sent: str) -> None:

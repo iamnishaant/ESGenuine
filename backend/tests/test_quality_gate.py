@@ -135,10 +135,19 @@ def test_gate_claims_stats():
 # ── gold-v0.2 upgrades: aspect backstops, furniture, FY-column, text types ──
 
 def test_air_pollutants_from_row_text():
+    # Round 3: a single named pollutant routes to its child node.
     c = _claim("SOx", aspect="emissions.total", value=110962.0, unit="tonnes")
     apply_gate(c)
-    assert c.normalized_aspect == "emissions.air_pollutants"
+    assert c.normalized_aspect == "emissions.air_pollutants.sox"
     assert "aspect_fixed" in c.quality_flags
+
+
+def test_multi_pollutant_summary_keeps_parent():
+    # Round 3: a summary row naming several pollutants stays on the parent node.
+    c = _claim("Air emissions of SOx, NOx and particulate matter reduced",
+               aspect="emissions.total", value=5.0, unit="tonnes")
+    apply_gate(c)
+    assert c.normalized_aspect == "emissions.air_pollutants"
 
 
 def test_heat_rate_overrides_emissions():
@@ -181,9 +190,47 @@ def test_posh_beats_gender_rescue():
 
 
 def test_female_workforce_row_is_diversity():
+    # Round 3: exactly one cohort named → its child node (was the parent).
     c = _claim("Female FY23", aspect="social.workforce.total", value=1901.0, unit="number")
     apply_gate(c)
+    assert c.normalized_aspect == "social.diversity.gender.female"
+
+
+def test_mixed_gender_row_keeps_parent():
+    # Round 3: a row naming both cohorts (summary/ratio) stays on the parent.
+    c = _claim("Male and Female employees by grade", aspect="social.workforce.total",
+               value=50.0, unit="%")
+    apply_gate(c)
     assert c.normalized_aspect == "social.diversity.gender"
+
+
+def test_permanent_vs_contractual_workforce_split():
+    # Round 3: employment-type cohorts get their own nodes.
+    p = _claim("Total permanent employees 23652", aspect="social.workforce.total",
+               value=23652.0, unit="employees")
+    apply_gate(p)
+    assert p.normalized_aspect == "social.workforce.permanent"
+    c = _claim("Workers other than permanent 74445", aspect="social.workforce.total",
+               value=74445.0, unit="workers")
+    apply_gate(c)
+    assert c.normalized_aspect == "social.workforce.contractual"
+
+
+def test_waste_disposal_routes_split():
+    # Round 3: re-used vs landfilled vs incinerated are different quantities.
+    lf = _claim("Landfilling waste FY 24", aspect="waste.total", value=2049160.0, unit="tonnes")
+    apply_gate(lf)
+    assert lf.normalized_aspect == "waste.landfilled"
+    ru = _claim("Re-used waste FY 24", aspect="waste.total", value=3791.0, unit="tonnes")
+    apply_gate(ru)
+    assert ru.normalized_aspect == "waste.recycled"
+    inc = _claim("Incineration waste FY 24", aspect="waste.total", value=0.0013, unit="tonnes")
+    apply_gate(inc)
+    assert inc.normalized_aspect == "waste.incinerated"
+    # A total row (no single route named) must NOT be re-routed.
+    tot = _claim("Total waste generated FY 24", aspect="waste.total", value=2100000.0, unit="tonnes")
+    apply_gate(tot)
+    assert tot.normalized_aspect == "waste.total"
 
 
 def test_afforestation_categorized():
@@ -259,7 +306,9 @@ _ALL_TESTS = [test_scope1_fixed_from_row_text, test_combined_scope_1_and_2_stays
               test_zld_reuse_is_recycled_not_discharge, test_posh_beats_gender_rescue,
               test_female_workforce_row_is_diversity, test_afforestation_categorized,
               test_furniture_dropped_by_gate_claims, test_fy_column_wrong_cell_repaired,
-              test_fy_column_correct_cell_untouched, test_digit_free_performance_downgraded]
+              test_fy_column_correct_cell_untouched, test_digit_free_performance_downgraded,
+              test_multi_pollutant_summary_keeps_parent, test_mixed_gender_row_keeps_parent,
+              test_permanent_vs_contractual_workforce_split, test_waste_disposal_routes_split]
 
 
 if __name__ == "__main__":

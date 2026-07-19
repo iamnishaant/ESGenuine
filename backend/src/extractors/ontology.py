@@ -27,8 +27,15 @@ class ESGOntology:
         "emissions.total": ["total emissions", "ghg emissions", "carbon footprint", "co2e"],
         # NOTE: no bare-"emissions"-containing keyword here — the B-rule (raw inside
         # keyword) would otherwise steal generic raw "emissions" from emissions.total.
-        "emissions.air_pollutants": ["sox", "nox", "particulate matter", "air pollutant",
-                                     "air pollutants", "air quality"],
+        # Round 3 (#20 root fix): per-pollutant children — PM vs SOx vs NOx are
+        # different substances; one shared key made their rows pairwise "contradict".
+        # The parent keeps only the generic keywords; specifics route to children.
+        "emissions.air_pollutants": ["air pollutant", "air pollutants", "air quality"],
+        "emissions.air_pollutants.pm": ["particulate matter", "pm10", "pm2.5", "pm 10", "pm 2.5"],
+        "emissions.air_pollutants.sox": ["sox", "so2", "sulphur oxides", "sulfur oxides",
+                                         "oxides of sulphur", "oxides of sulfur"],
+        "emissions.air_pollutants.nox": ["nox", "nitrogen oxides", "oxides of nitrogen"],
+        "emissions.air_pollutants.voc": ["voc", "vocs", "volatile organic compounds"],
         # Round 2 (gold v0.3 / Shell taxonomy-gap classes)
         "emissions.offsets": ["carbon credits", "carbon offsets", "carbon offset",
                               "emissions offset", "carbon-compensated", "carbon compensated"],
@@ -50,15 +57,33 @@ class ESGOntology:
         "water.recycled": ["recycled water", "water reused", "wastewater treated"],
         "water.discharge": ["water discharge", "water discharged", "effluent discharge", "effluent"],
         "waste.total": ["total waste", "solid waste", "hazardous waste", "waste generated", "plastic waste", "e-waste", "waste management"],
-        "waste.recycled": ["recycled waste", "waste diverted", "circular economy", "waste recycling"],
+        # Round 3 (#20 root fix): disposal-route children — re-used vs landfilled vs
+        # incinerated tonnages are different quantities, not restatements of one total.
+        "waste.recycled": ["recycled waste", "waste diverted", "circular economy", "waste recycling",
+                           "re-used waste", "reused waste", "waste re-used", "waste recovered",
+                           "other recovery"],
+        "waste.landfilled": ["landfill", "landfilled waste", "landfilling", "waste to landfill"],
+        "waste.incinerated": ["incineration", "incinerated waste", "waste incinerated"],
         "biodiversity.conservation": ["biodiversity", "reforestation", "habitat protection", "tree planting"],
 
         # Social
         "social.diversity.gender": ["gender diversity", "women in management", "female employees", "female representation",
                                     "diversity", "workforce diversity", "diversity in workforce", "employee diversity"],
+        # Round 3 (#20 root fix): cohort children — male vs female headcounts under one
+        # key made every gender-split table row pairwise "contradict". DELIBERATELY no
+        # keywords here: a cohort keyword like "men employees" is B-rule bait (generic
+        # raw "employees" → shortest containing keyword → gender.male steal, verified).
+        # Cohort routing happens ONLY in the quality gate, from the sentence text.
+        "social.diversity.gender.female": [],
+        "social.diversity.gender.male": [],
         "social.health_safety.ltifr": ["ltifr", "lost time injury", "safety incident rate", "work-related injuries"],
         "social.health_safety.fatalities": ["fatalities", "workplace deaths"],
         "social.workforce.total": ["total employees", "workforce size", "employment"],
+        # Round 3 (#20 root fix): employment-type cohorts (BRSR permanent vs
+        # contractual). No keywords — same B-rule-steal hazard as the gender cohorts
+        # (raw "workers" → "contract workers" → contractual); gate-only routing.
+        "social.workforce.permanent": [],
+        "social.workforce.contractual": [],
         "social.training.hours": ["training hours", "learning and development", "employee training"],
         "social.human_rights": ["human rights", "human rights due diligence"],
         "social.community": ["csr", "corporate social responsibility", "community development",
