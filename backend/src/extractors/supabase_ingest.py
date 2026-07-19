@@ -221,8 +221,11 @@ def ingest_claims_to_db(claims: List, report_meta: Dict[str, Any], batch_size: i
     embs = model.encode(texts, batch_size=32, show_progress_bar=False).tolist()
 
     inserted, batch = 0, []
+    slim_rows = []   # claim rows minus embedding, for the contradiction persist
     for c, emb in zip(claims, embs):
-        batch.append(_row(c, doc_id, emb, report_meta))
+        row = _row(c, doc_id, emb, report_meta)
+        slim_rows.append({k: v for k, v in row.items() if k != "embedding"})
+        batch.append(row)
         if len(batch) >= batch_size:
             inserted += _insert(sb, batch)
             batch = []
@@ -234,6 +237,14 @@ def ingest_claims_to_db(claims: List, report_meta: Dict[str, Any], batch_size: i
     # would leave a reports row that dedup-blocks the retry of an empty report.
     if inserted > 0:
         _upsert_report(sb, report_meta, inserted)
+        # Keep the UI-facing `contradictions` table in sync with the fresh claim set
+        # (delete-then-insert by doc_id; deterministic numeric scan, no model load).
+        # Guarded: a contradiction-persist failure must never fail an ingest.
+        try:
+            from reasoning.persist_contradictions import persist_doc_contradictions
+            persist_doc_contradictions(sb, doc_id, slim_rows)
+        except Exception as e:
+            print(f"[ingest] contradiction persist failed for {doc_id} (non-fatal): {e}")
 
     print(f"[ingest] {inserted}/{len(claims)} claims -> Supabase (doc_id={doc_id}, replaced={replaced})")
     return {"inserted": inserted, "total": len(claims), "doc_id": doc_id, "replaced": replaced}

@@ -191,3 +191,23 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 REVOKE ALL ON users FROM anon, authenticated;
+
+-- 11. Per-document contradictions (UI reasoning views read this straight from
+-- Supabase). Maintained by ingest: recomputed + replaced (delete-then-insert by
+-- doc_id) after every claim ingest — see reasoning/persist_contradictions.py and
+-- migration 2026-07-19_contradictions_doc_id.sql. Numeric-only (deterministic).
+CREATE TABLE IF NOT EXISTS contradictions (
+    id            BIGSERIAL PRIMARY KEY,
+    doc_id        TEXT,
+    claim_a_id    TEXT,
+    claim_b_id    TEXT,
+    severity      TEXT,
+    conflict_type TEXT,
+    reasoning     TEXT,
+    confidence    DOUBLE PRECISION,
+    created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS contradictions_doc_id_idx ON contradictions (doc_id);
+
+GRANT SELECT, INSERT, DELETE ON contradictions TO anon, authenticated;

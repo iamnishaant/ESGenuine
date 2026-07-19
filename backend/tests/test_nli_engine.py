@@ -152,6 +152,53 @@ def test_textual_path_with_injected_fake_model():
     assert not res2["has_contradiction"] and res2["conflict_type"] == "None"
 
 
+def test_subgroup_rows_under_count_key_are_not_contradictions():
+    # (#20) One count-family metric_key legitimately holds many subgroup rows
+    # (male/female, employees/workers). Same-year value differences between
+    # DIFFERENT rows are categories, not double-reporting — must NOT flag.
+    e = ContradictionEngine()
+    a = _c(metric_key="social.diversity.gender.headcount", metric_unit="employees",
+           metric_value=23652, time_bucket="2024",
+           source_sentence="Male employees 23652")
+    b = _c(metric_key="social.diversity.gender.headcount", metric_unit="employees",
+           metric_value=20255, time_bucket="2024",
+           source_sentence="Female employees 20255")
+    assert e._numeric_conflict(a, b) is None
+
+
+def test_count_key_double_report_still_flags():
+    # (#20) The same row text carrying two different numbers IS a genuine
+    # double-report — the subgroup gate must not swallow it. (Digits are
+    # stripped before comparing, so only the label text discriminates.)
+    e = ContradictionEngine()
+    a = _c(metric_key="social.diversity.gender.headcount", metric_unit="employees",
+           metric_value=23652, time_bucket="2024",
+           source_sentence="Total permanent employees 23652")
+    b = _c(metric_key="social.diversity.gender.headcount", metric_unit="employees",
+           metric_value=20255, time_bucket="2024",
+           source_sentence="Total permanent employees 20255")
+    r = e._numeric_conflict(a, b)
+    assert r and r["type"] == "Metric"
+
+
+def test_differing_statements_are_conflation_not_contradiction():
+    # (#20, aligned with #19's verdict) 58Mt vs 305Mt both tagged scope1 in the
+    # same year are DIFFERENT statements (entity/scope conflation from extraction)
+    # — deterministically indistinguishable from subgroup rows, so suppressed.
+    # Sentence-less rows keep pre-#20 behavior (conservative fallback, below).
+    e = ContradictionEngine()
+    a = _c(metric_value=58_000_000, time_bucket="2022",
+           source_sentence="Scope 1 GHG emissions were 58 million tonnes")
+    b = _c(metric_value=305_000_000, time_bucket="2022",
+           source_sentence="Total Scope 1 emissions including JVs were 305 million tonnes")
+    assert e._numeric_conflict(a, b) is None
+    # fallback: no sentences -> still flagged (legacy rows stay comparable)
+    a2 = _c(metric_value=58_000_000, time_bucket="2022")
+    b2 = _c(metric_value=305_000_000, time_bucket="2022")
+    r2 = e._numeric_conflict(a2, b2)
+    assert r2 and r2["type"] == "Metric"
+
+
 _ALL_TESTS = [
     test_construction_does_not_load_model,
     test_hard_direction_conflict,
@@ -166,6 +213,9 @@ _ALL_TESTS = [
     test_mislabeled_value_is_gated_by_plausibility,
     test_evaluate_pair_short_circuits_nli_on_numeric_hit,
     test_textual_path_with_injected_fake_model,
+    test_subgroup_rows_under_count_key_are_not_contradictions,
+    test_count_key_double_report_still_flags,
+    test_differing_statements_are_conflation_not_contradiction,
 ]
 
 

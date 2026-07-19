@@ -82,7 +82,7 @@
 - [x] Apply `database/match_claims_rpc.sql` to live DB — DONE 2026-06-25 (was PGRST202; RPC now callable, returns the full field set) — existing_issues #1
 - [ ] Remove the silent `except Exception: return []` in `retrieval.py` (still swallows → `[]`; now prints the error but the swallow remains at `retrieval.py:85-87`) — existing_issues #1
 - [x] Fix `doc_id` = chunk-id bug; use a real per-report document id — DONE (all ingest paths write real `report_id`; live rows relabeled) — existing_issues #3
-- [ ] Fix NLI input format (`</s></body>` hack → proper premise/hypothesis pair) — existing_issues #3/#7
+- [x] Fix NLI input format — DONE (`_textual_entailment` feeds a real premise/hypothesis pair via `{"text", "text_pair"}`; the `</s></body>` hack is gone) — existing_issues #3/#7
 - [x] Make numeric contradiction unit/metric_key-aware — DONE (`_numeric_conflict` compares same `metric_key`+canonical unit; cross-year series no longer flagged; unit-canonicalizer) — existing_issues #7/#18/#19
 - [ ] (optional) Swap embeddings to NVIDIA `llama-nemotron-embed` for SOTA retrieval
 

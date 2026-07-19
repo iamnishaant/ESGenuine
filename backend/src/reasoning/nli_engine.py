@@ -80,6 +80,40 @@ class ContradictionEngine:
     # Metric keys that carry no comparable numeric semantics.
     _VAGUE_KEYS = ("", "uncategorized")
 
+    # (#20) One metric_key is routinely a subgroup CATCH-ALL: gender.headcount
+    # holds male/female/permanent/contract rows, waste.total.mass holds disposal
+    # routes (re-used / C&D / paper / landfilled), air_pollutants.mass holds
+    # PM/SOx/NOx. Same-year value differences between DIFFERENT rows are
+    # categories, not double-reporting; comparing them pairwise exploded into
+    # C(n,2) false "Value mismatch" flags (307 on tata_power_2024 alone; 209 of
+    # the survivors under waste.total.mass after a count-only gate).
+    #
+    # existing_issues #19's verdict stands: same-key magnitude spreads are metric
+    # -key conflation (extraction residual) — the contradiction layer cannot
+    # distinguish them deterministically. So a same-year numeric mismatch is only
+    # trusted as a DOUBLE-REPORT when the two claims are literally the same
+    # statement with different numbers. Finer metric_keys (ontology round 3:
+    # waste routes, per-pollutant) remain the root fix and will re-enable
+    # cross-context comparison per key.
+
+    @staticmethod
+    def _same_reported_quantity(a: dict, b: dict) -> bool:
+        """Do these two claims report the SAME quantity (→ comparable)?
+
+        Discriminator: source sentences with digits/punctuation stripped. Two
+        subgroup rows ("Re-used waste FY24" vs "Landfilling waste FY24") differ
+        after normalization → different quantities → not a contradiction. A
+        genuine double-report (same statement, different numbers) normalizes
+        identically → still flagged. Missing sentences → assume same quantity
+        (conservative: keeps pre-#20 behavior for sentence-less rows)."""
+        sa = (a.get("source_sentence") or "").strip()
+        sb = (b.get("source_sentence") or "").strip()
+        if not sa or not sb:
+            return True
+        norm = lambda s: " ".join("".join(ch for ch in s.lower() if not ch.isdigit()
+                                          and (ch.isalnum() or ch.isspace())).split())
+        return norm(sa) == norm(sb)
+
     # (The absolute-quantity / extreme-YoY guard was removed with #18: cross-year value
     #  differences are no longer treated as contradictions at all, so there is nothing left
     #  to guard against an implausible year-over-year ratio.)
@@ -150,6 +184,10 @@ class ContradictionEngine:
                 base = max(abs(val_a), abs(val_b))
                 if abs(val_a - val_b) / base > 0.05 and real_a and real_b:
                     mk = claim_a.get("metric_key")
+                    # (#20) subgroup gate: different statements under one key are
+                    # categories/conflation (#19 residual), not a double-report.
+                    if not self._same_reported_quantity(claim_a, claim_b):
+                        return None
                     if time_a == time_b and same_scope:
                         return {"type": "Metric", "reason": f"Value mismatch: {val_a} vs {val_b} for {mk} in {time_a}/{scope_a}"}
                     elif not same_scope and time_a == time_b and scope_a and scope_b:

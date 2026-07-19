@@ -27,6 +27,22 @@ All 🔴 Critical and 🟠 major data defects are **resolved & verified on live 
 
 ---
 
+## Batch 2026-07-19 — #20: contradictions table was dead + same-key subgroup explosion
+
+### ✅ #20a 🔴 — UI `contradictions` table was a 3-month-old orphaned artifact
+- **What ran:** probed the live `contradictions` table the frontend reasoning views (ContradictionExplorer / ClaimGraph / RiskScorePanel via `useClaims`) read directly from Supabase: **20 rows, all created 2026-04-08** by the offline integration-test runner — nothing has written the table since. Rows were pre-#18 noise (`Value shifted 22372.0->9134.0 between null and unknown_time`) referencing **long-deleted claim ids**.
+- **Root cause:** no production path ever wrote `contradictions` — the backend computes conflicts on demand per request; the table (never in `schema.sql`) silently rotted while the UI kept rendering it.
+- **✅ Fixed:** contradictions are now a **maintained per-document artifact**. `reasoning/persist_contradictions.py` runs the deterministic numeric scan (no NLI model load) and replaces a doc's rows (delete-then-insert by `doc_id` — same idempotency pattern as claims), wired into `ingest_claims_to_db` (guarded; can never fail an ingest). Migration `2026-07-19_contradictions_doc_id.sql` applied live (adds `doc_id` + index + anon grants; table folded into `schema.sql` as #11); 20 legacy rows purged; tata/shell_2022/infosys_2023 backfilled.
+- **NOTE (infra):** the direct `db.*` host was unreachable (IPv6-only, router drops IPv6) — migration applied via the IPv4 **session pooler** `aws-1-ap-southeast-1.pooler.supabase.com:5432`, user `postgres.<project-ref>`, same password as DATABASE_URL.
+
+### ✅ #20b 🟠 — same-metric_key subgroup rows exploded into C(n,2) false "Value mismatch" flags
+- **Test:** the first backfill persisted **325 contradictions for tata_power_2024 alone** (307 Metric/High). Breakdown: `waste.total.mass` 209 pairs ("Re-used waste" vs "C&D waste" vs "Landfilling waste"…), `social.diversity.gender.headcount` (male/female/permanent/contract rows), `emissions.air_pollutants.mass` (PM vs SOx vs NOx). All same-year "mismatches" between **different subgroup rows sharing one catch-all metric_key** — categories, not double-reporting. This same inflated count feeds the CONTRADICTION flag in `build_report` (score side), so it wasn't just a UI artifact.
+- **Root cause:** the #19 metric_key-conflation residual, now at score-relevant scale on the round-2 corpus. Per #19's own verdict, the contradiction layer cannot deterministically distinguish conflated quantities.
+- **✅ Fixed (precision-first gate):** `_numeric_conflict` now trusts a same-year Metric/Scope mismatch only when the two claims are **literally the same statement with different numbers** (source sentences equal after stripping digits/punctuation — `_same_reported_quantity`). Different statements under one key = subgroup/conflation → suppressed. Sentence-less rows keep the old behavior (conservative fallback). Hard direction conflicts unaffected. **tata 325→2, shell_2022 85→7, infosys_2023 29→1 — survivors verified real** (e.g. `Hard/Critical: Direction conflict for emissions.total.percent in 2021: decrease vs increase`). +3 tests (16/16 nli, 37 report-suite green).
+- **Trade-off (documented, deliberate):** recall for cross-context double-reports (table vs narrative restating the same figure differently) is sacrificed for precision — acceptable because every observed cross-context pair in this corpus was conflation, not signal. **Root fix stays ontology round 3** (split waste by disposal route, air_pollutants per pollutant, gender by cohort) which re-enables per-key cross-context comparison.
+
+---
+
 ## Batch 2026-06-26 — #19 deterministic layer RESOLVED + test-leak fix
 
 ### ✅ #19 metric_key conflation — deterministic layer fixed (split dimensions) + backfilled
