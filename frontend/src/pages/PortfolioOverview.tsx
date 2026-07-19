@@ -15,8 +15,8 @@ import { AppLayout } from '@/components/AppLayout';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { useClaims } from '@/hooks/useClaims';
-import { useMemo, useState, useEffect } from 'react';
-import { getPortfolioIntegrity, type PortfolioIntegrity } from '@/lib/api';
+import { useMemo } from 'react';
+import { useBackendScores } from '@/hooks/useBackendScores';
 
 // Backend greenwashing_risk ("Low"/"Moderate"/"High") → the UI's risk band.
 const riskFromBackend = (r?: string | null): 'low' | 'medium' | 'high' =>
@@ -25,50 +25,45 @@ const riskFromBackend = (r?: string | null): 'low' | 'medium' | 'high' =>
 const PortfolioOverview = () => {
   const { companies, loading } = useClaims();
 
-  // Reconcile the headline Integrity Score with the backend audit (single source of
-  // truth). The Portfolio used to compute its own groundability-mean score that never
-  // matched the Integrity Audit page; we now overlay the backend build_report() score
-  // and only fall back to the local number if the backend is unreachable.
-  const [backendScores, setBackendScores] = useState<Map<string, PortfolioIntegrity>>(new Map());
-  useEffect(() => {
-    let cancelled = false;
-    getPortfolioIntegrity()
-      .then((res) => {
-        if (cancelled) return;
-        const m = new Map<string, PortfolioIntegrity>();
-        res.companies.forEach((c) => m.set((c.company_name || c.company_id).trim().toLowerCase(), c));
-        setBackendScores(m);
-      })
-      .catch(() => { /* backend down → keep local fallback scores */ });
-    return () => { cancelled = true; };
-  }, []);
+  // Integrity scores come EXCLUSIVELY from the backend build_report() portfolio
+  // endpoint (same methodology as the Integrity Audit page). When the backend is
+  // unreachable we say so and show "—" — we never substitute a homegrown number.
+  const { forCompany, availability } = useBackendScores();
 
-  // Companies with the backend score overlaid where available.
   const resolved = useMemo(() => companies.map((c) => {
-    const b = backendScores.get((c.name || '').trim().toLowerCase());
+    const b = forCompany(c.name) ?? forCompany(c.id);
     if (b && b.integrity_score != null) {
-      return { ...c, integrityScore: Math.round(b.integrity_score), riskLevel: riskFromBackend(b.greenwashing_risk),
-               grade: b.grade, scoreSource: 'backend' as const };
+      return { ...c, integrityScore: Math.round(b.integrity_score) as number | null,
+               riskLevel: riskFromBackend(b.greenwashing_risk), grade: b.grade };
     }
-    return { ...c, scoreSource: 'local' as const };
-  }), [companies, backendScores]);
+    return { ...c, integrityScore: null as number | null, grade: null };
+  }), [companies, forCompany]);
 
+  const scored = useMemo(() => resolved.filter((c) => c.integrityScore != null), [resolved]);
   const totalClaims = resolved.reduce((acc, c) => acc + c.claims.verified + c.claims.review + c.claims.gap, 0);
-  const avgScore = resolved.length > 0 ? Math.round(resolved.reduce((acc, c) => acc + c.integrityScore, 0) / resolved.length) : 0;
+  const avgScore = scored.length > 0
+    ? Math.round(scored.reduce((acc, c) => acc + (c.integrityScore as number), 0) / scored.length)
+    : null;
   const gapCount = resolved.reduce((acc, c) => acc + c.claims.gap, 0);
 
-  // Group by broad region heuristically based on location string
+  // Group by broad region heuristically based on location string.
+  // Score averages count ONLY backend-scored companies; claims count everyone.
   const regionData = useMemo(() => {
-    const regions = new Map<string, { companies: Set<string>, avgScoreSum: number, claims: number }>();
+    const regions = new Map<string, { companies: Set<string>, scoreSum: number, scored: number, claims: number }>();
+    const add = (region: string, company: (typeof resolved)[number]) => {
+      if (!regions.has(region)) regions.set(region, { companies: new Set(), scoreSum: 0, scored: 0, claims: 0 });
+      const r = regions.get(region)!;
+      if (!r.companies.has(company.id)) {
+        r.companies.add(company.id);
+        r.claims += company.claimsCount;
+        if (company.integrityScore != null) { r.scoreSum += company.integrityScore; r.scored += 1; }
+      }
+    };
 
     resolved.forEach(company => {
       // If no locations, put in Global
       if (company.locations.length === 0) {
-        if (!regions.has('Global')) regions.set('Global', { companies: new Set(), avgScoreSum: 0, claims: 0 });
-        const r = regions.get('Global')!;
-        r.companies.add(company.id);
-        r.avgScoreSum += company.integrityScore;
-        r.claims += company.claimsCount;
+        add('Global', company);
         return;
       }
 
@@ -81,12 +76,7 @@ const PortfolioOverview = () => {
         else if (l.includes('brazil') || l.includes('são paulo') || l.includes('buenos aires')) region = 'South America';
         else if (l.includes('johannesburg') || l.includes('africa')) region = 'Africa';
         else if (l.includes('uae') || l.includes('dubai')) region = 'Middle East';
-        
-        if (!regions.has(region)) regions.set(region, { companies: new Set(), avgScoreSum: 0, claims: 0 });
-        const r = regions.get(region)!;
-        r.companies.add(company.id);
-        r.avgScoreSum += company.integrityScore;
-        r.claims += company.claimsCount;
+        add(region, company);
       });
     });
 
@@ -94,24 +84,24 @@ const PortfolioOverview = () => {
       .map(([region, data]) => ({
         region,
         companies: data.companies.size,
-        avgScore: data.companies.size > 0 ? Math.round(data.avgScoreSum / data.companies.size) : 0,
+        avgScore: data.scored > 0 ? Math.round(data.scoreSum / data.scored) : null,
         claims: data.claims
       }))
       .sort((a, b) => b.companies - a.companies);
   }, [resolved]);
 
-  // Real risk distribution computed from company risk levels (no hardcoded split).
+  // Risk distribution over backend-scored companies only (risk = greenwashing_risk).
   const riskDist = useMemo(() => {
-    const total = resolved.length || 1;
-    const low = resolved.filter(c => c.riskLevel === 'low').length;
-    const medium = resolved.filter(c => c.riskLevel === 'medium').length;
-    const high = resolved.filter(c => c.riskLevel === 'high').length;
+    const total = scored.length || 1;
+    const low = scored.filter(c => c.riskLevel === 'low').length;
+    const medium = scored.filter(c => c.riskLevel === 'medium').length;
+    const high = scored.filter(c => c.riskLevel === 'high').length;
     return {
       low: Math.round((low / total) * 100),
       medium: Math.round((medium / total) * 100),
       high: Math.round((high / total) * 100),
     };
-  }, [resolved]);
+  }, [scored]);
 
   if (loading) {
     return (
@@ -147,15 +137,28 @@ const PortfolioOverview = () => {
 
       {/* Content */}
       <div className="flex-1 p-6 overflow-auto">
+        {/* Honest-degradation banner: never substitute a fake score when the audit
+            backend is unreachable. */}
+        {availability === 'down' && (
+          <motion.div
+            className="mb-4 px-4 py-3 rounded-lg border border-warning/40 bg-warning/10 text-sm text-warning flex items-center gap-2"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+            Audit backend offline — Integrity Scores unavailable. Claims data below is live; scores show “—” rather than an approximation.
+          </motion.div>
+        )}
+
         {/* Summary Stats */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-4 gap-4 mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           {[
             { label: 'Total Companies', value: resolved.length, icon: Building2, color: 'text-primary', tooltip: '' },
-            { label: 'Average Integrity', value: `${avgScore}%`, icon: CheckCircle2, color: 'text-success', tooltip: 'ESG Integrity Score (100 − greenwashing penalties) from the backend audit, averaged across companies. Same methodology as the Integrity Audit page; each company scored on its latest report.' },
+            { label: 'Average Integrity', value: avgScore != null ? `${avgScore}%` : '—', icon: CheckCircle2, color: 'text-success', tooltip: 'ESG Integrity Score (100 − greenwashing penalties) from the backend audit, averaged across companies. Same methodology as the Integrity Audit page; each company scored on its latest report.' },
             { label: 'Total Claims', value: totalClaims, icon: Globe2, color: 'text-foreground', tooltip: '' },
             { label: 'Active Gaps', value: gapCount, icon: AlertTriangle, color: 'text-danger', tooltip: '' },
           ].map((stat, i) => (
@@ -208,14 +211,20 @@ const PortfolioOverview = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-foreground">{company.name}</span>
-                          <span className={cn(
-                            "text-[10px] px-1.5 py-0.5 rounded uppercase font-medium",
-                            company.riskLevel === 'low' ? "bg-success/20 text-success" :
-                            company.riskLevel === 'medium' ? "bg-warning/20 text-warning" :
-                            "bg-danger/20 text-danger"
-                          )}>
-                            {company.riskLevel} risk
-                          </span>
+                          {company.integrityScore != null ? (
+                            <span className={cn(
+                              "text-[10px] px-1.5 py-0.5 rounded uppercase font-medium",
+                              company.riskLevel === 'low' ? "bg-success/20 text-success" :
+                              company.riskLevel === 'medium' ? "bg-warning/20 text-warning" :
+                              "bg-danger/20 text-danger"
+                            )}>
+                              {company.riskLevel} risk
+                            </span>
+                          ) : (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded uppercase font-medium bg-muted/40 text-muted-foreground">
+                              unscored
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-3 mt-1">
                           <span className="text-xs text-muted-foreground">{company.sector}</span>
@@ -227,17 +236,18 @@ const PortfolioOverview = () => {
                         </div>
                       </div>
 
-                      {/* Integrity Score */}
+                      {/* Integrity Score (backend-only; "—" when unavailable) */}
                       <div className="flex items-center gap-3">
                         <div className="text-right">
                           <div className="flex items-center gap-1">
                             <span className={cn(
                               "font-mono text-lg font-bold",
+                              company.integrityScore == null ? "text-muted-foreground" :
                               company.integrityScore >= 70 ? "text-success" :
                               company.integrityScore >= 40 ? "text-warning" :
                               "text-danger"
                             )}>
-                              {company.integrityScore}
+                              {company.integrityScore ?? '—'}
                             </span>
                             {company.trend === 'up' && <TrendingUp className="w-4 h-4 text-success" />}
                             {company.trend === 'down' && <TrendingDown className="w-4 h-4 text-danger" />}
@@ -255,15 +265,16 @@ const PortfolioOverview = () => {
                               cx="32" cy="32" r="28"
                               className={cn(
                                 "fill-none",
+                                company.integrityScore == null ? "stroke-muted" :
                                 company.integrityScore >= 70 ? "stroke-success" :
                                 company.integrityScore >= 40 ? "stroke-warning" :
                                 "stroke-danger"
                               )}
                               strokeWidth="4"
                               strokeLinecap="round"
-                              strokeDasharray={`${company.integrityScore * 1.76} 176`}
+                              strokeDasharray={`${(company.integrityScore ?? 0) * 1.76} 176`}
                               initial={{ strokeDasharray: "0 176" }}
-                              animate={{ strokeDasharray: `${company.integrityScore * 1.76} 176` }}
+                              animate={{ strokeDasharray: `${(company.integrityScore ?? 0) * 1.76} 176` }}
                               transition={{ duration: 1, delay: 0.3 + index * 0.05 }}
                             />
                           </svg>
@@ -324,11 +335,12 @@ const PortfolioOverview = () => {
                         <span className="text-muted-foreground">{region.companies} cos</span>
                         <span className={cn(
                           "font-mono",
+                          region.avgScore == null ? "text-muted-foreground" :
                           region.avgScore >= 70 ? "text-success" :
                           region.avgScore >= 50 ? "text-warning" :
                           "text-danger"
                         )}>
-                          {region.avgScore}%
+                          {region.avgScore != null ? `${region.avgScore}%` : '—'}
                         </span>
                       </div>
                     </div>
@@ -336,12 +348,13 @@ const PortfolioOverview = () => {
                       <motion.div
                         className={cn(
                           "h-full rounded-full",
+                          region.avgScore == null ? "bg-muted" :
                           region.avgScore >= 70 ? "bg-success" :
                           region.avgScore >= 50 ? "bg-warning" :
                           "bg-danger"
                         )}
                         initial={{ width: 0 }}
-                        animate={{ width: `${region.avgScore}%` }}
+                        animate={{ width: `${region.avgScore ?? 0}%` }}
                         transition={{ duration: 0.8, delay: 0.4 + i * 0.1 }}
                       />
                     </div>
@@ -351,7 +364,9 @@ const PortfolioOverview = () => {
 
               {/* Risk Distribution */}
               <div className="p-4 border-t border-border/30">
-                <h4 className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Risk Distribution</h4>
+                <h4 className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
+                  Risk Distribution{scored.length > 0 ? '' : ' (no scored companies)'}
+                </h4>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-3 rounded-full overflow-hidden flex">
                     <motion.div

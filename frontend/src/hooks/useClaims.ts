@@ -96,6 +96,15 @@ let globalConflictsCache: Conflict[] | null = null;
 let globalCompaniesCache: any[] | null = null;
 const fetchPromises: { current: Promise<void> | null } = { current: null };
 
+// Drop the module cache so the next mounted consumer refetches. Call after an
+// ingest lands (SubmitReport) — otherwise the UI shows pre-ingest data until a
+// full page reload.
+export function invalidateClaimsCache(): void {
+  globalClaimsCache = null;
+  globalConflictsCache = null;
+  globalCompaniesCache = null;
+}
+
 export function useClaims() {
   const [claims, setClaims] = useState<Claim[]>(globalClaimsCache || []);
   const [conflicts, setConflicts] = useState<Conflict[]>(globalConflictsCache || []);
@@ -147,7 +156,11 @@ export function useClaims() {
             });
           }
 
-          // Compute company aggregations for the portfolio view
+          // Compute company aggregations for the portfolio view.
+          // NOTE: this is claim-level bookkeeping (counts, locations, groundability).
+          // The company Integrity Score is NOT computed here — it comes exclusively
+          // from the backend build_report() via useBackendScores, so the UI can never
+          // show a homegrown number that disagrees with the Integrity Audit page.
           const companyMap = new Map();
           mappedClaims.forEach(claim => {
             if (!companyMap.has(claim.company)) {
@@ -155,14 +168,14 @@ export function useClaims() {
                 id: claim.company.replace(/\s+/g, '-').toLowerCase(),
                 name: claim.company,
                 sector: claim.sector,
-                integrityScoreSum: 0,
+                groundabilitySum: 0,
                 claimsCount: 0,
                 claims: { verified: 0, review: 0, gap: 0 },
                 locations: new Set(),
               });
             }
             const comp = companyMap.get(claim.company);
-            comp.integrityScoreSum += claim.confidence;
+            comp.groundabilitySum += claim.confidence;
             comp.claimsCount += 1;
             comp.claims[claim.status] += 1;
             if (claim.location && claim.location !== 'Unspecified') {
@@ -171,13 +184,17 @@ export function useClaims() {
           });
 
           mappedCompanies = Array.from(companyMap.values()).map(comp => {
-            const avgScore = Math.round(comp.integrityScoreSum / comp.claimsCount);
+            // Honest name: average groundability of the company's claims (a data-
+            // quality signal), NOT an integrity score.
+            const groundabilityAvg = Math.round(comp.groundabilitySum / comp.claimsCount);
             return {
               ...comp,
-              integrityScore: avgScore,
+              groundabilityAvg,
               trend: 'stable',
               locations: Array.from(comp.locations),
-              riskLevel: avgScore >= 70 ? 'low' : avgScore >= 40 ? 'medium' : 'high'
+              // Fallback risk band from groundability — superseded by the backend
+              // greenwashing_risk wherever the backend is reachable.
+              riskLevel: groundabilityAvg >= 70 ? 'low' : groundabilityAvg >= 40 ? 'medium' : 'high'
             };
           });
         }

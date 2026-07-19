@@ -1,10 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase credentials missing. Check your .env file.');
-}
-
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+// Single Supabase client for the whole app. Re-exports the typed generated
+// client so there is exactly ONE GoTrue/auth instance and one Database-typed
+// client — two parallel createClient() calls previously risked auth-storage
+// conflicts and type drift.
+export { supabase } from '@/integrations/supabase/client';

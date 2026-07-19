@@ -4,6 +4,7 @@ import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 import { useClaims } from '@/hooks/useClaims';
+import { useBackendScores } from '@/hooks/useBackendScores';
 import { resolveHeadquarters } from '@/lib/companyHeadquarters';
 
 // One marker per company, placed at its real headquarters. Clicking a marker
@@ -16,7 +17,6 @@ interface CompanyMarker {
   lng: number;
   claimsCount: number;
   riskLevel: 'low' | 'medium' | 'high';
-  integrityScore: number;
 }
 
 function latLngToVector3(lat: number, lng: number, radius: number): THREE.Vector3 {
@@ -236,6 +236,9 @@ export const Globe = ({ onCompanySelect, selectedCompany }: {
   selectedCompany: string | null;
 }) => {
   const { companies } = useClaims();
+  // Marker color = backend greenwashing_risk where available (same source as the
+  // Integrity Audit page); groundability-derived band only as offline fallback.
+  const { forCompany } = useBackendScores();
 
   // One marker per company whose HQ we can resolve. Unknown HQs are skipped
   // rather than fabricated.
@@ -244,6 +247,11 @@ export const Globe = ({ onCompanySelect, selectedCompany }: {
       .map((c) => {
         const hq = resolveHeadquarters(c.name);
         if (!hq) return null;
+        const b = forCompany(c.name) ?? forCompany(c.id);
+        const risk = b?.greenwashing_risk === 'Low' ? 'low'
+          : b?.greenwashing_risk === 'High' ? 'high'
+          : b?.greenwashing_risk ? 'medium'
+          : (c.riskLevel as CompanyMarker['riskLevel']);
         return {
           name: c.name,
           city: hq.city,
@@ -251,12 +259,11 @@ export const Globe = ({ onCompanySelect, selectedCompany }: {
           lat: hq.lat,
           lng: hq.lng,
           claimsCount: c.claimsCount,
-          riskLevel: c.riskLevel as CompanyMarker['riskLevel'],
-          integrityScore: c.integrityScore,
+          riskLevel: risk,
         } as CompanyMarker;
       })
       .filter((m): m is CompanyMarker => m !== null);
-  }, [companies]);
+  }, [companies, forCompany]);
 
   return (
     <motion.div

@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Building2, MapPin, X, ChevronRight, CheckCircle, HelpCircle, AlertCircle } from 'lucide-react';
 import { useMemo } from 'react';
 import { useClaims, Claim } from '@/hooks/useClaims';
+import { useBackendScores } from '@/hooks/useBackendScores';
 import { resolveHeadquarters } from '@/lib/companyHeadquarters';
 
 interface CompanyPanelProps {
@@ -18,8 +19,9 @@ const StatusIcon = ({ status }: { status: Claim['status'] }) => {
   }
 };
 
-const scoreColor = (score: number) =>
-  score >= 70 ? 'text-success' : score >= 40 ? 'text-warning' : 'text-danger';
+const scoreColor = (score: number | null) =>
+  score == null ? 'text-muted-foreground'
+    : score >= 70 ? 'text-success' : score >= 40 ? 'text-warning' : 'text-danger';
 
 const riskColor = (risk: 'low' | 'medium' | 'high') =>
   risk === 'low' ? 'bg-success/20 text-success'
@@ -30,6 +32,9 @@ const riskColor = (risk: 'low' | 'medium' | 'high') =>
 // Lists every claim ESGenuine extracted from that company's report(s).
 export const CompanyPanel = ({ companyName, onClaimSelect, onClose }: CompanyPanelProps) => {
   const { claims, companies } = useClaims();
+  // Integrity score comes exclusively from the backend audit (single source of
+  // truth); "—" when the backend is unreachable — never a homegrown number.
+  const { forCompany } = useBackendScores();
 
   const company = useMemo(
     () => companies.find((c) => c.name === companyName),
@@ -42,8 +47,12 @@ export const CompanyPanel = ({ companyName, onClaimSelect, onClose }: CompanyPan
   const hq = resolveHeadquarters(companyName);
 
   const counts = company?.claims ?? { verified: 0, review: 0, gap: 0 };
-  const integrity = company?.integrityScore ?? 0;
-  const risk = (company?.riskLevel ?? 'medium') as 'low' | 'medium' | 'high';
+  const backend = forCompany(companyName) ?? forCompany(company?.id);
+  const integrity = backend?.integrity_score != null ? Math.round(backend.integrity_score) : null;
+  const risk = (backend?.greenwashing_risk === 'Low' ? 'low'
+    : backend?.greenwashing_risk === 'High' ? 'high'
+    : backend?.greenwashing_risk ? 'medium'
+    : company?.riskLevel ?? 'medium') as 'low' | 'medium' | 'high';
 
   return (
     <motion.div
@@ -77,7 +86,7 @@ export const CompanyPanel = ({ companyName, onClaimSelect, onClose }: CompanyPan
         {/* Summary row */}
         <div className="flex items-center gap-3 mt-3">
           <div className="flex items-baseline gap-1">
-            <span className={`font-mono text-xl font-bold ${scoreColor(integrity)}`}>{integrity}</span>
+            <span className={`font-mono text-xl font-bold ${scoreColor(integrity)}`}>{integrity ?? '—'}</span>
             <span className="text-[10px] text-muted-foreground">integrity</span>
           </div>
           <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-medium ${riskColor(risk)}`}>
