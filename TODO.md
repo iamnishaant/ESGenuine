@@ -89,7 +89,7 @@
 ### Phase 5 — Evaluation harness  `[~]` 🟠
 - [x] Hand-label a gold set — DONE: v0.1 (46 claims, 4 companies), v0.2 (`gold_set_docling_tata.json`, 50 table-verified), v0.3 (Shell 2022, 50, out-of-sample) — `backend/tests/eval/`
 - [x] Precision/Recall/F1 for extraction fields + ontology mapping — DONE (`run_evaluation.py` → EXTRACTION_SCORE: precision/value/pillar/node/type). **63.6 → 96.1 in-sample, 89.7 OOS.** (contradiction-eval still TODO)
-- [~] Regression gate — manual protocol proven (re-score BOTH golds after any gate/taxonomy change; caught 2 round-2 regressions); **not yet CI-enforced**
+- [x] Regression gate — **CI-ENFORCED (2026-07-19)**: `test_gold_regression.py` regates frozen raw extractions (`tests/eval/fixtures/`) through the CURRENT deterministic stack and asserts gold floors (Tata ≥96.0, Shell ≥89.5) on every push — the manual re-score-both-golds protocol, automated. Proven live: the round-3 subgroup split initially scored 94.0 (keyword-steal bug) before the fix; this gate would have failed CI.
 
 ---
 
@@ -113,7 +113,7 @@
 - [ ] Async job/run model + workers → **real production ingest path** (today ingest is a manual script)
 - [ ] Pin deps / lockfile + `pyproject.toml`; seed RNG; pin model revisions
 - [x] Dockerfile + docker-compose — DONE + verified live 2026-07-06 (`a09691c`): backend multi-stage + frontend nginx + compose (Supabase-only by design, no local PG); container healthy. 3 deploy-blocking bugs fixed.
-- [ ] CI (lint, typecheck, pytest, frontend build)
+- [x] CI — was ALREADY live (`.github/workflows/ci.yml` since 2026-07-01, unbroken green streak): backend offline pytest + advisory ruff + frontend tsc/build; now also runs the gold-floor regression gate
 - [~] Structured logging — JSON request-log middleware shipped (`981a13f`, request_id/status/duration); full `print()`→structlog sweep still TODO
 - [ ] Security: enable Supabase RLS, service-role for writes, restrict CORS
 - [ ] Versioned Supabase migrations (stop `setup_db.py` DROP TABLE); fix dead LIST partitioning
