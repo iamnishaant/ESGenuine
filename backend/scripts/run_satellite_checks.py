@@ -71,7 +71,8 @@ def main():
         if not args.dry_run and res.get("reason") not in skip_reasons:
             try:
                 sb.table("satellite_evidence").insert({
-                    "claim_id": res["claim_id"], "report_id": res.get("report_id"),
+                    "claim_id": res["claim_id"], "check_key": res.get("check_key"),
+                    "report_id": res.get("report_id"),
                     "verdict": res["verdict"], "reason": res.get("reason"),
                     "ndvi_delta": res.get("ndvi_delta"), "z_score": res.get("z_score"),
                     "bundle": json.loads(json.dumps(res, default=str)),

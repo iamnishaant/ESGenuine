@@ -42,6 +42,17 @@ _REFOREST = re.compile(r"\b(reforest|afforest|tree[s]? plant|sapling|plantation|
                        r"agroforestry|habitat restor|riverbed revitali)\b", re.I)
 
 
+def check_key(claim: Dict[str, Any]) -> str:
+    """Stable identity of a satellite check across re-ingests. claim_id is a fresh
+    uuid on every ingest (delete-then-insert), which orphaned all stored evidence;
+    this keys on the CONTENT being verified — (report, aspect, place, year) — which
+    is invariant for the same semantic claim in the same PDF. Lets `_satellite_for`
+    re-link stored verdicts to the current claim rows instead of showing stale data."""
+    basis = "|".join(str(claim.get(k) or "") for k in
+                     ("report_id", "normalized_aspect", "location_text", "time_bucket"))
+    return hashlib.sha256(basis.encode("utf-8")).hexdigest()[:16]
+
+
 def _expectation(claim: Dict[str, Any]) -> Optional[str]:
     """'up' | 'down' | None (no optical expectation)."""
     sent = (claim.get("source_sentence") or "")
@@ -76,8 +87,8 @@ def _windows(claim: Dict[str, Any]) -> Optional[Dict[str, str]]:
 
 
 def _inconclusive(claim: Dict[str, Any], reason: str, extra: Dict[str, Any] = None) -> Dict[str, Any]:
-    out = {"claim_id": claim.get("claim_id"), "verdict": "inconclusive",
-           "reason": reason, "params": PARAMS}
+    out = {"claim_id": claim.get("claim_id"), "check_key": check_key(claim),
+           "verdict": "inconclusive", "reason": reason, "params": PARAMS}
     if extra:
         out.update(extra)
     out["bundle_sha256"] = _commit(out)
@@ -126,7 +137,8 @@ def verify_claim(claim: Dict[str, Any]) -> Dict[str, Any]:
     before_arr = before.pop("_median_array", None)
     after_arr = after.pop("_median_array", None)
     result: Dict[str, Any] = {
-        "claim_id": claim.get("claim_id"), "report_id": claim.get("report_id"),
+        "claim_id": claim.get("claim_id"), "check_key": check_key(claim),
+        "report_id": claim.get("report_id"),
         "location_text": loc, "geocoded": geo, "windows": win,
         "expectation": expectation, "before": before, "after": after, "params": PARAMS,
     }

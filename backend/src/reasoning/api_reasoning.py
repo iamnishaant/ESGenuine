@@ -241,17 +241,32 @@ def _factcheck_for(claims):
 
 
 def _satellite_for(doc_id):
-    """Latest satellite_evidence row per claim for this report (v2.3). The table is
-    an append-only log, so keep only the newest check per claim_id. Failure degrades
-    to None → build_report scores exactly as v2.2."""
+    """Latest satellite_evidence row per claim for this report (v2.3), RE-LINKED to the
+    current claims by the stable `check_key` — claim_id is a fresh uuid on every
+    re-ingest, so a claim_id join would show stale/orphaned verdicts. We map each stored
+    row back to a live claim via check_key and drop rows whose claim no longer exists,
+    so the panel self-heals after a re-ingest. Failure degrades to None → scores as v2.2."""
     try:
-        res = (get_supabase().table("satellite_evidence")
-               .select("claim_id,verdict,reason,ndvi_delta,z_score,bundle_sha256,checked_at")
+        sb = get_supabase()
+        # live check_key -> current claim_id for this report
+        live = (sb.table("claims").select("claim_id,report_id,normalized_aspect,"
+                                          "location_text,time_bucket")
+                .eq("doc_id", doc_id).execute()).data or []
+        from verification.satellite_evidence import check_key
+        key_to_live = {check_key(c): c["claim_id"] for c in live}
+
+        res = (sb.table("satellite_evidence")
+               .select("claim_id,check_key,verdict,reason,ndvi_delta,z_score,bundle_sha256,checked_at")
                .eq("report_id", doc_id)
-               .order("checked_at", desc=True).limit(1000).execute())
+               .order("checked_at", desc=True).limit(2000).execute())
         latest = {}
-        for r in (res.data or []):          # newest first — first wins per claim
-            latest.setdefault(r["claim_id"], r)
+        for r in (res.data or []):          # newest first — first wins per check
+            k = r.get("check_key")
+            live_id = key_to_live.get(k) if k else None
+            if live_id is None:
+                continue                    # orphaned (pre-check_key or removed claim)
+            r["claim_id"] = live_id         # re-link to the current claim
+            latest.setdefault(k, r)
         return list(latest.values()) or None
     except Exception as e:
         print(f"[integrity] satellite integration skipped: {e}")
