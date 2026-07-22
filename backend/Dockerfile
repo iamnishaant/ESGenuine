@@ -45,8 +45,13 @@ ENV PYTHONUNBUFFERED=1 \
 
 EXPOSE 8000
 
+# Bind to $PORT when the host injects one (Render/Railway/Fly/Cloud Run all do);
+# default 8000 for local/compose. The healthcheck follows the same variable.
+ENV PORT=8000
+
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -fsS http://localhost:8000/health | grep -q '"ready": *true' || exit 1
+  CMD curl -fsS "http://localhost:${PORT}/health" | grep -q '"ready": *true' || exit 1
 
 # 2 workers: job state lives in the DB (commit e67b323), so multi-worker is safe.
-CMD ["uvicorn", "api.server:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# Shell form so ${PORT} expands at runtime (exec form does no substitution).
+CMD ["sh", "-c", "uvicorn api.server:app --app-dir src --host 0.0.0.0 --port ${PORT:-8000} --workers 2"]

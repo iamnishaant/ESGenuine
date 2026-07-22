@@ -1,8 +1,15 @@
 // FastAPI client for the next-gen analysis endpoints (integrity, fact-check,
 // benchmarking, agentic audit). Reads VITE_API_BASE, falls back to local dev.
 
-export const API_BASE =
-  (import.meta.env.VITE_API_BASE as string) || 'http://localhost:8000';
+// Scheme-tolerant: a host-only value (e.g. Render's `fromService` host property,
+// "esgenuine-backend.onrender.com") is upgraded to https; a full URL is used as-is;
+// a trailing slash is trimmed so `${API_BASE}${path}` never double-slashes.
+function resolveApiBase(v?: string): string {
+  if (!v) return 'http://localhost:8000';
+  const withScheme = /^https?:\/\//.test(v) ? v : `https://${v}`;
+  return withScheme.replace(/\/+$/, '');
+}
+export const API_BASE = resolveApiBase(import.meta.env.VITE_API_BASE as string);
 
 // ── auth token (Bearer) ──────────────────────────────────────────────────────
 const TOKEN_KEY = 'esg_access_token';

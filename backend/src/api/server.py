@@ -40,9 +40,16 @@ app.include_router(bench_router)
 app.include_router(audit_router)
 app.include_router(auth_router)
 
+# CORS: localhost dev origins are always allowed; production origins are added
+# via env so a deployed frontend works without a code change. Set either:
+#   ALLOWED_ORIGINS       — comma-separated exact origins (e.g. https://app.example.com)
+#   ALLOWED_ORIGIN_REGEX  — a regex (e.g. https://.*\.onrender\.com) for preview URLs
+_DEV_ORIGINS = ["http://localhost:8080", "http://localhost:5173", "http://localhost:3000"]
+_ENV_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "http://localhost:5173", "http://localhost:3000"],
+    allow_origins=_DEV_ORIGINS + _ENV_ORIGINS,
+    allow_origin_regex=os.environ.get("ALLOWED_ORIGIN_REGEX") or None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

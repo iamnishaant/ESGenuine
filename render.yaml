@@ -1,0 +1,71 @@
+# ESGenuine — Render Blueprint (Infrastructure-as-Code deploy).
+#
+# Closes the last roadmap gap: the frontend hard-defaults to http://localhost:8000,
+# so a deployed UI needs the FastAPI backend hosted. This provisions BOTH on Render's
+# free tier — a Docker web service (backend) + a static site (frontend) — wired so the
+# frontend build points at the backend and CORS accepts it, with zero code edits.
+#
+# Deploy: Render Dashboard -> New -> Blueprint -> connect this repo -> apply.
+# Then fill the `sync: false` secrets (see DEPLOY.md for exact values).
+#
+# NOTE: the free web service SLEEPS after 15 min idle (~50s cold start on wake).
+# Fine for a demo/portfolio; upgrade the plan for always-on.
+
+services:
+  # ── Backend: FastAPI (Docker) ────────────────────────────────────────────────
+  - type: web
+    name: esgenuine-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    region: singapore            # match the Supabase project region (ap-southeast-1)
+    plan: free
+    healthCheckPath: /health     # returns ready:true only when Supabase+embedder are up
+    autoDeploy: true
+    envVars:
+      # Supabase REST — powers every claims/reports/contradictions read (REQUIRED).
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      # Auth (login/register write endpoints). DATABASE_URL MUST be the IPv4 Supabase
+      # SESSION POOLER string — the direct db.<ref>.supabase.co host is IPv6-only and
+      # unreachable from Render. Omit both to run read-only (scores still work).
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true      # Render mints a strong random secret
+      # NVIDIA LLM — only the /audit/ask Q&A endpoint uses it; the integrity score,
+      # fact-check and benchmark are deterministic. Optional.
+      - key: NVIDIA_API_KEYS
+        sync: false
+      # Accept the paired static site's origin (and any *.onrender.com preview).
+      - key: ALLOWED_ORIGIN_REGEX
+        value: https://.*\.onrender\.com
+
+  # ── Frontend: Vite static site ───────────────────────────────────────────────
+  - type: web
+    name: esgenuine-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    region: singapore
+    autoDeploy: true
+    envVars:
+      # Bake the backend URL into the build. `property: host` yields the bare host;
+      # resolveApiBase() in src/lib/api.ts upgrades it to https://.
+      - key: VITE_API_BASE
+        fromService:
+          type: web
+          name: esgenuine-backend
+          property: host
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+    routes:
+      # SPA fallback — React Router owns client-side routing.
+      - type: rewrite
+        source: /*
+        destination: /index.html
