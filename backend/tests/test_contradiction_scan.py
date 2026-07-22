@@ -98,6 +98,23 @@ def test_no_candidates_is_empty():
     assert eng.calls == 0
 
 
+def test_retrieval_failure_propagates_not_swallowed():
+    # existing_issues #1: a retrieval failure must SURFACE (the endpoint reports
+    # retrieval_available:false), never be silently swallowed into "0 conflicts".
+    # scan_contradictions is pure — it lets a raising retrieve_fn propagate.
+    A = _claim("A")
+    eng = FakeEngine(hits=[])
+
+    def boom(_claim):
+        raise RuntimeError("match_claims RPC failed (Server disconnected)")
+
+    try:
+        scan_contradictions([A], boom, eng)
+        raise AssertionError("expected the retrieval error to propagate")
+    except RuntimeError as e:
+        assert "RPC failed" in str(e)
+
+
 _ALL_TESTS = [
     test_symmetric_pair_reported_once,
     test_self_pair_skipped,
@@ -105,6 +122,7 @@ _ALL_TESTS = [
     test_confidence_numeric_vs_textual,
     test_missing_ids_are_still_evaluated,
     test_no_candidates_is_empty,
+    test_retrieval_failure_propagates_not_swallowed,
 ]
 
 

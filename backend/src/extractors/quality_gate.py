@@ -172,8 +172,14 @@ def _fix_aspect(claim: ExtractedClaim, sent: str) -> None:
         if asp != "emissions.intensity":
             _set("emissions.intensity")
         return
-    if asp == "uncategorized" and _METHANE.search(sent):
-        _set("emissions.methane")
+    # Methane is its own concept, not a GHG total. Fires on emissions.* too (not just
+    # uncategorized) — Shell p80 CH4 rows were LLM-labeled emissions-generic → normalized
+    # to emissions.total, polluting the total-emissions key with 1-2 Mt methane figures.
+    # Safe: the scope-from-row-text rule above already returned for any real Scope-1/2/3
+    # row, so only non-scope methane rows reach here.
+    if (asp.startswith("emissions") or asp == "uncategorized") and _METHANE.search(sent):
+        if asp != "emissions.methane":
+            _set("emissions.methane")
         return
 
     # LNG/gas supply force-fits to energy.renewable; EV charging is infrastructure,

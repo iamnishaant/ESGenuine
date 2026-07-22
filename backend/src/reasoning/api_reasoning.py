@@ -18,7 +18,7 @@ import collections
 
 # In a full production setup these would be imported from the DB layer
 try:
-    from reasoning.retrieval import find_candidate_pairs, get_supabase
+    from reasoning.retrieval import find_candidate_pairs, get_supabase, RetrievalError
     from reasoning.nli_engine import ContradictionEngine
     from reasoning.contradiction_scan import scan_contradictions
     from reasoning.greenwash_taxonomy import GreenwashTaxonomy
@@ -27,7 +27,7 @@ try:
     from reasoning.fact_check import fact_check_document, load_external_corpus
     from reasoning.agent import ask as agent_ask, synthesize_audit, suggest_questions, _get_llm, _has_llm
 except ImportError:  # pragma: no cover - path-setup fallback (repo root on sys.path)
-    from src.reasoning.retrieval import find_candidate_pairs, get_supabase
+    from src.reasoning.retrieval import find_candidate_pairs, get_supabase, RetrievalError
     from src.reasoning.nli_engine import ContradictionEngine
     from src.reasoning.contradiction_scan import scan_contradictions
     from src.reasoning.greenwash_taxonomy import GreenwashTaxonomy
@@ -138,11 +138,20 @@ async def get_contradictions(doc_id: str):
     # 2. For each claim, find historical/peer contradictions. The loop + unordered-pair
     #    dedup (NLI #4) live in the pure `scan_contradictions` so they are testable without
     #    Supabase / the NLI model; here we just inject the retrieval and engine.
-    conflicts, severity_counts = scan_contradictions(
-        doc_claims,
-        lambda c: find_candidate_pairs(c, similarity_threshold=0.85),
-        engine,
-    )
+    #    A retrieval failure is SURFACED (retrieval_available: false), not swallowed into a
+    #    misleading "0 conflicts" (existing_issues #1). The persisted `contradictions` table
+    #    + the integrity-report's numeric scan are unaffected — only this semantic/NLI view.
+    try:
+        conflicts, severity_counts = scan_contradictions(
+            doc_claims,
+            lambda c: find_candidate_pairs(c, similarity_threshold=0.85),
+            engine,
+        )
+    except RetrievalError as e:
+        return {
+            "total_conflicts": 0, "critical": 0, "high": 0, "medium": 0, "low": 0,
+            "conflicts": [], "retrieval_available": False, "retrieval_error": str(e),
+        }
 
     return {
         "total_conflicts": len(conflicts),
@@ -150,7 +159,8 @@ async def get_contradictions(doc_id: str):
         "high": severity_counts["High"],
         "medium": severity_counts["Medium"],
         "low": severity_counts["Low"],
-        "conflicts": conflicts
+        "conflicts": conflicts,
+        "retrieval_available": True,
     }
 
 @router.get("/{doc_id}/risk-score")

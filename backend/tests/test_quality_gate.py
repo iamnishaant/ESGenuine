@@ -142,6 +142,24 @@ def test_air_pollutants_from_row_text():
     assert "aspect_fixed" in c.quality_flags
 
 
+def test_methane_row_rescued_from_emissions_total():
+    # A CH4 row the LLM labeled emissions-generic (→ emissions.total) must be rescued to
+    # emissions.methane, not left polluting the total-emissions key (Shell p80 class).
+    c = _claim("Methane (CH4) emissions", aspect="emissions.total",
+               value=1700000.0, unit="tCO2e")
+    apply_gate(c)
+    assert c.normalized_aspect == "emissions.methane"
+
+
+def test_scope1_row_with_methane_word_stays_scope1():
+    # A real Scope-1 row that merely mentions methane must NOT be reclassified — the
+    # scope-from-row-text rule wins first.
+    c = _claim("Scope 1 emissions including methane and CO2", aspect="emissions.total",
+               value=50000000.0, unit="tCO2e")
+    apply_gate(c)
+    assert c.normalized_aspect == "emissions.scope1"
+
+
 def test_multi_pollutant_summary_keeps_parent():
     # Round 3: a summary row naming several pollutants stays on the parent node.
     c = _claim("Air emissions of SOx, NOx and particulate matter reduced",
@@ -308,7 +326,8 @@ _ALL_TESTS = [test_scope1_fixed_from_row_text, test_combined_scope_1_and_2_stays
               test_furniture_dropped_by_gate_claims, test_fy_column_wrong_cell_repaired,
               test_fy_column_correct_cell_untouched, test_digit_free_performance_downgraded,
               test_multi_pollutant_summary_keeps_parent, test_mixed_gender_row_keeps_parent,
-              test_permanent_vs_contractual_workforce_split, test_waste_disposal_routes_split]
+              test_permanent_vs_contractual_workforce_split, test_waste_disposal_routes_split,
+              test_methane_row_rescued_from_emissions_total, test_scope1_row_with_methane_word_stays_scope1]
 
 
 if __name__ == "__main__":

@@ -27,6 +27,25 @@ All 🔴 Critical and 🟠 major data defects are **resolved & verified on live 
 
 ---
 
+## Batch 2026-07-22 — live-run verification: perf, retrieval surfacing, methane mislabel
+
+### ✅ #21a 🔴 (perf) — `/reports/{doc}/integrity-report` took 100–235s
+- **What ran:** booted uvicorn, timed the endpoint live. shell_2023 **235s**, infosys_2025 **106s** — a multi-minute spinner on the Integrity Audit page.
+- **Root cause:** it sourced contradictions from `get_contradictions()`, which fires one Supabase vector-search RPC **per claim** (379 round-trips on shell_2023, many "Server disconnected") + an NLI model pass. Every other endpoint (review-queue / greenwashing-flags / audit) uses the in-memory `_numeric_contradictions()` scan — the same source that now populates the persisted `contradictions` table.
+- **✅ Fixed (`59d8ff8`):** integrity-report uses `_numeric_contradictions()`. **235→2.6s, 106→1.7s, microsoft 1.3s**, identical scores/flags/satellite, contradiction counts match the persisted table. Semantic/NLI retrieval stays on `GET /{doc}/contradictions`.
+
+### ✅ #21b 🟠 — `retrieval.py` swallowed RPC failures into a false "0 conflicts"
+- **What ran:** the live run logged `Error executing vector search RPC: Server disconnected` — the `except Exception: return []` (existing_issues #1's residual) made a dead RPC indistinguishable from "no contradictions found."
+- **✅ Fixed:** `find_candidate_pairs` now raises `RetrievalError` on persistent failure (one reconnect+retry for transient drops), and `GET /{doc}/contradictions` reports `retrieval_available: false` + `retrieval_error` instead of a misleading 0. Also fails fast (no 379 failing round-trips). +1 test. The persisted table + integrity score are unaffected (they don't use this RPC).
+
+### ✅ #21c 🟠 (extraction) — methane figures mislabeled as `emissions.total.co2e`
+- **What ran:** probed `emissions.total.co2e` on shell_2023: found Methane (CH4) rows (p80, 1–2.3 Mt) and net-zero narrative zeros tagged as total emissions — the total-emissions key was polluted, and a Scope1+2-vs-total sanity check would fire on *our* mislabels, not greenwashing.
+- **Root cause:** the gate's methane backstop fired only on `asp == "uncategorized"`, so a CH4 row the LLM labeled emissions-generic (→ normalized to `emissions.total`) was never rescued — even though the round-2 comment says methane should be split *from* total.
+- **✅ Fixed:** methane backstop now fires on `emissions.*` too (guarded — the scope-from-row-text rule runs first, so real Scope-1/2/3 rows are untouched). +2 tests. Regated+re-ingested all 6 reports: shell_2023 **11** methane claims recovered from total (was 0), shell_2022 **3**; 0 methane rows remain mislabeled. Gold gate held (Tata 96.1 / Shell 89.7).
+- **Deferred (documented):** the **Scope1+2-vs-total symbolic score check** (roadmap Phase 3) stays OUT of the integrity score — even after the methane fix, `emissions.total` still holds table segment-breakdown rows ("Total Scope 1 and Scope 2" per business line: 0.1/0.9/5.7/22.9 Mt), so an arithmetic check would penalize the score for extraction granularity, not disclosure quality. Root fix = split emissions.total by segment (a future ontology round), then the check becomes trustworthy.
+
+---
+
 ## Batch 2026-07-19 — #20: contradictions table was dead + same-key subgroup explosion
 
 ### ✅ #20a 🔴 — UI `contradictions` table was a 3-month-old orphaned artifact

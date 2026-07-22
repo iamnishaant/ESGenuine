@@ -28,8 +28,8 @@
 - [x] **Fix `metric_key` normalization** — canonical *dimensions* (co2e/mass/energy/volume/area/percent/count/rate/currency); implausible (aspect,dim) pairs collapse to `.unspecified`. Drift now honest (`water.consumption.volume 18M→17M m³`, `ltifr.rate 6.9→2.0`) — existing_issues #14–16 ✅
 - [x] **Multi-key endpoint pool** — `LLMClient` round-robins NVIDIA + Groq (multi-key via `GROQ_API_KEYS`/`NVIDIA_API_KEYS`); Groq ~0.9s/call vs ~20s NVIDIA-70B 🟠
 - [x] HF token in `.env` (kills unauthenticated HF Hub warning) 🟡
-- [ ] Re-run final extraction on 70B (cached claims make this cheap) for max quality once table fixes land 🟡
-- [ ] Local intra/cross-report contradiction pass on clean claims (no Supabase RPC needed) — partial Phase 4 🟠
+- [x] Re-run final extraction on 70B — DONE via the round-3 corpus re-ingest (all 6 reports live on the 96.1/round-3 pipeline, 2026-07-22)
+- [x] Local intra/cross-report contradiction pass on clean claims (no Supabase RPC) — DONE: `reasoning/persist_contradictions.py` runs the deterministic numeric scan at ingest and maintains the `contradictions` table (existing_issues #20)
 - [x] Wire section mode into `ExtractionPipeline.run()` (accept `sentences`, prefer sections, keep chunk path as fallback) 🟠
 - [x] Wire `/v1/claims/extract` to load `sentences` and use section mode 🟠
 - [x] Harden NVIDIA call (read-timeout 300s + `max_tokens` cap); driver persists/REUSEs claims 🟠
@@ -45,7 +45,7 @@
 - [~] Produce final Shell findings WITH table metrics (REUSE text + VLM tables) — running
 - [x] Wire VLM tables into `ExtractionPipeline.run()` (production path; env `USE_VLM_TABLES`) ✅
 - [ ] **Better table-page detection** — pdfplumber `find_tables` misses borderless perf tables (only 2/91 pages on Shell). Use digit-density or VLM page-classify so we don't under-select.
-- [ ] Dedup table vs text claims; sub-dimension split for co2e absolute-vs-intensity
+- [x] Sub-dimension split for co2e absolute-vs-intensity — DONE (`emissions.*.co2e` vs `.intensity` via the metric_key dimension split; existing_issues #19). Table-vs-text dedup: deferred (low value — furniture gate already drops most table noise).
 
 ### Phase 3 — Verification layer  `[~]` 🟠
 - [x] **Satellite Evidence v2 — ✅ SHIPPED (v2.3 live, commits →`68accff`, 2026-07-12).**
@@ -74,13 +74,13 @@
         on-chain anchoring, VCs/DIDs, challenge contracts, carbon/biomass MRV.
       - Prereq: corpus re-ingest done (location fields only trustworthy on the
         96.1 pipeline) + gold v0.3 sanity on extraction.
-- [ ] Self-consistency (sample extraction 2×, keep agreeing fields)
-- [ ] LLM-judge pass for the greenwashing verdict + calibrated confidence
-- [ ] Symbolic sanity checks (unit/temporal plausibility; Scope1+2 vs total)
+- [ ] Self-consistency (sample extraction 2×, keep agreeing fields) — deferred (metered LLM)
+- [ ] LLM-judge pass for the greenwashing verdict + calibrated confidence — deferred (metered LLM)
+- [~] Symbolic sanity checks (Scope1+2 vs total) — **investigated 2026-07-22, deferred with reason** (existing_issues #21c): the check would fire on extraction granularity, not greenwashing — `emissions.total` still holds per-segment "Total Scope 1 and Scope 2" table rows. The methane-mislabel half was FIXED (CH4 no longer pollutes total-emissions). Unlocks once emissions.total is split by segment. Unit/value plausibility already enforced (`UnitCanonicalizer.is_value_plausible`).
 
 ### Phase 4 — Fix retrieval & reasoning  `[~]` 🔴
 - [x] Apply `database/match_claims_rpc.sql` to live DB — DONE 2026-06-25 (was PGRST202; RPC now callable, returns the full field set) — existing_issues #1
-- [ ] Remove the silent `except Exception: return []` in `retrieval.py` (still swallows → `[]`; now prints the error but the swallow remains at `retrieval.py:85-87`) — existing_issues #1
+- [x] Remove the silent `except Exception: return []` in `retrieval.py` — DONE 2026-07-22 (`RetrievalError` raised on persistent RPC failure + one reconnect/retry; `GET /{doc}/contradictions` reports `retrieval_available:false` instead of a false 0; fails fast) — existing_issues #1/#21b
 - [x] Fix `doc_id` = chunk-id bug; use a real per-report document id — DONE (all ingest paths write real `report_id`; live rows relabeled) — existing_issues #3
 - [x] Fix NLI input format — DONE (`_textual_entailment` feeds a real premise/hypothesis pair via `{"text", "text_pair"}`; the `</s></body>` hack is gone) — existing_issues #3/#7
 - [x] Make numeric contradiction unit/metric_key-aware — DONE (`_numeric_conflict` compares same `metric_key`+canonical unit; cross-year series no longer flagged; unit-canonicalizer) — existing_issues #7/#18/#19
@@ -122,13 +122,13 @@
 ## 🟡 Data / corpus
 - [x] Shell 2022 + 2023 downloaded & validated → `backend/ESG_Reports/`
 - [ ] Coca-Cola / Nestlé / Shein reports — sites are JS/WAF-gated; **user to drop PDFs into `backend/ESG_Reports/`**, then run `scripts/run_company_analysis.py`
-- [~] Re-ingest a clean corpus on the round-2 (96.1) pipeline — IN PROGRESS: tata/shell_2022/infosys_2023 done; infosys_2025/microsoft/shell_2023 extracting (`reingest_corpus.py`); ⑥ regate sweep re-applies round-2 gate to batch JSONLs (`regate_ingest.py`)
+- [x] Re-ingest a clean corpus on the round-3 (96.1) pipeline — **DONE 2026-07-22: all 6 reports live** (tata 335 / shell_2022 247 / shell_2023 379 / infosys_2023 249 / infosys_2025 242 / microsoft_2024 278). Old-pipeline garbage gone (0 huge-scope1 rows); contradictions persisted per report. Small gap: microsoft + shell_2023 miss their congestion-failed 'Environmental Performance' section (targeted resume when NVIDIA is calm).
 
 ## 🟡 Housekeeping / decisions
 - [x] Commit the uncommitted stack — DONE (repo fully committed; the whole 7-step program + round-2 + satellite + benchmark landed as split commits through `68accff`)
 - [ ] Rotate exposed keys when convenient (GROQ, NVIDIA, DB password) — all in gitignored `.env`; deferred by user
 - [ ] Optional: rename the top-level folder to `ESGenuine` (manual; breaks IDE/cwd if done mid-session)
-- [ ] Repoint frontend `analyze-claims` edge function off Lovable AI → NVIDIA (needs Supabase secret + redeploy)
+- [x] Repoint `analyze-claim(s)` edge functions off Lovable AI → NVIDIA — DONE 2026-07-22 (both functions now call `integrate.api.nvidia.com` OpenAI-compatible with `NVIDIA_API_KEY`; JSON-mode + max_tokens). **To activate:** set `NVIDIA_API_KEY` as a Supabase function secret + `supabase functions deploy` (code done; inert until redeploy).
 
 ---
 

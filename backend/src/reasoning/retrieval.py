@@ -20,6 +20,13 @@ SUPABASE_URL = os.getenv("VITE_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
 EMBED_MODEL = "BAAI/bge-base-en-v1.5"
 
+class RetrievalError(RuntimeError):
+    """The vector-search RPC failed. Raised (not swallowed) so callers can report the
+    failure instead of a misleading '0 contradictions' — existing_issues #1: the old
+    `except: return []` made semantic retrieval look like 'no conflicts found' whether
+    the RPC was missing, the DB was down, or there genuinely were no matches."""
+
+
 # Initialize singletons for performance
 _model = None
 _supabase = None
@@ -66,25 +73,32 @@ def find_candidate_pairs(query_claim: Dict[Any, Any], similarity_threshold: floa
         
     query_id = query_claim.get("claim_id")
 
-    # 3. Call the Supabase Match RPC function to perform pgVector search
-    # Note: We need to create this RPC function in the database.
-    try:
-        response = supabase.rpc(
-            'match_claims',
-            {
-                'query_embedding': query_embedding,
-                'match_threshold': similarity_threshold,
-                'match_count': 10,
-                'filter_family': metric_family,
-                'exclude_claim_id': query_id
-            }
-        ).execute()
-        
-        matches = response.data if response.data else []
-        return matches
-    except Exception as e:
-        print(f"Error executing vector search RPC: {e}")
-        return []
+    # 3. Call the Supabase match_claims RPC (pgVector search). A transient connection
+    #    drop ("Server disconnected") gets ONE reconnect+retry; any persistent failure
+    #    (missing RPC, auth, DB down) raises RetrievalError so the caller surfaces it
+    #    rather than silently reporting zero conflicts (existing_issues #1). Raising on
+    #    the first claim also avoids the old behaviour of hammering a dead RPC once per
+    #    claim (379 failing round-trips on a large report).
+    global _supabase
+    params = {
+        'query_embedding': query_embedding,
+        'match_threshold': similarity_threshold,
+        'match_count': 10,
+        'filter_family': metric_family,
+        'exclude_claim_id': query_id,
+    }
+    for attempt in (1, 2):
+        try:
+            response = supabase.rpc('match_claims', params).execute()
+            return response.data if response.data else []
+        except Exception as e:
+            msg = str(e).lower()
+            transient = any(k in msg for k in ("disconnect", "timeout", "connection", "reset"))
+            if transient and attempt == 1:
+                _supabase = None                 # drop the dead client, reconnect once
+                supabase = get_supabase()
+                continue
+            raise RetrievalError(f"match_claims RPC failed ({e})") from e
 
 if __name__ == "__main__":
     # Test execution
