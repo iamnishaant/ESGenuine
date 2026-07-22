@@ -110,6 +110,7 @@
 ---
 
 ## 🟠 Production hardening (from take_step_forward.md, Tier 1)
+- [x] **Hostable deployment** — DONE 2026-07-22 (`cb90eeb`): `render.yaml` Blueprint (Docker backend + static frontend) + `DEPLOY.md`; `$PORT`-aware Dockerfile; env-driven CORS; scheme-tolerant `VITE_API_BASE`. Not yet deployed (needs user's Render account + secrets). Closes the "backend has no deployment" gap that capped the frontend at localhost.
 - [ ] Async job/run model + workers → **real production ingest path** (today ingest is a manual script)
 - [ ] Pin deps / lockfile + `pyproject.toml`; seed RNG; pin model revisions
 - [x] Dockerfile + docker-compose — DONE + verified live 2026-07-06 (`a09691c`): backend multi-stage + frontend nginx + compose (Supabase-only by design, no local PG); container healthy. 3 deploy-blocking bugs fixed.
