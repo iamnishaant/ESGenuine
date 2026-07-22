@@ -26,6 +26,9 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 
+# Geocode disk caches (regenerated on demand from Nominatim)
+backend/.geocode_cache*.json
+
 # Backend runtime artifacts
 backend/uploads/
 _upgrade_inspect/
@@ -41,6 +44,8 @@ _upgrade_inspect/
 *.sln
 *.sw?
 
-# extraction/ingest run artifacts (checkpoints, per-run JSONL)
-backend/test_results/reingest/
+# extraction/ingest/eval run artifacts (checkpoints, per-run JSONL, output dumps).
+# All of backend/test_results/ is generated at runtime; the committed gold-set
+# FIXTURES live under backend/tests/eval/fixtures/, not here, so this is safe.
+backend/test_results/
 /test_results/
