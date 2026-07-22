@@ -21,9 +21,11 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY is not configured');
+    // NVIDIA NIM (OpenAI-compatible) — off the Lovable gateway, onto the platform's
+    // own provider. Set NVIDIA_API_KEY as a Supabase function secret.
+    const NVIDIA_API_KEY = Deno.env.get('NVIDIA_API_KEY');
+    if (!NVIDIA_API_KEY) {
+      console.error('NVIDIA_API_KEY is not configured');
       throw new Error('AI service not configured');
     }
 
@@ -57,14 +59,17 @@ Provide your analysis in JSON format with these fields:
   "summary": "string (2-3 sentences)"
 }`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${NVIDIA_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
+        model: Deno.env.get('NVIDIA_MODEL') || 'meta/llama-3.3-70b-instruct',
+        temperature: 0.2,
+        max_tokens: 2048,
+        response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
