@@ -255,10 +255,13 @@ async def get_integrity_report(doc_id: str):
     claims = _fetch_doc_claims(doc_id)
     if not claims:
         raise HTTPException(status_code=404, detail="No claims found for this document.")
-    try:
-        contradictions = (await get_contradictions(doc_id)).get("conflicts", [])
-    except HTTPException:
-        contradictions = []
+    # Fast, deterministic numeric contradiction scan — the SAME source that populates the
+    # persisted `contradictions` table and drives every other endpoint (review-queue,
+    # greenwashing-flags, audit summary). The previous path called get_contradictions(),
+    # which fires one Supabase vector-search RPC PER claim (379 round-trips on shell_2023
+    # → 100–235s, many "Server disconnected") plus an NLI model pass. Semantic/NLI
+    # retrieval stays available on the dedicated GET /{doc_id}/contradictions endpoint.
+    contradictions = _numeric_contradictions(claims)[0]
     return build_report(claims, contradictions, _fetch_reviews(doc_id),
                         factcheck=_factcheck_for(claims), satellite=_satellite_for(doc_id))
 
