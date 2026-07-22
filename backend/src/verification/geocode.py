@@ -15,9 +15,10 @@ from typing import Optional, Dict, Any
 
 import requests
 
-# v2 suffix: bump whenever _candidates() changes — cached misses from an older
-# ladder must not mask queries the new ladder could resolve.
-_CACHE_PATH = Path(__file__).resolve().parents[2] / ".geocode_cache_v2.json"
+# Version suffix: bump whenever _candidates() OR the result filtering changes —
+# cached results from an older ladder/filter must not mask what the new one yields.
+# v3: added the geographic-class filter (reject POIs like the Xochimilco restaurant).
+_CACHE_PATH = Path(__file__).resolve().parents[2] / ".geocode_cache_v3.json"
 _UA = {"User-Agent": "ESGenuine-satellite-evidence/1.0 (open-source ESG audit tool)"}
 _LAST_CALL = [0.0]
 
@@ -87,21 +88,46 @@ def _candidates(text: str) -> list:
     return out
 
 
+# Nominatim `class` values that denote a real GEOGRAPHIC feature (a place on the
+# ground with vegetation/land to sample), vs a point-of-interest. Without this
+# filter "Lake Xochimilco" (a Mexico City wetland) matched a Chicago restaurant
+# named Xochimilco (class=amenity) ranked first for the exact-name query — and the
+# NDVI was then measured around the wrong continent.
+_GEO_CLASSES = {"place", "natural", "water", "waterway", "boundary", "landuse",
+                "leisure", "geological", "landcover"}
+# POI leisure sub-types that ARE ground features worth sampling (a park/reserve),
+# vs a gym/pitch. `leisure` is in _GEO_CLASSES but narrowed here.
+_GOOD_LEISURE = {"park", "nature_reserve", "garden", "recreation_ground", "common"}
+
+
+def _acceptable(h: Dict[str, Any]) -> bool:
+    cls, typ = h.get("class", ""), h.get("type", "")
+    if cls == "leisure":
+        return typ in _GOOD_LEISURE
+    return cls in _GEO_CLASSES
+
+
 def _query(q: str) -> Optional[Dict[str, Any]]:
     wait = 1.1 - (time.monotonic() - _LAST_CALL[0])
     if wait > 0:
         time.sleep(wait)
+    # Ask for several candidates and keep the highest-importance GEOGRAPHIC one,
+    # so a POI (restaurant/shop/office) sharing the place name never wins.
     r = requests.get("https://nominatim.openstreetmap.org/search",
-                     params={"q": q, "format": "json", "limit": 1},
+                     params={"q": q, "format": "json", "limit": 10, "addressdetails": 0},
                      headers=_UA, timeout=20)
     _LAST_CALL[0] = time.monotonic()
     r.raise_for_status()
     hits = r.json()
     if not hits:
         return None
-    h = hits[0]
+    geo = [h for h in hits if _acceptable(h)]
+    if not geo:
+        return None   # only POIs matched — honest miss, don't sample a business
+    h = max(geo, key=lambda x: float(x.get("importance", 0) or 0))
     return {"lat": float(h["lat"]), "lon": float(h["lon"]),
             "display_name": h.get("display_name", ""),
+            "class": h.get("class", ""),
             "type": h.get("type", ""), "boundingbox": h.get("boundingbox")}
 
 
