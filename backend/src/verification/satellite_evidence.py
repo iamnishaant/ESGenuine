@@ -22,7 +22,11 @@ from datetime import date
 from typing import Dict, Any, Optional
 
 from .geocode import geocode, geocodable
-from .sentinel_ndvi import ndvi_composite
+# NOTE: sentinel_ndvi (rasterio / pystac_client / planetary_computer) is imported
+# LAZILY inside verify_claim — those heavy geospatial libs are needed only to fetch
+# imagery, not to compute check_key / expectations / read stored evidence. Keeping
+# them out of module import means this module (and check_key) load in environments
+# without the geo stack — e.g. CI's offline test suite (existing_issues #21f).
 
 PARAMS = {
     "version": "sat-ev-2.1",
@@ -129,6 +133,7 @@ def verify_claim(claim: Dict[str, Any]) -> Dict[str, Any]:
         return _inconclusive(claim, "no_valid_date_window",
                              {"report_year": claim.get("report_year")})
 
+    from .sentinel_ndvi import ndvi_composite   # lazy: heavy geo stack, run-only
     before = ndvi_composite(geo["lon"], geo["lat"], win["before_from"], win["before_to"],
                             buffer_m=PARAMS["buffer_m"])
     after = ndvi_composite(geo["lon"], geo["lat"], win["after_from"], win["after_to"],
