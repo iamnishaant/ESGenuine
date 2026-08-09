@@ -51,12 +51,42 @@ BEGIN;
 -- RLS alone is not enough: a GRANT without a permissive policy still fails, but
 -- removing the GRANT makes the intent explicit and defends if a policy is ever
 -- loosened by mistake. Belt and braces.
-REVOKE INSERT, UPDATE, DELETE ON claims             FROM anon, authenticated;
-REVOKE INSERT, UPDATE, DELETE ON reports            FROM anon, authenticated;
-REVOKE INSERT, UPDATE, DELETE ON contradictions     FROM anon, authenticated;
-REVOKE INSERT, UPDATE, DELETE ON claim_reviews      FROM anon, authenticated;
-REVOKE INSERT, UPDATE, DELETE ON jobs               FROM anon, authenticated;
-REVOKE INSERT, UPDATE, DELETE ON satellite_evidence FROM anon, authenticated;
+--
+-- REVOKE ALL, not "INSERT, UPDATE, DELETE" — two gaps found in the live audit
+-- 2026-08-09 before this was first applied:
+--
+--   (a) TRUNCATE IS NOT SUBJECT TO RLS. Policies only filter SELECT/INSERT/
+--       UPDATE/DELETE; TRUNCATE is a table-level privilege checked before any
+--       policy runs. anon actually held TRUNCATE on all 11 tables, so revoking
+--       only I/U/D would have left the public key able to wipe the entire
+--       1730-claim corpus with RLS "on" and looking correct.
+--   (b) REFERENCES / TRIGGER were likewise granted and are likewise unaffected
+--       by RLS.
+--
+-- REVOKE ALL then GRANT SELECT is both stricter and simpler to reason about.
+REVOKE ALL PRIVILEGES ON claims             FROM anon, authenticated;
+REVOKE ALL PRIVILEGES ON reports            FROM anon, authenticated;
+REVOKE ALL PRIVILEGES ON contradictions     FROM anon, authenticated;
+REVOKE ALL PRIVILEGES ON claim_reviews      FROM anon, authenticated;
+REVOKE ALL PRIVILEGES ON jobs               FROM anon, authenticated;
+REVOKE ALL PRIVILEGES ON satellite_evidence FROM anon, authenticated;
+
+-- PARTITIONS CARRY THEIR OWN GRANTS. A REVOKE on the `claims` parent does NOT
+-- cascade — the live audit showed claims_default / _environment / _social /
+-- _governance / _uncategorized each independently holding
+-- DELETE,INSERT,TRUNCATE,UPDATE for anon. Writes routed through the parent are
+-- stopped by RLS, but a direct TRUNCATE on a partition is not (see (a) above),
+-- so each partition must be revoked explicitly.
+DO $$
+DECLARE part regclass;
+BEGIN
+    FOR part IN
+        SELECT inhrelid::regclass FROM pg_inherits WHERE inhparent = 'claims'::regclass
+    LOOP
+        EXECUTE format('REVOKE ALL PRIVILEGES ON %s FROM anon, authenticated', part);
+        EXECUTE format('GRANT SELECT ON %s TO anon, authenticated', part);
+    END LOOP;
+END $$;
 
 -- Sequence USAGE was granted so anon could INSERT; it no longer can.
 DO $$
@@ -155,7 +185,19 @@ COMMIT;
 --   FOR part IN SELECT inhrelid::regclass FROM pg_inherits WHERE inhparent='claims'::regclass
 --   LOOP EXECUTE format('ALTER TABLE %s DISABLE ROW LEVEL SECURITY', part); END LOOP;
 -- END $$;
+-- -- Restore the pre-migration grants (matches what the live audit found on
+-- -- 2026-08-09; note TRUNCATE, which the original per-table GRANTs implied via
+-- -- Supabase table defaults):
 -- GRANT SELECT, INSERT, UPDATE, DELETE ON claim_reviews, jobs TO anon, authenticated;
 -- GRANT SELECT, INSERT, DELETE ON contradictions TO anon;
 -- GRANT SELECT, INSERT ON satellite_evidence TO anon;
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON claims, reports TO anon, authenticated;
+-- DO $$ DECLARE part regclass; BEGIN
+--   FOR part IN SELECT inhrelid::regclass FROM pg_inherits WHERE inhparent='claims'::regclass
+--   LOOP EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON %s TO anon, authenticated', part);
+--   END LOOP;
+-- END $$;
 -- COMMIT;
+--
+-- NOTE: rolling back restores an ANONYMOUS WRITE PRIMITIVE on the published
+-- score. Prefer fixing the offending write path to use SUPABASE_SERVICE_ROLE_KEY.
