@@ -41,6 +41,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ReportIngestPanel } from '@/components/ReportIngestPanel';
 
 const sectors = [
   'Energy',
@@ -244,13 +246,43 @@ const SubmitReport = () => {
             <div>
               <h1 className="text-2xl font-semibold text-foreground">Submit New Report</h1>
               <p className="text-sm text-muted-foreground">
-                Add multiple ESG claims — AI will analyze relationships & contradictions
+                Ingest a full ESG report PDF, or spot-check individual claim statements
               </p>
             </div>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Two distinct capabilities, deliberately separated so the difference is
+            visible rather than implied:
+              • Ingest — the production pipeline. Persists to the shared corpus and
+                feeds every score, benchmark and audit surface in the app.
+              • Quick check — a stateless LLM read on pasted text (Supabase edge
+                function). Nothing is persisted; it does not touch the corpus or any
+                integrity score. */}
+        <Tabs defaultValue="ingest" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="ingest">Ingest report PDF</TabsTrigger>
+            <TabsTrigger value="quick">Quick claim check</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="ingest" className="mt-0">
+            <div className="max-w-3xl">
+              <ReportIngestPanel />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="quick" className="mt-0 space-y-4">
+            <div className="glass-panel p-4 border-l-4 border-l-warning/50">
+              <p className="text-xs text-muted-foreground">
+                <span className="font-medium text-warning">Scratchpad only.</span>{' '}
+                This runs a standalone LLM pass over text you paste and exports the result
+                as JSON. It does <span className="font-medium">not</span> write to the corpus
+                and does <span className="font-medium">not</span> affect any integrity score —
+                use the <span className="font-medium">Ingest report PDF</span> tab for that.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Form Column */}
           <motion.form
             initial={{ opacity: 0, y: 20 }}
@@ -722,7 +754,9 @@ const SubmitReport = () => {
               </ScrollArea>
             </div>
           </motion.div>
-        </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );

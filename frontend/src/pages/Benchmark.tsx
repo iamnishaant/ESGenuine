@@ -9,7 +9,7 @@ import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { getCrossCompany, getTrajectory2, getPortfolioIntegrity } from '@/lib/api';
+import { getCrossCompany, getTrajectory, getPortfolioIntegrity } from '@/lib/api';
 import { metricLabel } from '@/lib/metricLabels';
 
 // Curated comparison set: metrics with real cross-company surface in the corpus.
@@ -41,7 +41,7 @@ export default function Benchmark() {
   const activeCompany = company ?? cross.data?.entries?.[0]?.company ?? null;
   const traj = useQuery({
     queryKey: ['traj', activeCompany, metric],
-    queryFn: () => getTrajectory2(activeCompany!, metric),
+    queryFn: () => getTrajectory(activeCompany!, metric),
     enabled: !!activeCompany,
   });
 

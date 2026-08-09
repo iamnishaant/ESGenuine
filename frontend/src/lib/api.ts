@@ -14,7 +14,9 @@ export const API_BASE = resolveApiBase(import.meta.env.VITE_API_BASE as string);
 // ── auth token (Bearer) ──────────────────────────────────────────────────────
 const TOKEN_KEY = 'esg_access_token';
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
-export const setToken = (t: string | null) =>
+// Module-private: token writes go through login/register/logout so the stored token
+// can never drift from the session those calls established.
+const setToken = (t: string | null) =>
   t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY);
 
 function authHeaders(): Record<string, string> {
@@ -35,6 +37,26 @@ async function post<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} on ${path}`);
+  return res.json() as Promise<T>;
+}
+
+// Multipart POST. Deliberately does NOT set Content-Type — the browser must supply
+// it so the multipart boundary is correct. Surfaces FastAPI's `detail` string, which
+// carries the actionable message ("Only PDF files are accepted.", "Not authenticated").
+async function postForm<T>(path: string, form: FormData): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { ...authHeaders() },
+    body: form,
+  });
+  if (!res.ok) {
+    let detail = `${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = typeof body.detail === 'string' ? body.detail : JSON.stringify(body.detail);
+    } catch { /* non-JSON error body — keep the status line */ }
+    throw new Error(detail);
+  }
   return res.json() as Promise<T>;
 }
 
@@ -145,8 +167,45 @@ export const getReviewQueue = (docId: string) => get<ReviewQueue>(`/reports/${do
 export const postReview = (docId: string, body: ReviewInput) =>
   post<{ status: string } & ReviewInput>(`/reports/${docId}/reviews`, body);
 
+// ── production ingest: PDF → parse → extract → embed → Supabase ──────────────
+// This is the pipeline that actually populates the dashboard. It is async: the POST
+// returns a job_id, and GET /v1/jobs/{id} reports progress. Requires a Bearer token
+// (the endpoint is gated by Depends(get_current_user)); reads stay open.
+export interface IngestQueued { job_id: string; status: string; report_id: string }
+export interface IngestDuplicate {
+  status: 'duplicate'; report_id: string; file_hash: string;
+  claim_count?: number | null; ingested_at?: string | null; message: string;
+}
+export type IngestResponse = IngestQueued | IngestDuplicate;
+
+// Content-hash dedup: re-uploading a PDF that was already ingested returns the
+// existing report rather than duplicating its claims.
+export const isIngestDuplicate = (r: IngestResponse): r is IngestDuplicate =>
+  (r as IngestDuplicate).status === 'duplicate';
+
+export type JobStatus = 'queued' | 'parsing' | 'extracting' | 'ingesting' | 'done' | 'error';
+export interface JobState {
+  job_id: string; status: JobStatus;
+  report_id?: string; company_name?: string; report_year?: number; file_hash?: string;
+  pages?: number; sentences?: number; extracted?: number;   // progress detail
+  inserted?: number; total?: number; doc_id?: string;       // terminal (done)
+  error?: string;                                           // terminal (error)
+}
+
+export function ingestReport(
+  file: File, companyName: string, reportYear: number, useVlmTables = false,
+): Promise<IngestResponse> {
+  const form = new FormData();
+  form.append('file', file);
+  form.append('company_name', companyName);
+  form.append('report_year', String(reportYear));
+  form.append('use_vlm_tables', String(useVlmTables));
+  return postForm<IngestResponse>('/v1/reports/ingest', form);
+}
+
+export const getJob = (jobId: string) => get<JobState>(`/v1/jobs/${jobId}`);
+
 export const getIntegrityReport = (docId: string) => get<IntegrityReport>(`/reports/${docId}/integrity-report`);
-export const getGreenwashingFlags = (docId: string) => get<{ total_flags: number; flags: GreenwashFlag[] }>(`/reports/${docId}/greenwashing-flags`);
 export const getFactCheck = (docId: string, limit = 50) => get<FactCheckReport>(`/reports/${docId}/fact-check?limit=${limit}`);
 export const getScorecard = (companyId: string) => get<Scorecard>(`/benchmark/company/${companyId}`);
 // Single source of truth for the headline Integrity Score: same build_report() the
@@ -169,18 +228,10 @@ export interface Trajectory {
   series: TrajectoryPoint[]; points: number;
   change?: number; change_pct?: number | null; trend?: string;
 }
-export const getTrajectory2 = (companyId: string, metricKey: string) =>
+export const getTrajectory = (companyId: string, metricKey: string) =>
   get<Trajectory>(`/benchmark/trajectory/${companyId}/${metricKey}`);
 
-export const getTrajectory = (companyId: string, metricKey: string, targetValue?: number, targetYear?: number) => {
-  const q = new URLSearchParams();
-  if (targetValue != null) q.set('target_value', String(targetValue));
-  if (targetYear != null) q.set('target_year', String(targetYear));
-  const qs = q.toString();
-  return get(`/benchmark/trajectory/${companyId}/${metricKey}${qs ? `?${qs}` : ''}`);
-};
 export const askAudit = (question: string, docId?: string) => post<AskAnswer>('/audit/ask', { question, doc_id: docId ?? null });
-export const getAuditSummary = (docId: string) => get<Record<string, unknown>>(`/audit/${docId}/summary`);
 // Starter questions derived from the report's flags + stats (no LLM, pure backend).
 export const getSuggestedQuestions = (docId: string) =>
   get<{ doc_id: string; questions: string[] }>(`/audit/${docId}/suggested-questions`);
