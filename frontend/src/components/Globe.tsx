@@ -275,7 +275,7 @@ export const Globe = ({ onCompanySelect, selectedCompany }: {
   onCompanySelect: (name: string) => void;
   selectedCompany: string | null;
 }) => {
-  const { companies } = useClaims();
+  const { companies, loading: claimsLoading } = useClaims();
   // Marker color = backend greenwashing_risk where available (same source as the
   // Integrity Audit page); groundability-derived band only as offline fallback.
   const { forCompany } = useBackendScores();
@@ -334,9 +334,33 @@ export const Globe = ({ onCompanySelect, selectedCompany }: {
         {pickerOpen && (
           <div className="mt-1 glass-panel p-1 max-h-64 overflow-y-auto">
             {markers.length === 0 && (
-              <div className="px-2 py-3 text-[11px] text-muted-foreground">
-                No companies plotted. A company appears here once its report is ingested
-                and its HQ is in the registry.
+              // Distinguish the two very different reasons this can be empty. They used
+              // to look identical, which cost real debugging time: an empty globe could
+              // mean "no claim data reached this component" (a data/loading bug) or
+              // "claims loaded but no HQ is registered" (a registry gap). Say which.
+              <div className="px-2 py-3 text-[11px] text-muted-foreground space-y-1">
+                {claimsLoading ? (
+                  <div>Loading claims…</div>
+                ) : companies.length === 0 ? (
+                  <>
+                    <div className="text-warning">No claim data reached the globe.</div>
+                    <div>
+                      The claims table returned no companies for this component. If other
+                      panels show claims, this is a data-loading bug, not a missing HQ.
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-warning">
+                      {companies.length} compan{companies.length === 1 ? 'y' : 'ies'} loaded,
+                      none with a known HQ.
+                    </div>
+                    <div className="font-mono text-[10px] break-words">
+                      {companies.map((c) => c.name).join(', ')}
+                    </div>
+                    <div>Add them to HQ_REGISTRY in lib/companyHeadquarters.ts to plot them.</div>
+                  </>
+                )}
               </div>
             )}
             {markers.map((m) => (
