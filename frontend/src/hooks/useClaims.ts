@@ -149,12 +149,6 @@ export function useClaims() {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // If data is already cached and we're not currently fetching, do nothing
-    if (globalClaimsCache && !fetchPromises.current) {
-      setLoading(false);
-      return;
-    }
-
     async function fetchData() {
       try {
         const claimsData = await fetchAllClaimRows();
@@ -230,30 +224,53 @@ export function useClaims() {
           });
         }
 
-        // Update global cache
+        // Publish to the module cache ONLY. Local state is hydrated below, by every
+        // consumer, so the component that happened to win the fetch race is not the
+        // only one that ends up with data.
         globalClaimsCache = mappedClaims;
         globalConflictsCache = mappedConflicts;
         globalCompaniesCache = mappedCompanies;
-
-        // Update local state
-        setClaims(mappedClaims);
-        setConflicts(mappedConflicts);
-        setCompanies(mappedCompanies);
         setError(null);
       } catch (err: any) {
         console.error('Error fetching data:', err);
         setError(err);
-      } finally {
-        setLoading(false);
+        throw err;                       // propagate so late subscribers stop loading
       }
     }
 
+    let cancelled = false;
+    const hydrate = () => {
+      if (cancelled) return;
+      setClaims(globalClaimsCache || []);
+      setConflicts(globalConflictsCache || []);
+      setCompanies(globalCompaniesCache || []);
+      setLoading(false);
+    };
+
+    // Already fetched by an earlier mount — hydrate straight from the cache.
+    if (globalClaimsCache && !fetchPromises.current) {
+      hydrate();
+      return () => { cancelled = true; };
+    }
+
+    // Start the shared fetch at most once...
     if (!fetchPromises.current) {
       setLoading(true);
       fetchPromises.current = fetchData().finally(() => {
         fetchPromises.current = null;
       });
     }
+
+    // ...but EVERY consumer subscribes to it. This is the fix for a race that made
+    // the app look half-empty: `fetchData` used to call the state setters of whichever
+    // component mounted first, and any other component mounting in the same tick saw
+    // `fetchPromises.current` already set, never awaited it, and kept its initial []
+    // forever. Live symptom: DashboardCards showed 1730 claims while the Globe showed
+    // 0 companies and rendered no HQ pins at all — same hook, same instant, different
+    // data, purely decided by mount order.
+    fetchPromises.current?.then(hydrate).catch(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
   }, []);
 
   return { claims, conflicts, companies, loading, error };
