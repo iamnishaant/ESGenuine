@@ -1,12 +1,15 @@
 # ESGenuine Backend Dependencies
 # Pinned to the versions verified working in the project .venv (2026-06-26) for
-# reproducible installs / CI. The three trailing deps are kept at a floor (>=)
+# reproducible installs / CI. The two trailing deps are kept at a floor (>=)
 # because their exact build was not captured at pin time — re-pin on next freeze.
+#
+# langgraph was dropped 2026-08-09: its only consumer was src/pipeline/workflow_dag.py,
+# a disconnected dry-run that hardcoded mock outputs in every node while its docstring
+# claimed "(Production)". The real flow is DocumentParsingPipeline (parsers/pdf_parser.py)
+# → ExtractionPipeline (extractors/pipeline.py) → ingest_claims_to_db, made resumable by
+# extractors/checkpoint.py. See take_step_forward.md §3.2, which prescribed this deletion.
 
-# Week 1: Pipeline orchestration
-langgraph>=0.2.0
-
-# Week 2: Document Parsing Pipeline
+# Document Parsing Pipeline
 PyMuPDF==1.27.1
 pdfplumber==0.11.9
 spacy==3.8.11
@@ -21,6 +24,18 @@ python-multipart==0.0.22
 sentence-transformers==5.2.3
 supabase==2.28.0
 psycopg2-binary==2.9.11
+# ── deliberately left at a floor (>=), re-checked 2026-08-09 ────────────────────
+# Both gate OPTIONAL, self-degrading paths and neither is installed in the project
+# .venv — which is why the 173-test offline suite passes without them:
+#   beautifulsoup4      -> collector/report_collector.py (ESG-report downloader). Raises a
+#                          clear "pip install" ImportError if absent; nothing else imports it.
+#   spacy-transformers  -> supplies en_core_web_trf for location_extractor.py, which walks a
+#                          FALLBACK_CHAIN down to en_core_web_sm when trf is unavailable.
+# NOT pinned on purpose: spacy-transformers is tightly coupled to the spacy version
+# (pinned above at 3.8.11), so guessing a pin without resolving it against that spacy build
+# risks breaking `pip install -r requirements.txt` in CI — a worse failure than floating.
+# To close this properly: install both into the .venv, verify against spacy 3.8.11, then
+# freeze the resolved versions here.
 beautifulsoup4>=4.12.0
 spacy-transformers>=1.3.4
 requests==2.32.5

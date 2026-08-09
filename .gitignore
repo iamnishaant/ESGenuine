@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# tsc build-mode incremental cache (CI runs `tsc -b --force`)
+*.tsbuildinfo
+
 # Secrets — never commit
 .env
 .env.*
