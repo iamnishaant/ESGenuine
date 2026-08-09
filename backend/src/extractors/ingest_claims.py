@@ -9,7 +9,6 @@ import json
 import uuid
 import psycopg2
 from pathlib import Path
-from sentence_transformers import SentenceTransformer
 
 # -----------------------------
 # CONFIG
@@ -22,11 +21,19 @@ from supabase import create_client, Client
 load_dotenv()
 
 SUPABASE_URL = os.getenv("VITE_SUPABASE_URL")
-SUPABASE_KEY = os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
+# Write path (claims insert) — needs the RLS-bypassing service-role key once
+# 2026-08-09_enable_rls.sql is applied. Anon fallback for pre-migration/local use.
+SUPABASE_KEY = (os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+                or os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY"))
 
 # Resolve relative to this file (backend/src/extractors/ -> backend/parsed/) for portability.
 CLAIMS_FILE = Path(__file__).resolve().parents[2] / "parsed" / "08dbf8224013_claims.json"
-EMBED_MODEL = "BAAI/bge-base-en-v1.5"
+# Single source of truth for model + pinned revision. EMBED_MODEL is re-exported here
+# because tests/run_integration_test.py imports it from this module.
+try:
+    from model_config import EMBED_MODEL, load_embedder      # noqa: F401
+except ImportError:                      # path-setup fallback (repo root on sys.path)
+    from src.model_config import EMBED_MODEL, load_embedder  # noqa: F401
 
 
 def clean_date(value):
@@ -142,7 +149,7 @@ def ingest_claims(report_metadata: dict = None):
         return
 
     print(f"Loading embedding model: {EMBED_MODEL} ...")
-    model = SentenceTransformer(EMBED_MODEL)
+    model = load_embedder()               # pinned revision (model_config)
 
     print(f"Connecting to Supabase at {SUPABASE_URL}...")
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)

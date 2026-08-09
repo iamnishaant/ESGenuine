@@ -26,8 +26,17 @@ from extractors.supabase_ingest import (
     create_job, update_job, get_job as get_job_state,
 )
 from reasoning.api_reasoning import router as reasoning_router, bench_router, audit_router
+try:                                     # pinned model revisions + deterministic seeding
+    from model_config import seed_everything, model_provenance
+except ImportError:                      # path-setup fallback (repo root on sys.path)
+    from src.model_config import seed_everything, model_provenance
 from api.auth_routes import router as auth_router
 from api.auth import get_current_user
+
+# Deterministic RNG for the whole process, before anything loads a model. Printed so
+# every run's log states which weights + seed produced its numbers (reproducibility).
+seed_everything()
+print(f"[models] {model_provenance()}")
 
 app = FastAPI(
     title="ESGenuine API",
@@ -40,16 +49,32 @@ app.include_router(bench_router)
 app.include_router(audit_router)
 app.include_router(auth_router)
 
-# CORS: localhost dev origins are always allowed; production origins are added
-# via env so a deployed frontend works without a code change. Set either:
+# CORS. Production origins are supplied via env so a deployed frontend works without a
+# code change. Set either:
 #   ALLOWED_ORIGINS       — comma-separated exact origins (e.g. https://app.example.com)
 #   ALLOWED_ORIGIN_REGEX  — a regex (e.g. https://.*\.onrender\.com) for preview URLs
-_DEV_ORIGINS = ["http://localhost:8080", "http://localhost:5173", "http://localhost:3000"]
+#
+# The localhost dev origins are added ONLY outside production. They used to be allowed
+# unconditionally, which meant a deployed API trusted http://localhost:8080 — combined
+# with allow_credentials=True that let a page on a developer's machine (or anyone running
+# a local app on those ports) make credentialed cross-origin calls against production.
+# Gated on the same ENVIRONMENT flag auth.py uses for its JWT_SECRET fail-closed check.
+_IS_PROD = os.getenv("ENVIRONMENT", "development").lower() in ("production", "prod")
+_DEV_ORIGINS = [] if _IS_PROD else [
+    "http://localhost:8080", "http://localhost:5173", "http://localhost:3000",
+]
 _ENV_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+_ORIGIN_REGEX = os.environ.get("ALLOWED_ORIGIN_REGEX") or None
+
+if _IS_PROD and not _ENV_ORIGINS and not _ORIGIN_REGEX:
+    # Fail loudly rather than silently serving an API no browser client can reach.
+    print("[cors] WARNING: ENVIRONMENT=production but neither ALLOWED_ORIGINS nor "
+          "ALLOWED_ORIGIN_REGEX is set — all browser origins will be rejected.")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_DEV_ORIGINS + _ENV_ORIGINS,
-    allow_origin_regex=os.environ.get("ALLOWED_ORIGIN_REGEX") or None,
+    allow_origin_regex=_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

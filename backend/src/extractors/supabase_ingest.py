@@ -13,11 +13,13 @@ from typing import List, Dict, Any, Optional
 
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 
-EMBED_MODEL = os.getenv("EMBED_MODEL", "BAAI/bge-base-en-v1.5")  # 768-dim (matches schema VECTOR(768))
+try:                                     # single source of truth for model + pinned revision
+    from model_config import EMBED_MODEL, load_embedder      # noqa: F401 (re-exported)
+except ImportError:                      # path-setup fallback (repo root on sys.path)
+    from src.model_config import EMBED_MODEL, load_embedder  # noqa: F401
 _model = None
 _sb: Client = None
 
@@ -25,7 +27,7 @@ _sb: Client = None
 def _get_model():
     global _model
     if _model is None:
-        _model = SentenceTransformer(EMBED_MODEL)
+        _model = load_embedder()          # pinned revision (model_config)
     return _model
 
 
@@ -33,9 +35,15 @@ def _get_sb() -> Client:
     global _sb
     if _sb is None:
         url = os.getenv("VITE_SUPABASE_URL")
-        key = os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
+        # This is the INGEST write path (claims delete+insert, reports upsert, jobs
+        # upsert). Once 2026-08-09_enable_rls.sql demotes anon to SELECT-only, the
+        # service-role key is required — it bypasses RLS. Anon fallback keeps local
+        # dev and pre-migration deploys working. Server-side only, never shipped to JS.
+        key = (os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+               or os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY"))
         if not url or not key:
-            raise ValueError("Missing Supabase credentials (VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY).")
+            raise ValueError("Missing Supabase credentials (VITE_SUPABASE_URL / "
+                             "SUPABASE_SERVICE_ROLE_KEY or VITE_SUPABASE_PUBLISHABLE_KEY).")
         _sb = create_client(url, key)
     return _sb
 

@@ -28,6 +28,11 @@ services:
         sync: false
       - key: VITE_SUPABASE_PUBLISHABLE_KEY
         sync: false
+      # Service-role key — bypasses RLS, so it is REQUIRED for every write path once
+      # backend/database/2026-08-09_enable_rls.sql is applied (anon becomes read-only).
+      # Backend-only: it is NOT set on the static site below and must never be.
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
       # Auth (login/register write endpoints). DATABASE_URL MUST be the IPv4 Supabase
       # SESSION POOLER string — the direct db.<ref>.supabase.co host is IPv6-only and
       # unreachable from Render. Omit both to run read-only (scores still work).

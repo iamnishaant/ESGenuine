@@ -27,8 +27,11 @@ from verification.satellite_evidence import verify_claim  # noqa: E402
 def _sb():
     import os
     from supabase import create_client
+    # Writes satellite_evidence — needs the RLS-bypassing service-role key once
+    # 2026-08-09_enable_rls.sql is applied. Anon fallback for pre-migration use.
     return create_client(os.environ["VITE_SUPABASE_URL"],
-                         os.environ["VITE_SUPABASE_PUBLISHABLE_KEY"])
+                         os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+                         or os.environ["VITE_SUPABASE_PUBLISHABLE_KEY"])
 
 
 def main():
