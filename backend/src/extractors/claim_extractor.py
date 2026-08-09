@@ -160,7 +160,27 @@ Return {{"claims": [ ... ]}}. Each claim:
 }}
 
 ## Rules
-1. ONE claim per (metric, year) cell. If a row shows current vs previous year (e.g. 2023 and 2022), emit TWO claims, each with its own year.
+1. ONE claim per DATA CELL. Walk the table cell by cell — every numeric cell is its own claim.
+   A cell is identified by FOUR things, not two: row label x column GROUP x period x measure.
+   - column GROUP: wide tables repeat a header block (e.g. "Permanent employees" and
+     "Other than permanent employees", or one block per benefit). The SAME row label appears
+     under EACH group and means something different every time. Emit a claim for each.
+   - measure: a group often holds a Number column AND a % column. Those are TWO claims with
+     different units ("count" and "%"), never one.
+   - period: if a row shows current vs previous year (FY24 and FY23), emit TWO claims.
+   Do NOT summarise a table into a few headline rows, and do NOT emit only the Total row —
+   the cohort rows (Male / Female / Permanent / Contractual) are the disclosure being audited.
+1a. WORKED EXAMPLE. For:
+      | Category | Permanent (FY24 No.) | Permanent (FY24 %) | Other than permanent (FY24 No.) |
+      | Male     | 9881                 | 49                 | 21358                           |
+      | Female   | 486                  | 23                 | 6979                            |
+    emit SIX claims (2 rows x 3 cells), not two and not one.
+1b. COMPLETENESS CHECK before you answer: count the numeric data cells in the tables, then
+    confirm you emitted that many claims. If your count is lower, you collapsed a matrix —
+    go back and expand it. Under-reporting cells is the single most common failure here.
+1c. source_sentence MUST disambiguate the cell: combine row label + column group + period,
+    e.g. "Male permanent employees FY24" and "Male permanent employees % FY24". Two claims
+    must never share a source_sentence.
 2. metric.value: numbers only, no thousands separators (1,234 -> 1234).
 3. metric.unit: take the unit from the column header, the table title, or a units row, and INHERIT it for every row in that table. e.g. "million tonnes CO2e", "%", "GWh", "thousand m3", "MWh". NEVER output "number", "unit", or an empty unit if a unit is discernible from the table; only use null if truly none exists.
 4. metric.direction: "absolute" for a reported figure (most table cells).
