@@ -166,11 +166,15 @@ def test_trajectory_increasing_compound_cagr():
 
 
 def test_trajectory_zero_baseline_and_single_point():
-    # zero baseline: compound cagr & pct are undefined → None; linear rate still defined
+    # Zero baseline: compound cagr & pct are undefined → None; linear rate still defined.
+    # Uses a COUNT metric deliberately: since 2026-08-09 a zero on an absolute magnitude
+    # (.co2e/.energy/.volume/.mass) is treated as an extraction artefact and filtered from
+    # benchmarks, but "zero fatalities" is a real, meaningful disclosure — so counts are
+    # where a genuine zero baseline actually occurs. See test_zero_magnitude_filtered.
     z = trajectory([
-        _claim("z", 2021, "emissions.scope1.co2e", 0, "tCO2e"),
-        _claim("z", 2023, "emissions.scope1.co2e", 40, "tCO2e"),
-    ], "z", "emissions.scope1.co2e")
+        _claim("z", 2021, "social.health_safety.fatalities.count", 0, "count"),
+        _claim("z", 2023, "social.health_safety.fatalities.count", 40, "count"),
+    ], "z", "social.health_safety.fatalities.count")
     assert z["cagr"] is None and z["change_pct"] is None
     assert _close(z["avg_change_per_year"], 20.0)
     # single data point: no trend/change/cagr emitted at all
@@ -182,7 +186,79 @@ def test_trajectory_zero_baseline_and_single_point():
         assert k not in one
 
 
+def test_zero_magnitude_filtered_but_zero_count_kept():
+    """A zero on an absolute magnitude is an extraction artefact; a zero count is real.
+
+    Regression for the live bug found 2026-08-09: an Infosys claim extracted from a
+    CLIENT case study ("A leading consumer goods company set sustainability goals for
+    net zero emissions") landed as emissions.scope1.co2e = 0 tCO2e, and cross_company
+    ranked Infosys BEST IN CLASS — i.e. the product published "Infosys has the lowest
+    Scope 1 emissions" off a sentence about a different company entirely.
+    """
+    claims = [
+        _claim("ghost", 2023, "emissions.scope1.co2e", 0, "tCO2e"),      # artefact
+        _claim("real", 2023, "emissions.scope1.co2e", 1000, "tCO2e"),
+    ]
+    r = cross_company(claims, "emissions.scope1.co2e")
+    assert r["n"] == 1, "a 0 tCO2e claim must not become a peer-comparison data point"
+    assert r["entries"][0]["company"] == "real"
+    assert r["best"]["company"] == "real", "zero must never win a lower_better ranking"
+
+    # ...but zero fatalities is a genuine disclosure and must still rank (and win).
+    safe = [
+        _claim("safe", 2023, "social.health_safety.fatalities.count", 0, "count"),
+        _claim("unsafe", 2023, "social.health_safety.fatalities.count", 5, "count"),
+    ]
+    r2 = cross_company(safe, "social.health_safety.fatalities.count")
+    assert r2["n"] == 2, "zero counts are real disclosures — must not be filtered"
+    assert r2["best"]["company"] == "safe"
+
+
+def test_metric_year_beats_report_year():
+    """A multi-year series in ONE report must expand into one point per DISCLOSURE
+    year, not collapse into a single point at the publication year.
+
+    Regression for the 2026-08-09 live-data bug: grouping keyed on `report_year`, so
+    Shell SR2022's 2018-2022 Scope 1 series (all report_year=2022) became a single
+    point whose value was the MEDIAN of five different years — a number belonging to
+    no year at all — and the trajectory/YoY chart was silently defeated.
+    """
+    # One report (published 2022) disclosing five years of history.
+    claims = [
+        dict(_claim("S", 2022, "emissions.scope1.co2e", v, "tCO2e"), time_bucket=str(y))
+        for y, v in [(2018, 71), (2019, 70), (2020, 63), (2021, 60), (2022, 51)]
+    ]
+    t = trajectory(claims, "S", "emissions.scope1.co2e")
+    assert t["points"] == 5, f"expected 5 disclosure years, got {t['points']} (collapsed)"
+    assert [p["year"] for p in t["series"]] == [2018, 2019, 2020, 2021, 2022]
+    assert [p["value"] for p in t["series"]] == [71, 70, 63, 60, 51]
+    assert t["trend"] == "down"
+
+    # cross_company must report the LATEST disclosure year's real value, not a median.
+    r = cross_company(claims, "emissions.scope1.co2e")
+    assert r["n"] == 1
+    assert r["entries"][0]["year"] == 2022
+    assert _close(r["entries"][0]["value"], 51), (
+        f"got {r['entries'][0]['value']} — 63 would mean the five years were medianed")
+
+
+def test_metric_year_falls_back_to_report_year():
+    """~38% of the live corpus has time_bucket='unknown_time'. Those claims must still
+    benchmark (under the publication year) rather than silently vanishing."""
+    claims = [
+        dict(_claim("A", 2023, "emissions.scope1.co2e", 100, "tCO2e"), time_bucket="unknown_time"),
+        dict(_claim("B", 2023, "emissions.scope1.co2e", 200, "tCO2e"), time_bucket=None),
+    ]
+    r = cross_company(claims, "emissions.scope1.co2e")
+    assert r["n"] == 2, "placeholder buckets must fall back to report_year, not drop"
+    assert {e["company"] for e in r["entries"]} == {"A", "B"}
+    assert all(e["year"] == 2023 for e in r["entries"])
+
+
 _ALL_TESTS = [
+    test_zero_magnitude_filtered_but_zero_count_kept,
+    test_metric_year_beats_report_year,
+    test_metric_year_falls_back_to_report_year,
     test_polarity_routing,
     test_cross_company_lower_better_and_cross_unit,
     test_cross_company_higher_better,

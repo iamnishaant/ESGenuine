@@ -38,11 +38,45 @@ def polarity(metric_key: str) -> str:
     return "neutral"
 
 
+# Absolute magnitude metrics where a reported ZERO is, in practice, an extraction
+# artefact rather than a disclosure: no operating company emits exactly 0 tCO2e or
+# consumes exactly 0 energy. Deliberately NOT applied to counts — "zero fatalities" and
+# "zero incidents" are real, meaningful, and must keep benchmarking.
+_NONZERO_SUFFIXES = (".co2e", ".intensity", ".energy", ".volume", ".mass")
+
+
+def _is_artefact_zero(metric_key: str, value) -> bool:
+    try:
+        if float(value) != 0.0:
+            return False
+    except (TypeError, ValueError):
+        return False
+    return str(metric_key or "").endswith(_NONZERO_SUFFIXES)
+
+
 def _canon_vals(claims: List[Dict[str, Any]], metric_key: str):
     """Canonical (value, unit) for plausible, metric-bearing claims of one metric_key."""
     out = []
     for c in claims:
         if c.get("metric_key") != metric_key or c.get("metric_value") is None:
+            continue
+        # A narrative mention is prose that happens to contain a number ("we aim to cut
+        # Scope 1 emissions..."), not a reported figure. Ranking one against audited
+        # disclosures compares an aspiration with a measurement.
+        if str(c.get("claim_type") or "").lower() == "narrative":
+            continue
+        # Guard the specific failure found in live data 2026-08-09: an Infosys claim
+        # extracted from a CLIENT case study ("A leading consumer goods company set
+        # sustainability goals for net zero emissions") landed as
+        # emissions.scope1.co2e = 0 tCO2e and cross_company ranked Infosys BEST in class
+        # — publishing "Infosys has the lowest Scope 1 emissions" off a sentence about
+        # somebody else. The quality gate had already flagged it `value_not_in_source`.
+        #
+        # We do NOT filter on that flag: `source_type` is not persisted to the DB, and
+        # for TABLE claims the flag is expected (the source_sentence is only the row
+        # label), so flag-filtering would also delete Shell's legitimate 50 Mt figure.
+        # The zero-guard is narrower and safe.
+        if _is_artefact_zero(metric_key, c.get("metric_value")):
             continue
         if not UnitCanonicalizer.is_value_plausible(metric_key, c.get("metric_value")):
             continue
@@ -65,10 +99,39 @@ def _representative(claims, metric_key):
     return round(statistics.median(same), 4), (modal_unit or None)
 
 
+def _metric_year(c) -> Optional[int]:
+    """The year the METRIC DESCRIBES — not the year its report was published.
+
+    `time_bucket` is the disclosure year ("Scope 1 emissions FY23" -> 2023);
+    `report_year` is only the publication year of the containing document. They differ
+    constantly, because an ESG report almost always discloses a multi-year series: Shell
+    SR2022 carries Scope 1 for 2018-2022, all with report_year=2022.
+
+    Grouping on report_year therefore merged unrelated years and took their MEDIAN,
+    which produced numbers belonging to no year at all:
+      * Tata FY23 28,312,137 + FY24 38,671,851 -> benchmarked as 33,491,994 (2024)
+      * Shell's five-point 71->51 Mt series    -> one point at 2022, value 63
+    The second case silently defeated the trajectory/YoY chart entirely.
+
+    Falls back to report_year when the bucket is a placeholder ('unknown_time' etc.,
+    ~38% of the corpus) so those claims still benchmark rather than vanishing.
+    """
+    tb = c.get("time_bucket")
+    if tb is not None:
+        s = str(tb).strip()
+        if len(s) == 4 and s.isdigit():
+            return int(s)
+    ry = c.get("report_year")
+    try:
+        return int(ry) if ry is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
 def _company_year_groups(claims):
     groups: Dict[tuple, List[Dict[str, Any]]] = {}
     for c in claims:
-        key = (c.get("company_id") or c.get("company_name"), c.get("report_year"))
+        key = (c.get("company_id") or c.get("company_name"), _metric_year(c))
         groups.setdefault(key, []).append(c)
     return groups
 

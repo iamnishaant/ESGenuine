@@ -95,7 +95,7 @@ _CLAIM_COLS = (
     "claim_id,doc_id,report_id,company_id,company_name,report_year,page_number,source_sentence,"
     "aspect,normalized_aspect,metric_family,metric_key,metric_value,metric_unit,"
     "metric_direction,time_bucket,location_scope,claim_type,vagueness_score,groundability_score,"
-    "observability_type"
+    "observability_type,quality_flags"
 )
 
 
