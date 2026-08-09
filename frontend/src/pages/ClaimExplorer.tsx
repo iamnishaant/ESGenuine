@@ -10,13 +10,14 @@ import {
   Clock,
   ArrowUpDown,
   LayoutDashboard,
-  ListFilter
+  ListFilter,
+  FileText
 } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import { Claim, Conflict, mapDbToClaim } from '@/hooks/useClaims';
+import { Claim, Conflict, mapDbToClaim, fetchAllClaimRows } from '@/hooks/useClaims';
 import { metricLabel } from '@/lib/metricLabels';
 
 import ClaimGraph from '@/components/reasoning/ClaimGraph';
@@ -53,13 +54,10 @@ const ClaimExplorer = () => {
     async function fetchData() {
       setLoading(true);
       try {
-        const { data: claimsData, error: claimsError } = await supabase
-          .from('claims')
-          .select('*')
-          .order('groundability_score', { ascending: false });
+        // Shared paginated fetch — a plain .select() stops at PostgREST's 1000-row
+        // cap and silently hid 730 of the 1730 claims from this page.
+        const claimsData = await fetchAllClaimRows();
 
-        if (claimsError) throw claimsError;
-        
         const { data: conflictsData } = await supabase
           .from('contradictions')
           .select('*');
@@ -293,7 +291,29 @@ const ClaimExplorer = () => {
                               <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
                                 <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {claim.location}</span>
                                 <span>•</span>
-                                <span>{claim.company}</span>
+                                {/* Company alone is AMBIGUOUS: the corpus holds two Shell
+                                    reports (2022, 2023) and two Infosys reports (2023, 2025),
+                                    so "Shell" does not say which document a claim came from.
+                                    Always pair the company with its source report. */}
+                                <span className="text-foreground/80">{claim.company}</span>
+                                {claim.reportYear && (
+                                  <>
+                                    <span>•</span>
+                                    <span
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-border/50 bg-muted/30 font-mono text-[10px]"
+                                      title={claim.docId ? `Source report: ${claim.docId}` : undefined}
+                                    >
+                                      <FileText className="w-2.5 h-2.5" />
+                                      {claim.reportYear} report
+                                    </span>
+                                  </>
+                                )}
+                                {claim.page != null && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="font-mono text-[10px]">p{claim.page}</span>
+                                  </>
+                                )}
                               </div>
                             </td>
                             <td className="px-6 py-4">

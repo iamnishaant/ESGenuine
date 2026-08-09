@@ -27,6 +27,10 @@ export interface Claim {
   reportYear?: number;
   timeStart?: string;
   timeEnd?: string;
+  /** Which REPORT this claim came from (e.g. 'shell_2023'). The corpus holds two
+   *  Shell reports and two Infosys reports, so a company name alone does not
+   *  identify the source document — every claim-level view must show this. */
+  docId?: string;
 }
 
 // Treats Postgres "null" string artifacts and blanks as missing.
@@ -87,8 +91,40 @@ export const mapDbToClaim = (dbRow: any): Claim => {
     reportYear: dbRow.report_year ?? undefined,
     timeStart: timeStart || undefined,
     timeEnd: timeEnd || undefined,
+    docId: realOrNull(dbRow.doc_id) || undefined,
   };
 };
+
+/**
+ * Fetch EVERY claim row, paging past PostgREST's row cap.
+ *
+ * Supabase caps a plain `.select()` at 1000 rows (`db-max-rows`). The corpus is 1730,
+ * so an unpaginated fetch silently dropped 730 claims: the dashboard read
+ * "CLAIMS ANALYZED 1000" — an exactly-round number that is itself the tell — and every
+ * derived figure (company aggregates, verified/review counts, globe markers) was
+ * computed on a truncated slice. Nothing errored; the data just stopped.
+ *
+ * Exported because ClaimExplorer previously duplicated this query and therefore
+ * duplicated the bug. One implementation, one place to fix.
+ */
+export async function fetchAllClaimRows(): Promise<any[]> {
+  const PAGE = 1000;
+  const rows: any[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data: page, error } = await supabase
+      .from('claims')
+      .select('*')
+      .order('groundability_score', { ascending: false })
+      .order('claim_id', { ascending: true })   // tiebreak → stable, non-overlapping pages
+      .range(from, from + PAGE - 1);
+
+    if (error) throw error;
+    if (!page?.length) break;
+    rows.push(...page);
+    if (page.length < PAGE) break;
+  }
+  return rows;
+}
 
 // Global state cache to prevent re-fetching on every page navigation
 let globalClaimsCache: Claim[] | null = null;
@@ -121,12 +157,7 @@ export function useClaims() {
 
     async function fetchData() {
       try {
-        const { data: claimsData, error: claimsError } = await supabase
-          .from('claims')
-          .select('*')
-          .order('groundability_score', { ascending: false });
-
-        if (claimsError) throw claimsError;
+        const claimsData = await fetchAllClaimRows();
         
         const { data: conflictsData, error: conflictsError } = await supabase
           .from('contradictions')
