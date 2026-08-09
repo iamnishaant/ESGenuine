@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, ChevronRight, AlertCircle, CheckCircle, HelpCircle, Upload, Loader2, BookOpen, MapPin, Zap, Target, Hash } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { useClaims } from '@/hooks/useClaims';
+import { API_BASE } from '@/lib/api';
 
 // ── Types ──
 
@@ -73,7 +74,10 @@ interface DocumentViewerProps {
 }
 
 // ── API Config ──
-const API_BASE = 'http://localhost:8000';
+// API_BASE comes from lib/api (VITE_API_BASE, scheme-tolerant, localhost fallback).
+// It must NOT be redeclared here: this component renders on the landing page, so a
+// hardcoded localhost broke every deployed build (and was blocked as mixed content
+// on an HTTPS origin) even though render.yaml injects VITE_API_BASE correctly.
 
 // ── Removed mock claims ──
 

@@ -51,6 +51,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Type-check
-        run: npx tsc --noEmit
+        # MUST be build mode (`-b`). Plain `tsc --noEmit` resolves frontend/tsconfig.json,
+        # which is a solution-style config (`"files": []` + project references) — so it
+        # type-checks NOTHING and always exits 0. That silently hid 10 real errors while
+        # this job reported green. `-b` walks the referenced projects (tsconfig.app.json,
+        # tsconfig.node.json); `--force` skips incremental caching so CI is deterministic.
+        # `noEmit: true` in tsconfig.app.json means build mode still emits no JS.
+        run: npx tsc -b --force
       - name: Build
         run: npm run build
