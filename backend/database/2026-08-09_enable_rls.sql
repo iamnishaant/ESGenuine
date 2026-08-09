@@ -1,6 +1,14 @@
 -- ============================================================================
 -- ESGenuine — enable Row Level Security; demote anon to READ-ONLY.
--- Applied: <pending>            Closes TODO.md "Security: enable Supabase RLS".
+-- Applied: 2026-08-09 (Supabase SQL Editor, project fpxgspimlsgiuvalwcmx).
+--                               Closes TODO.md "Security: enable Supabase RLS".
+--
+-- VERIFIED AFTER APPLYING:
+--   RLS=true on all 6 tables AND all 5 claims partitions; 11 SELECT-only policies;
+--   anon/authenticated hold SELECT and nothing else (TRUNCATE gone); corpus intact
+--   at 1730 claims. Behaviourally: anon READ 200 on claims/contradictions/reports;
+--   anon INSERT jobs -> 401 42501 "permission denied" (was 201 before); anon DELETE
+--   contradictions -> 401; service_role INSERT -> 201 and cleanup 204.
 -- ============================================================================
 --
 -- WHY THIS EXISTS

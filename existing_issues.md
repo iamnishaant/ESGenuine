@@ -27,6 +27,58 @@ All 🔴 Critical and 🟠 major data defects are **resolved & verified on live 
 
 ---
 
+## Batch 2026-08-09c — #24: RLS APPLIED to production; anon write primitive closed
+
+> First session with live DB access. The vulnerability was **demonstrated, not inferred**,
+> and auditing the real grants revealed the migration would not have closed it.
+
+### ✅ #24a 🔴 — anonymous write access to score-bearing tables — CLOSED
+**Pre-migration, verified live** (project `fpxgspimlsgiuvalwcmx`, 1730 claims):
+RLS `false` on all 12 public tables, **0 policies**, and anon holding
+`DELETE,INSERT,TRUNCATE,UPDATE` on 11 tables. Proof it was live, not theoretical: using the
+publishable key that ships in the JS bundle, `POST /rest/v1/jobs` returned **201** (sentinel
+deleted immediately after). Any visitor could forge `claim_reviews` — which move the
+published integrity score — or delete `contradictions`.
+
+**Applied 2026-08-09** via Supabase SQL Editor (the agent's DDL execution was correctly
+blocked by the permission classifier; self-granting production write access is exactly what
+that guard is for). **Post-apply, verified:**
+| check | result |
+|---|---|
+| RLS on 6 tables + all 5 `claims` partitions | ✅ true |
+| policies | ✅ 11, all `SELECT`-only |
+| anon / authenticated privileges | ✅ `SELECT` only (TRUNCATE gone) |
+| corpus | ✅ 1730 claims intact |
+| anon READ claims / contradictions / reports | ✅ 200 |
+| anon INSERT jobs | ✅ **401 `42501` permission denied** (was 201) |
+| anon DELETE contradictions | ✅ 401 |
+| service_role INSERT / cleanup | ✅ 201 / 204 |
+| offline suite | ✅ 173/173 |
+
+### ✅ #24b 🔴 — the migration itself would have left the corpus wipeable
+See `927fcc4`. Two bypasses caught by auditing the live grants *before* applying:
+1. **TRUNCATE is not subject to RLS.** Policies filter SELECT/INSERT/UPDATE/DELETE only;
+   TRUNCATE is a table-level privilege checked before any policy. Revoking just I/U/D would
+   have left the public key able to wipe all 1730 claims **while the verify query reported
+   `RLS=true`** — a fix that looks correct and isn't. Now `REVOKE ALL PRIVILEGES` + re-`GRANT
+   SELECT` (also catches REFERENCES/TRIGGER).
+2. **Partition grants do not cascade.** All five partitions independently held
+   `DELETE,INSERT,TRUNCATE,UPDATE`; the parent REVOKE missed them. Now revoked in the same
+   `pg_inherits` loop that enables RLS.
+
+*Lesson: verify a security fix against the live object, not the migration's intent — and
+remember RLS has a TRUNCATE-shaped hole in it.*
+
+### ⚠️ #24c — follow-ups
+- **Rotate `SUPABASE_SERVICE_ROLE_KEY`** — it was pasted into a chat transcript. It bypasses
+  RLS entirely, so it is the one credential worth being strict about.
+- `.env` still holds a legacy `eyJ…` publishable key while the dashboard now issues
+  `sb_publishable_…`; both work today, they diverge when legacy keys are retired.
+- Supabase migration history is still empty ("No migrations") — everything has been applied
+  by hand. Versioned `supabase/migrations/` remains an open TODO item.
+
+---
+
 ## Batch 2026-08-09b — measurement gaps closed: ablation + recall (#23)
 
 > Not runtime defects — **measurement** defects. The system was being judged by a number

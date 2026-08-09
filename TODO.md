@@ -245,14 +245,24 @@ NLP4Sustainability, FinNLP) — viable with 6.1 + 6.2 + 6.3 (~3 weeks). **Full r
       10 real errors. Fixed 2026-08-09 → `npx tsc -b --force` (existing_issues #22b; proven with a
       canary: old command exit 0, new exit 2). Backend pytest was always genuine.
 - [~] Structured logging — JSON request-log middleware shipped (`981a13f`, request_id/status/duration); full `print()`→structlog sweep still TODO
-- [~] Security: enable Supabase RLS, service-role for writes, restrict CORS — **code + migration
-      DONE 2026-08-09, migration NOT YET APPLIED** (existing_issues #22d). All backend write paths
+- [x] ✅ Security: enable Supabase RLS, service-role for writes, restrict CORS — **APPLIED TO
+      PRODUCTION 2026-08-09** (existing_issues #22d/#24). All backend write paths
       now prefer `SUPABASE_SERVICE_ROLE_KEY` (anon fallback preserved);
       `database/2026-08-09_enable_rls.sql` revokes anon writes and enables RLS on all six tables
-      **plus every `claims` partition** with SELECT-only policies. **To activate:** set
-      `SUPABASE_SERVICE_ROLE_KEY` in the backend env, then apply the migration and run its verify
-      block. Was genuinely exploitable: the bundle-embedded anon key could delete `contradictions`
-      and forge `claim_reviews`, which move the published integrity score.
+      **plus every `claims` partition** with SELECT-only policies.
+      **Was genuinely exploitable, and that was PROVEN not assumed:** using the actual
+      bundle-embedded publishable key, an INSERT via PostgREST returned **201** pre-migration
+      (sentinel removed immediately). anon also held **TRUNCATE** on all 11 tables — and
+      TRUNCATE is *not* subject to RLS, so the first draft of the migration would have left
+      the corpus wipeable while reporting `RLS=true`. Fixed before applying (`927fcc4`), along
+      with partition grants, which do not cascade from the parent.
+      **Post-apply verification:** RLS=true on all 6 tables + all 5 partitions · 11 SELECT-only
+      policies · anon holds SELECT and nothing else · 1730 claims intact · anon READ 200 ·
+      anon INSERT **401 42501** (was 201) · anon DELETE 401 · service_role INSERT 201.
+      Offline suite 173/173 after.
+      *Follow-up:* rotate the service-role key (it was pasted into a chat transcript), and
+      `.env` still carries a legacy `eyJ…` publishable key while the dashboard issues
+      `sb_publishable_…`.
       ✅ **CORS FIXED 2026-08-09:** `_DEV_ORIGINS` (localhost:8080/5173/3000) is now added only
       when `ENVIRONMENT` is not production — combined with `allow_credentials=True` it previously
       let a page on any developer's machine make credentialed cross-origin calls against a
