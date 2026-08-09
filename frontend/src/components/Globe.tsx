@@ -3,6 +3,7 @@ import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
+import { MapPinned, ChevronDown } from 'lucide-react';
 import { useClaims } from '@/hooks/useClaims';
 import { useBackendScores } from '@/hooks/useBackendScores';
 import { resolveHeadquarters } from '@/lib/companyHeadquarters';
@@ -39,8 +40,22 @@ const RISK_COLOR: Record<CompanyMarker['riskLevel'], string> = {
 const sizeFactor = (claimsCount: number) =>
   Math.min(0.85 + Math.log2(claimsCount + 1) * 0.13, 2.2);
 
+// Height of the beam that lifts a pin head clear of the globe surface.
+const BEAM_H = 0.26;
+
 function CompanyPin({ marker, onClick, isSelected }: { marker: CompanyMarker; onClick: () => void; isSelected: boolean }) {
-  const position = latLngToVector3(marker.lat, marker.lng, 2.02);
+  // Anchor ON the surface (r = 2.0, the Earth mesh radius) and build upward along the
+  // local normal. The old pin sat at r = 2.02 with a 0.057 radius, so most of it was
+  // BURIED inside the globe and the cloud layer drew at that exact radius — which is
+  // why the markers were effectively invisible.
+  const surface = latLngToVector3(marker.lat, marker.lng, 2.0);
+  // Rotate local +Y to point straight out from the globe centre.
+  const orientation = useMemo(() => {
+    const q = new THREE.Quaternion();
+    q.setFromUnitVectors(new THREE.Vector3(0, 1, 0), surface.clone().normalize());
+    return q;
+  }, [surface]);
+
   const color = RISK_COLOR[marker.riskLevel];
   const base = sizeFactor(marker.claimsCount);
   const groupRef = useRef<THREE.Group>(null);
@@ -74,31 +89,49 @@ function CompanyPin({ marker, onClick, isSelected }: { marker: CompanyMarker; on
   };
 
   return (
-    <group position={position}>
-      {/* Invisible larger hit target for reliable clicking */}
-      <mesh onClick={handleClick} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
-        <sphereGeometry args={[0.1, 16, 16]} />
-        <meshBasicMaterial transparent opacity={0} />
+    <group position={surface} quaternion={orientation}>
+      {/* Generous invisible hit target spanning the whole pin, so clicking is easy. */}
+      <mesh
+        position={[0, BEAM_H * 0.6, 0]}
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+      >
+        <cylinderGeometry args={[0.13, 0.13, BEAM_H * 1.6, 12]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      {/* Animated visible marker (scaled by claim volume + state) */}
-      <group ref={groupRef}>
+      {/* Halo lying flat ON the surface — reads as "a site is here" even at low zoom. */}
+      <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.045, 0.075, 32]} />
+        <meshBasicMaterial color={color} transparent opacity={0.55} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
+
+      {/* Vertical beam lifting the head clear of the terrain + cloud layer. */}
+      <mesh position={[0, BEAM_H / 2, 0]}>
+        <cylinderGeometry args={[0.008, 0.014, BEAM_H, 8]} />
+        <meshBasicMaterial color={color} transparent opacity={0.75} depthWrite={false} />
+      </mesh>
+
+      {/* Animated head, held above the surface (scaled by claim volume + state). */}
+      <group ref={groupRef} position={[0, BEAM_H, 0]}>
         <mesh>
-          <sphereGeometry args={[0.03, 16, 16]} />
+          <sphereGeometry args={[0.042, 20, 20]} />
           <meshBasicMaterial color={color} />
         </mesh>
         <mesh ref={ringRef}>
-          <ringGeometry args={[0.05, 0.07, 32]} />
-          <meshBasicMaterial color={color} transparent opacity={0.6} side={THREE.DoubleSide} />
+          <ringGeometry args={[0.06, 0.085, 32]} />
+          <meshBasicMaterial color={color} transparent opacity={0.75} side={THREE.DoubleSide} depthWrite={false} />
         </mesh>
         <mesh ref={outerRingRef}>
-          <ringGeometry args={[0.08, 0.09, 32]} />
-          <meshBasicMaterial color={color} transparent opacity={0.3} side={THREE.DoubleSide} />
+          <ringGeometry args={[0.1, 0.115, 32]} />
+          <meshBasicMaterial color={color} transparent opacity={0.35} side={THREE.DoubleSide} depthWrite={false} />
         </mesh>
       </group>
 
-      {(isSelected || hovered) && (
-        <Html distanceFactor={8} position={[0, 0.14 * base, 0]} style={{ pointerEvents: 'none' }}>
+      {/* Company name is always legible; the full card appears on hover/selection. */}
+      <Html distanceFactor={9} position={[0, BEAM_H + 0.11 * base, 0]} style={{ pointerEvents: 'none' }} center>
+        {isSelected || hovered ? (
           <div className="glass-panel px-3 py-2 text-xs whitespace-nowrap text-center">
             <div className="text-foreground font-semibold">{marker.name}</div>
             <div className="text-muted-foreground text-[11px]">{marker.city}, {marker.country}</div>
@@ -106,8 +139,15 @@ function CompanyPin({ marker, onClick, isSelected }: { marker: CompanyMarker; on
               {marker.claimsCount} claim{marker.claimsCount === 1 ? '' : 's'} · {marker.riskLevel} risk
             </div>
           </div>
-        </Html>
-      )}
+        ) : (
+          <div
+            className="px-1.5 py-0.5 rounded whitespace-nowrap text-[11px] font-medium"
+            style={{ color, background: 'rgba(3,10,20,0.6)', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}
+          >
+            {marker.name}
+          </div>
+        )}
+      </Html>
     </group>
   );
 }
@@ -239,6 +279,7 @@ export const Globe = ({ onCompanySelect, selectedCompany }: {
   // Marker color = backend greenwashing_risk where available (same source as the
   // Integrity Audit page); groundability-derived band only as offline fallback.
   const { forCompany } = useBackendScores();
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   // One marker per company whose HQ we can resolve. Unknown HQs are skipped
   // rather than fabricated.
@@ -267,11 +308,67 @@ export const Globe = ({ onCompanySelect, selectedCompany }: {
 
   return (
     <motion.div
-      className="w-full h-full"
+      className="w-full h-full relative"
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.8, ease: 'easeOut' }}
     >
+      {/* Company picker. A globe hides half its markers by definition, so hunting for a
+          pin by dragging is a poor primary interaction — this lists every plotted company
+          up front and flies the globe to the one you choose. */}
+      <div className="absolute top-3 right-3 z-20 w-60">
+        <button
+          type="button"
+          onClick={() => setPickerOpen((o) => !o)}
+          className="w-full flex items-center justify-between gap-2 glass-panel px-3 py-2 text-xs text-foreground hover:bg-white/[0.06] transition-colors"
+        >
+          <span className="flex items-center gap-2 truncate">
+            <MapPinned className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+            <span className="truncate">
+              {selectedCompany ?? `Jump to company (${markers.length})`}
+            </span>
+          </span>
+          <ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${pickerOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {pickerOpen && (
+          <div className="mt-1 glass-panel p-1 max-h-64 overflow-y-auto">
+            {markers.length === 0 && (
+              <div className="px-2 py-3 text-[11px] text-muted-foreground">
+                No companies plotted. A company appears here once its report is ingested
+                and its HQ is in the registry.
+              </div>
+            )}
+            {markers.map((m) => (
+              <button
+                key={m.name}
+                type="button"
+                onClick={() => { onCompanySelect(m.name); setPickerOpen(false); }}
+                className={`w-full text-left px-2 py-1.5 rounded hover:bg-white/[0.07] transition-colors ${
+                  selectedCompany === m.name ? 'bg-white/[0.06]' : ''
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: RISK_COLOR[m.riskLevel] }} />
+                  <span className="text-xs text-foreground truncate flex-1">{m.name}</span>
+                  <span className="text-[10px] text-muted-foreground font-mono">{m.claimsCount}</span>
+                </div>
+                <div className="text-[10px] text-muted-foreground pl-4">{m.city}, {m.country}</div>
+              </button>
+            ))}
+            {selectedCompany && (
+              <button
+                type="button"
+                onClick={() => { onCompanySelect(selectedCompany); setPickerOpen(false); }}
+                className="w-full text-left px-2 py-1.5 mt-1 rounded text-[11px] text-muted-foreground hover:bg-white/[0.07] border-t border-border/40"
+              >
+                Clear selection · resume rotation
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
       <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 3, 5]} intensity={1.5} color="#ffffff" />

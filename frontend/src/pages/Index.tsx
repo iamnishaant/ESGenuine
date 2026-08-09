@@ -85,7 +85,7 @@ const Index = () => {
               {/* Overlay info */}
               <div className="absolute top-4 left-4 flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <span>Drag to rotate • Scroll to zoom • Click a company HQ to view its claims</span>
+                <span>Use “Jump to company” (top right) • or drag / scroll / click a pin</span>
               </div>
 
               {/* Legend */}
