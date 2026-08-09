@@ -27,6 +27,242 @@ All 🔴 Critical and 🟠 major data defects are **resolved & verified on live 
 
 ---
 
+## Batch 2026-08-09b — measurement gaps closed: ablation + recall (#23)
+
+> Not runtime defects — **measurement** defects. The system was being judged by a number
+> that could not fall for the two most important reasons. Both harnesses are LLM-free and
+> run off the frozen fixtures already committed, so they re-run in seconds on any change.
+
+### ✅ #23a 🔴 — the extraction score had no recall term, and could not have one
+`EXTRACTION_SCORE` averaged five precision-family rates. Structural, not a missing formula:
+every gold set is sampled *from claims the extractor already emitted*, so a missed claim was
+invisible. A pipeline that emitted 1 perfect claim and dropped 372 would have scored ~100.
+**Fix:** `backend/scripts/run_recall.py`. Docling returns each page as GFM markdown with row
+labels and column headers intact, so numeric table facts are **mechanically enumerable** — a
+real recall denominator with no human annotation. **Measured: Tata 54.4%** (262/482 cells).
+Deliberately conservative (the denominator includes non-claim cells like office counts), so
+true recall is ≥ reported; the cell filter is small and auditable in `_candidate_cells`.
+
+### ✅ #23g 🔴 (reproducibility) — every local model floated on `main`; name duplicated 4×
+`SentenceTransformer("BAAI/bge-base-en-v1.5")` and the NLI `pipeline(...)` loaded by **bare
+name**, i.e. whatever is currently on that HF repo's `main`. An upstream re-upload would
+change embeddings → retrieval → contradictions → **every published score**, with no code
+change, no version bump and nothing in git to explain the drift. Fatal for a reproducible
+result. The model name was also duplicated across `ingest_claims`, `supabase_ingest`,
+`reasoning.agent` and `reasoning.retrieval`, so the embedder that *built* the vectors could
+silently diverge from the one that *queries* them.
+
+**Fix:** new `backend/src/model_config.py` — one definition of model + pinned commit +
+loader, env-overridable (`EMBED_MODEL`/`EMBED_REVISION`/`NLI_MODEL`/`NLI_REVISION`/`SEED`).
+Pinned to the SHAs **already in the local HF cache**, i.e. the exact weights that produced
+the currently reported numbers, so this makes existing results reproducible rather than
+freezing an arbitrary new version:
+- `BAAI/bge-base-en-v1.5` → `a5beb1e3e68b9ab74eb54cfd186867f64f240e1a`
+- `typeform/distilbert-base-uncased-mnli` → `cfa538a0fddbbd978fefe8966c1aeff7ad409c90`
+
+All 5 load sites now call `load_embedder()` / `load_nli()`; `seed_everything()` (python +
+numpy + torch, SEED=42) runs at process start and the server logs `model_provenance()` so
+every run states which weights and seed produced its numbers. **Verified:** both models load
+offline from cache at the pinned revision, embedder 768-dim (matches `VECTOR(768)`), NLI
+returns CONTRADICTION 0.999, process-level caching holds. Gold floors unchanged (96.1/89.7).
+`test_model_config.py` (5 tests) asserts the revisions are **40-char SHAs** (a tag or `main`
+would still float), that the embedder stays 768-dim, and that seeding is deterministic.
+
+### ✅ #23f 🟠 — recall denominator refined, and the real extraction gap identified
+Diagnosing the 220 Tata misses showed the raw denominator was penalising correct behaviour:
+- **90 cells (21%) were the SAME fact repeated** across column groups of a wide matrix table
+  (p15 lists `Male | 20255` four times under one benefits matrix).
+- **27 cells sat on BRSR governance FORM tables** ("was this reviewed by the Board?",
+  "Frequency (Annually/Half-yearly)"). They carry numbers but assert no ESG quantity — the
+  extractor is RIGHT to skip them, and p10 scoring 0/27 was correct behaviour, not a miss.
+
+`run_recall.py` now reports **distinct-fact recall** as the headline (one `(row_label, value)`
+per page = one fact, form cells dropped) and keeps raw cell recall as the conservative bound:
+**Tata 54.4% raw → 59.5% distinct-fact.**
+
+**The residual gap is real and now localised: wide matrix tables are under-extracted.** Not a
+pillar bias (social is the largest table pillar at 41 claims) but a density problem — the LLM
+summarises a big matrix into a handful of claims instead of one per row×period:
+| page | table | GT cells | claims emitted |
+|---|---|---|---|
+| p15 | benefits coverage (Male/Female/Total × benefit) | ~34 | **3** |
+| p23 | permanent vs other-than-permanent workforce | ~46 | **10** |
+| p17 | employee demographics by gender | 92 | 21 |
+Next lever is therefore **prompt/chunking for wide tables** (emit one claim per row×period),
+not table-page detection. Locked by 2 new gates (distinct-fact floor + a guard that the
+duplicate/form filters keep firing). Suite **168/168**.
+
+### ⚠️ #23b — RETRACTED SAME DAY: "detection is the main recall loss" was over-attributed
+The harness splits misses into *page produced no claims* vs *processed but not emitted*:
+| report | overall recall | pages w/ 0 claims | recall elsewhere | table claims |
+|---|---|---|---|---|
+| Tata BRSR FY24 | **54.4%** | 29 cells / 2 pages | **57.8%** | 179/373 (48%) |
+| Shell SR2022 | 8.0% | 162 cells / 3 pages | **33.3%** | **13/247 (5%)** |
+
+**First reading (WRONG):** "~76% of Shell's table facts were never looked at → pdfplumber
+table-page detection is the top recall bug", and the Phase-2 detection item was promoted 🟠→🔴.
+
+**Re-check the same day retracted that.** Two independent reasons the attribution fails:
+1. **The Shell fixture is text-dominant — 13 table claims out of 247 (5%).** That run barely
+   exercised the table pipeline, so its table-cell recall measures the run's configuration,
+   not the shipped table path.
+2. **Production Docling doesn't use pdfplumber detection at all.** `pipeline.py` calls
+   `DoclingTableExtractor().extract(pdf_path)` with **no `pages` argument** → it converts
+   every page. `find_table_pages` gates only the **VLM** path.
+
+**What survives:** the Tata figure (**54.4%**, 48% table claims, near-full-document cache) is
+sound and is the real recall number. The Shell figure is not evidence about detection.
+**Guard added so this cannot recur:** `run_recall.py` now reports `table_claim_share` and
+prints an explicit CONFOUND warning when it is <15%. Detection cost on the VLM path remains
+**unmeasured** — measure before prioritising. Detection item restored to 🟠.
+
+*Lesson for the paper: a recall denominator is only interpretable against a fixture that
+actually ran the pipeline being judged.*
+
+### ✅ #23c 🟠 — the 63.6→96.1 headline was never attributed to a component
+No ablation existed, so "the deterministic layer is the contribution" was an assertion.
+**Fix:** `backend/scripts/run_ablation.py` — 6 cumulative stages scored against both golds.
+**Deterministic repair layer = +24.6 (Tata 71.5→96.1) and +7.0 (Shell 82.7→89.7)** over an
+LLM-plus-vocabulary baseline, at zero LLM cost. The dominant lever depends on document type:
+form-heavy BRSR → gate fixes **+20.5** (node 18.9%→94.6%) + furniture drop +2.4 (precision
+74%→86%); narrative IR report → ontology mapping **+10.6** (node 0%→53.1%), furniture drop 0.
+**Honesty guard:** the S0→S5 totals (+28.4/+17.6) are inflated because S0 node accuracy is 0%
+*by construction* (free LLM text vs controlled vocabulary); the script prints S1→S5 as the
+number to quote and says why. Also surfaced that S3 (`value_not_in_table`) contributes **+0.0**
+to the composite — it flags rather than drops, feeding downstream fabrication analysis only.
+
+### ✅ #23d 🟠 (security) — deployed API trusted localhost origins with credentials
+`_DEV_ORIGINS` (localhost:8080/5173/3000) was in the CORS allowlist unconditionally, and
+`allow_credentials=True`. A page on any developer's machine — or anything a user ran locally
+on those ports — could make credentialed cross-origin calls against production. **Fix:** dev
+origins are added only when `ENVIRONMENT` is not production (same flag `auth.py` uses for its
+JWT fail-closed check), plus a loud warning if prod sets neither `ALLOWED_ORIGINS` nor
+`ALLOWED_ORIGIN_REGEX`. Verified in both modes.
+
+### ✅ #23e — both measurements locked as CI gates
+`backend/tests/test_ablation_recall.py` (5 tests): the S1→S5 deterministic gain must stay
+≥20.0 / ≥5.0; ablation S5 must still reproduce the shipped gold score (proves the ablation
+mirrors the real stack rather than drifting into its own path); no stage may drop the score
+>1.0; table-cell recall floors 50% / 6%; the detection split must stay populated. **Why this
+matters:** a refactor that silently stopped the gate firing would still pass the gold floors
+(the LLM fixture is frozen and already decent) while the project's actual contribution went
+to zero. Suite now **166/166** offline.
+
+---
+
+## Batch 2026-08-09 — full-depth frontend↔backend cross-check (#22)
+
+> Method: enumerated all 32 backend routes and every frontend call site, ran the offline
+> suite, `tsc` under both the CI command and the real project config, `vite build`, and
+> read the migration set for the security posture. Live DB was NOT reachable from the
+> audit environment, so #22d's grant/RLS state is derived from migrations + code, not a
+> live probe — **verify with the queries at the bottom of the migration after applying.**
+
+### ✅ #22a 🔴 — landing page hard-coded `http://localhost:8000`, breaking every deploy
+`DocumentViewer.tsx` declared its own `const API_BASE = 'http://localhost:8000'` instead of
+importing the scheme-tolerant one from `lib/api.ts`. `DocumentViewer` renders on `Index.tsx`
+(**the landing page**), so all 6 of its calls (`/v1/upload`, `/v1/documents`, `/v1/claims/*`)
+pointed at localhost in a deployed build — and an HTTPS origin blocks them outright as mixed
+content. `render.yaml` injects `VITE_API_BASE`, but that only reaches `lib/api.ts`; the local
+constant was invisible to it, so the Blueprint's own stated fix did not cover the landing page.
+**Fix:** import `API_BASE` from `@/lib/api`; the local declaration is gone. Only remaining
+`localhost` is the intentional dev fallback inside `resolveApiBase()`.
+
+### ✅ #22b 🔴 (CI) — the frontend type-check job checked *nothing* and hid 10 real errors
+`.github/workflows/ci.yml` ran `npx tsc --noEmit`, which resolves `frontend/tsconfig.json` —
+a solution-style config (`"files": []` + project references). Without build mode, tsc compiles
+no files and **always exits 0**. Measured: `npx tsc --noEmit` → exit 0 / 0 errors, while
+`npx tsc --noEmit -p tsconfig.app.json` → **exit 2 / 10 errors**. The job's long green streak
+was vacuous.
+**Root cause of the 10 errors (#22c).** **Fix:** CI now runs `npx tsc -b --force`. Proven with a
+canary file containing a bogus column: old command exit 0 (missed), new command exit 2 (caught).
+`*.tsbuildinfo` gitignored.
+
+### ✅ #22c 🟠 — generated Supabase types were an empty stub; the whole read path was untyped
+`frontend/src/integrations/supabase/types.ts` declared `Tables: { [_ in never]: never }` — an
+empty `Database`. So `.from('claims')` / `.from('contradictions')` typed as `never`, and every
+downstream field access errored (`useClaims.ts`, `ClaimExplorer.tsx`). Runtime was unaffected
+(PostgREST ignores TS), but the frontend's **primary data source had zero compile-time safety**,
+and calling it "the typed generated client" was inaccurate.
+**Fix:** hand-written from the authoritative DDL (`schema.sql` + all 7 migrations, kept in step
+with `_row()` in `supabase_ingest.py`): `claims` (28 cols), `contradictions`, `reports`,
+`claim_reviews`, `jobs`, `satellite_evidence`, plus the `match_claims` / `search_claims` RPCs.
+`users` deliberately omitted — anon is REVOKED on it. All 10 errors cleared with no source edits.
+
+### ✅ #22d 🔴 (security) — public anon key had write access to score-bearing tables
+No `ENABLE ROW LEVEL SECURITY` existed anywhere in `backend/database/`, while migrations granted
+**anon** `INSERT/UPDATE/DELETE` on `claim_reviews` and `jobs`, `INSERT/DELETE` on `contradictions`,
+and `INSERT` on `satellite_evidence`. The anon key ships inside the JS bundle (and is in git
+history at `9338e89`), so any visitor could delete every contradiction or forge review rows —
+and reviews **move the published integrity score** (`build_report()` honours `dismissed`; live
+example: Microsoft 44.0 D → 59.4 C). An anonymous score-editing primitive is fatal for a product
+whose deliverable *is* the score.
+**Compounding factor found while fixing:** the backend authenticated with that *same anon key*
+for all writes — there was no service-role key anywhere — so naive RLS would have broken ingest.
+**Fix (two parts):** (1) all write paths now prefer `SUPABASE_SERVICE_ROLE_KEY`, falling back to
+anon so pre-migration/local/CI use is unchanged — `supabase_ingest.py`, `ingest_claims.py`,
+`retrieval.py`, `run_satellite_checks.py`. `agent.py` stays anon (read-only: least privilege).
+(2) `backend/database/2026-08-09_enable_rls.sql` — revokes anon writes, enables RLS on all six
+tables **and every `claims` partition** (RLS does not cascade to partitions; enabling only the
+parent would have been cosmetic), adds SELECT-only policies, ships verify + rollback blocks.
+**⚠️ NOT YET APPLIED** — needs `SUPABASE_SERVICE_ROLE_KEY` set in the backend env first.
+
+### ✅ #22e 🟠 — the production ingest pipeline had no UI at all
+`POST /v1/reports/ingest` + `GET /v1/jobs/{id}` had **zero frontend call sites**, so the entire
+Docling→70B→quality-gate→ontology→embed→Supabase pipeline was reachable only from
+`backend/scripts/`. Meanwhile the page named *"Submit New Report"* took typed-in claim **text**,
+called an unrelated Supabase edge function (`analyze-claims`), and "submitted" by downloading a
+JSON file — nothing persisted. Two independent LLM analysis paths that could disagree, with the
+weaker one occupying the product's front door.
+**Fix:** new `components/ReportIngestPanel.tsx` — PDF upload → auth (endpoint is
+`Depends(get_current_user)`) → `ingestReport()` → 3s job polling with a stage bar
+(queued→parsing→extracting→ingesting→done) → cache invalidation (`invalidateClaimsCache` +
+`invalidateBackendScores`) → link to Integrity Audit. Handles the `status:"duplicate"`
+content-hash response distinctly from a queued job. `SubmitReport` is now two tabs with the
+ingest path as default; the text tool is retained, relabelled **"Quick claim check"**, and
+carries an explicit banner that it does not touch the corpus or any score.
+
+### ✅ #22f 🟡 — mock "production" orchestration + dead API surface
+`src/pipeline/workflow_dag.py` was imported by nothing, hardcoded mock outputs in every node
+(incl. `ndvi_delta_zscore: -1.5`, `"doc-mock-tata-2024"`), and its docstring claimed
+**"(Production)"** — exactly the misleading artifact `take_step_forward.md` §3.2 flagged and
+prescribed deleting. The real flow (`DocumentParsingPipeline` → `ExtractionPipeline` →
+`ingest_claims_to_db`, resumable via `checkpoint.py`) is what §3.2 asked for and now exists.
+**Fix:** deleted `src/pipeline/` (its only other file was `__init__.py`); dropped `langgraph`
+from `requirements.txt` (sole consumer). Also pruned dead `lib/api.ts` exports —
+`getGreenwashingFlags`, `getAuditSummary`, the unused `getTrajectory` variant (the surviving
+`getTrajectory2` was renamed back to `getTrajectory`), and `setToken` demoted to module-private.
+
+### ✅ #22g 🟠 — `start.bat` launched the backend with the wrong interpreter
+The first cut of the new `start.bat` launcher invoked a bare `uvicorn` (venv prepended to
+PATH). Smoke-testing it end-to-end exposed two independent failures:
+1. the venv's `uvicorn.exe` console-script shim exits **rc=1 with no output** — those shims
+   hardcode an absolute interpreter path at install time, so they break whenever the venv or
+   repo folder moves or is renamed (a live risk here: renaming the top folder to `ESGenuine`
+   is an open TODO item);
+2. bare `python` on PATH resolved to a **different interpreter** (uvicorn **0.40.0**) than the
+   venv (**0.41.0**, the pinned version) — i.e. the app would have run against the wrong
+   environment even with the venv prepended to PATH.
+**Fix:** launch as `..\.venv\Scripts\python.exe -m uvicorn ...`. The *relative* path from
+`backend\` contains no spaces even though the absolute repo path does ("Pharos Integrity"),
+so it needs no quoting — which also keeps the `cmd /k` argument free of the nested quotes cmd
+parses inconsistently. PATH is still prepended, but only for interactive convenience in the
+spawned window; the launch no longer depends on it.
+**Verified:** `/health` → **HTTP 200 in 5s** (`embedding_model: ok`, `disk: ok`; `database`
+errored only because the audit sandbox has no network to Supabase). All 4 launcher modes
+dry-run correctly; port-warning helper fires on a listening port and stays silent on a free one.
+
+**Verified after all of the above:** offline suite **161/161 pass**; `npx tsc -b --force`
+**0 errors**; `vite build` **succeeds**; FastAPI app imports with **36 routes** (ingest + jobs
+present) after the `src/pipeline` deletion.
+
+**Still open from this batch:** apply `2026-08-09_enable_rls.sql` (needs live DB + service-role
+key); `_DEV_ORIGINS` (localhost:8080/5173/3000) remains unconditionally in the CORS allowlist
+including production; `.env` at `9338e89` still carries the anon key in git history (publishable,
+but rotate when convenient); bundle is a single 2.3 MB chunk (no code splitting).
+
+---
+
 ## Batch 2026-07-22 — live-run verification: perf, retrieval surfacing, methane mislabel
 
 ### ✅ #21a 🔴 (perf) — `/reports/{doc}/integrity-report` took 100–235s
