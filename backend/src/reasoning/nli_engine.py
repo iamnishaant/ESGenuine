@@ -11,7 +11,10 @@ try:  # canonical unit conversion + value sanity (#15/#16); robust to import pat
 except ImportError:  # pragma: no cover
     from src.extractors.ontology import UnitCanonicalizer
 
-_NLI_MODEL_NAME = "typeform/distilbert-base-uncased-mnli"
+try:                                     # single source of truth for model + pinned revision
+    from model_config import NLI_MODEL as _NLI_MODEL_NAME, load_nli
+except ImportError:                      # path-setup fallback (repo root on sys.path)
+    from src.model_config import NLI_MODEL as _NLI_MODEL_NAME, load_nli
 
 
 class ContradictionEngine:
@@ -28,9 +31,10 @@ class ContradictionEngine:
     def nli_model(self):
         """The HF text-classification pipeline, loaded on first access."""
         if self._nli_model is None:
-            print("Loading DistilBERT-MNLI model for rapid textual reasoning...")
-            from transformers import pipeline  # deferred: only paid for textual NLI
-            self._nli_model = pipeline("text-classification", model=_NLI_MODEL_NAME)
+            print(f"Loading NLI model {_NLI_MODEL_NAME} for rapid textual reasoning...")
+            # load_nli defers the transformers import, so it is only paid for on the
+            # textual-NLI path (the numeric contradiction scan never touches it).
+            self._nli_model = load_nli()      # pinned revision (model_config)
         return self._nli_model
 
     @staticmethod

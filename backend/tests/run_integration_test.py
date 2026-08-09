@@ -227,10 +227,12 @@ def step6_ingest(claims, report: dict):
         return 0
     
     try:
-        from sentence_transformers import SentenceTransformer
         from supabase import create_client, Client
-        
-        model = SentenceTransformer(EMBED_MODEL)
+        from extractors.ingest_claims import load_embedder
+
+        # Must use the SAME pinned revision the ingest path uses — vectors from two
+        # different embedder builds are not comparable.
+        model = load_embedder()
         supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
         
         batch = []

@@ -10,15 +10,23 @@ import os
 from typing import List, Dict, Any
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from sentence_transformers import SentenceTransformer
 
 # -----------------------------
 # CONFIG
 # -----------------------------
 load_dotenv()
 SUPABASE_URL = os.getenv("VITE_SUPABASE_URL")
-SUPABASE_KEY = os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
-EMBED_MODEL = "BAAI/bge-base-en-v1.5"
+# Service-role key when configured — it bypasses RLS and is REQUIRED for the write
+# paths this client backs (claim_reviews upsert, contradictions delete+insert) once
+# 2026-08-09_enable_rls.sql is applied, which demotes anon to SELECT-only. Falls back
+# to the anon key so local dev / CI / read-only deploys keep working unchanged.
+# NEVER expose SUPABASE_SERVICE_ROLE_KEY to the frontend — server-side only.
+SUPABASE_KEY = (os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+                or os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY"))
+try:                                     # single source of truth for model + pinned revision
+    from model_config import load_embedder
+except ImportError:                      # path-setup fallback (repo root on sys.path)
+    from src.model_config import load_embedder
 
 class RetrievalError(RuntimeError):
     """The vector-search RPC failed. Raised (not swallowed) so callers can report the
@@ -34,7 +42,7 @@ _supabase = None
 def get_model():
     global _model
     if _model is None:
-        _model = SentenceTransformer(EMBED_MODEL)
+        _model = load_embedder()          # pinned revision (model_config)
     return _model
 
 def get_supabase() -> Client:

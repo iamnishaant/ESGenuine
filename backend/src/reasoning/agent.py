@@ -18,7 +18,6 @@ from typing import List, Dict, Any, Optional
 
 from dotenv import load_dotenv
 from supabase import create_client
-from sentence_transformers import SentenceTransformer
 
 try:
     from extractors.claim_extractor import LLMClient
@@ -28,7 +27,10 @@ except ImportError:  # pragma: no cover
 from .json_utils import loads_lenient
 
 load_dotenv()
-EMBED_MODEL = "BAAI/bge-base-en-v1.5"
+try:                                     # single source of truth for model + pinned revision
+    from model_config import load_embedder
+except ImportError:                      # path-setup fallback (repo root on sys.path)
+    from src.model_config import load_embedder
 
 _model = None
 _sb = None
@@ -38,7 +40,7 @@ _llm = None
 def _get_model():
     global _model
     if _model is None:
-        _model = SentenceTransformer(EMBED_MODEL)
+        _model = load_embedder()          # pinned revision (model_config)
     return _model
 
 
