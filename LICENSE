@@ -1,0 +1,68 @@
+MIT License
+
+Copyright (c) 2026 The ESGenuine authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+SCOPE — WHAT THIS LICENSE DOES AND DOES NOT COVER
+================================================================================
+
+This license covers the SOURCE CODE, documentation, evaluation harnesses and
+gold-set annotations in this repository.
+
+It does NOT cover, and cannot grant any rights to:
+
+1. THIRD-PARTY ESG REPORTS under `backend/ESG_Reports/` (~84 MB of PDFs published
+   by Shell, BP, Microsoft, Infosys and Tata Power). These remain the copyright
+   of their respective publishers. They are present for local development only
+   and are NOT redistributable under the terms above.
+
+   >> Before publishing this repository or submitting it as a research artifact,
+   >> replace these files with a fetch manifest (source URL + SHA-256 per report).
+   >> That is both the licensing fix and better provenance practice, since a hash
+   >> pins the exact document a result was computed from.
+
+2. MODEL WEIGHTS pulled at runtime from HuggingFace (`bge-base-en-v1.5`,
+   `distilbert-base-uncased-mnli`), which carry their own upstream licenses.
+
+3. OUTPUT OF THIRD-PARTY APIs (NVIDIA NIM, Groq, OpenAI, Anthropic), which is
+   governed by the terms of whichever provider generated it.
+
+================================================================================
+TWO THINGS TO CONFIRM BEFORE PUBLISHING
+================================================================================
+
+Added by the 2026-08-10 audit, which found no LICENSE file at all. Both of the
+following are placeholders chosen so the repository is not left unlicensed —
+neither is a decision this file can make for you.
+
+  (a) COPYRIGHT HOLDER. "The ESGenuine authors" is deliberately generic. All 74
+      commits are authored by `Ansh Bajpai <anshbajpai2005@gmail.com>`, but the
+      repository is being operated by a different account, so the actual holder
+      (individual? both authors? a university, if this is coursework or funded
+      research?) could not be determined from the repository alone. Institutional
+      affiliation often determines ownership — check before publishing.
+
+  (b) LICENSE CHOICE. MIT is the common default for academic NLP artifacts and is
+      accepted by every artifact-evaluation track. Apache-2.0 is the alternative
+      worth considering: same permissions, plus an express patent grant and a
+      patent-retaliation clause. If there is any prospect of commercialisation,
+      or an institution with a technology-transfer office is involved, prefer
+      Apache-2.0.

@@ -1,0 +1,60 @@
+# Citation metadata (Citation File Format 1.2.0) — https://citation-file-format.github.io
+#
+# ⚠ AUTHOR LIST IS UNVERIFIED — CONFIRM BEFORE PUBLISHING.
+#   Populated from the git record: all 74 commits are authored by
+#   `Ansh Bajpai <anshbajpai2005@gmail.com>`. The repository is operated by a
+#   different account (nishant108ns@gmail.com), so the true author list, ordering
+#   and affiliations could not be determined from the repository alone.
+#   Getting authorship wrong on a research artifact is not a cosmetic error —
+#   fix this before the repo goes public. Add ORCIDs and affiliations while you are here.
+
+cff-version: 1.2.0
+message: "If you use this software or its evaluation harnesses, please cite it as below."
+title: "ESGenuine: claim-level extraction and integrity auditing of corporate ESG reports"
+abstract: >-
+  ESGenuine parses corporate ESG and sustainability reports into individually
+  auditable claims, normalises them against an ESG taxonomy, and scores document
+  integrity from greenwashing-signal flags, cross-report contradictions, external
+  fact-checks and Sentinel-2 satellite evidence. The repository additionally ships
+  offline evaluation harnesses for extraction precision, mechanically-derived table
+  recall, a deterministic-stack ablation, and external baselines.
+type: software
+license: MIT
+repository-code: "https://github.com/REPLACE-ME/E-S-Genuine"
+version: "4.0.0"
+date-released: "2026-08-10"
+
+authors:
+  - family-names: Bajpai
+    given-names: Ansh
+    email: anshbajpai2005@gmail.com
+    # affiliation: ""
+    # orcid: ""
+
+keywords:
+  - ESG
+  - greenwashing detection
+  - claim extraction
+  - information extraction
+  - climate NLP
+  - document AI
+  - sustainability reporting
+
+# ── Reproducibility notes for anyone citing a NUMBER from this repository ─────────────
+#
+# Read `backend/tests/eval/README.md` before quoting any figure. In short:
+#
+#   * The headline `precision_composite` (Tata 96.1 / Shell 89.7) is PRECISION-FAMILY
+#     with no recall term, computed on DEVELOPMENT sets. Neither set is held out — the
+#     ontology was tuned against both. They are not evidence of generalization.
+#   * Measured table-fact recall on the same pipeline and document is far lower
+#     (Tata 59.5%). Quote precision and recall together or neither.
+#   * All 146 gold labels are single-annotator with no agreement statistic.
+#   * Local model weights are pinned by commit SHA and RNGs seeded (`src/model_config.py`),
+#     so the ablation, recall and baseline harnesses reproduce exactly and offline.
+#     The LLM extraction stage is NOT reproducible: it calls hosted models at
+#     temperature 0.1. Results depending on it are reproducible only via the frozen
+#     fixtures committed under `backend/tests/eval/fixtures/`.
+#
+# The gold sets are keyed to extractor output rather than source text; the replacement
+# protocol is specified in `docs/ANNOTATION_PROTOCOL.md`.
