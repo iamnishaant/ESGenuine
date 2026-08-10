@@ -1,0 +1,1337 @@
+{
+  "gold_set.json": {
+    "claims": 46,
+    "labels": {
+      "0181f586-123": {
+        "aspect": "water.consumption",
+        "claim_id": "0181f586-123",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "rate",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "042bfff2-dee": {
+        "aspect": "social.diversity.gender",
+        "claim_id": "042bfff2-dee",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "07182e28-0fc": {
+        "aspect": "energy.renewable",
+        "claim_id": "07182e28-0fc",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "11a9b3d5-76b": {
+        "aspect": null,
+        "claim_id": "11a9b3d5-76b",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "1a1abf4c-41b": {
+        "aspect": null,
+        "claim_id": "1a1abf4c-41b",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "203cf175-d9b": {
+        "aspect": "emissions.scope1",
+        "claim_id": "203cf175-d9b",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "co2e_mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "24ca97c5-0b3": {
+        "aspect": "energy.renewable",
+        "claim_id": "24ca97c5-0b3",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "2654c76d-1a9": {
+        "aspect": null,
+        "claim_id": "2654c76d-1a9",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "280f6697-e3e": {
+        "aspect": "social.diversity.gender",
+        "claim_id": "280f6697-e3e",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "2b624a10-3c9": {
+        "aspect": null,
+        "claim_id": "2b624a10-3c9",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "3433f295-83b": {
+        "aspect": null,
+        "claim_id": "3433f295-83b",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "3600809a-836": {
+        "aspect": "uncategorized",
+        "claim_id": "3600809a-836",
+        "claim_type": "target",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": 99.0,
+        "value_ambiguous": false
+      },
+      "38aeb45b-d45": {
+        "aspect": "energy.total",
+        "claim_id": "38aeb45b-d45",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "3ae5d659-90d": {
+        "aspect": "social.workforce.total",
+        "claim_id": "3ae5d659-90d",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 22372.0,
+        "value_ambiguous": false
+      },
+      "423a217c-59e": {
+        "aspect": null,
+        "claim_id": "423a217c-59e",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "43861bb2-840": {
+        "aspect": "energy.renewable",
+        "claim_id": "43861bb2-840",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 10.8,
+        "value_ambiguous": false
+      },
+      "48473e2f-34e": {
+        "aspect": null,
+        "claim_id": "48473e2f-34e",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "4f5fa0df-140": {
+        "aspect": "social.diversity.gender",
+        "claim_id": "4f5fa0df-140",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "5298b9a7-84a": {
+        "aspect": null,
+        "claim_id": "5298b9a7-84a",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "53143b38-e5a": {
+        "aspect": "uncategorized",
+        "claim_id": "53143b38-e5a",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "5f7ba90c-af9": {
+        "aspect": null,
+        "claim_id": "5f7ba90c-af9",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "6a0a58bb-c47": {
+        "aspect": null,
+        "claim_id": "6a0a58bb-c47",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "71e08d42-f68": {
+        "aspect": "emissions.total",
+        "claim_id": "71e08d42-f68",
+        "claim_type": "target",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "72be4d75-09f": {
+        "aspect": "social.diversity.gender",
+        "claim_id": "72be4d75-09f",
+        "claim_type": "target",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": 20.0,
+        "value_ambiguous": false
+      },
+      "75375229-63c": {
+        "aspect": null,
+        "claim_id": "75375229-63c",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "7f314868-04d": {
+        "aspect": "water.consumption",
+        "claim_id": "7f314868-04d",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "8d6275ac-cac": {
+        "aspect": null,
+        "claim_id": "8d6275ac-cac",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "979391d3-f3a": {
+        "aspect": null,
+        "claim_id": "979391d3-f3a",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "9b9b07ba-353": {
+        "aspect": "social.health_safety.ltifr",
+        "claim_id": "9b9b07ba-353",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "9ee635b5-90f": {
+        "aspect": "social.workforce.total",
+        "claim_id": "9ee635b5-90f",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "b06556b7-0e2": {
+        "aspect": "waste.total",
+        "claim_id": "b06556b7-0e2",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "b19be0e1-830": {
+        "aspect": "governance.ethics.incidents",
+        "claim_id": "b19be0e1-830",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 0.0,
+        "value_ambiguous": false
+      },
+      "b276f997-06a": {
+        "aspect": "social.workforce.total",
+        "claim_id": "b276f997-06a",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 3347.0,
+        "value_ambiguous": false
+      },
+      "b63565a9-36b": {
+        "aspect": null,
+        "claim_id": "b63565a9-36b",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "b880def1-b37": {
+        "aspect": "emissions.scope3",
+        "claim_id": "b880def1-b37",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "co2e_mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "be09b7eb-961": {
+        "aspect": "uncategorized",
+        "claim_id": "be09b7eb-961",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": 95.0,
+        "value_ambiguous": false
+      },
+      "c7df650c-eed": {
+        "aspect": null,
+        "claim_id": "c7df650c-eed",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "c95216be-e95": {
+        "aspect": "social.health_safety.ltifr",
+        "claim_id": "c95216be-e95",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "d23e3d1c-9bb": {
+        "aspect": "social.workforce.total",
+        "claim_id": "d23e3d1c-9bb",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "e5b8f944-8eb": {
+        "aspect": "water.consumption",
+        "claim_id": "e5b8f944-8eb",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "volume",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "e66ae9c8-c8d": {
+        "aspect": "waste.total",
+        "claim_id": "e66ae9c8-c8d",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "e8705363-f0b": {
+        "aspect": "biodiversity.conservation",
+        "claim_id": "e8705363-f0b",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "ea08d9b0-aeb": {
+        "aspect": "emissions.scope1",
+        "claim_id": "ea08d9b0-aeb",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "co2e_mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "ed64d3af-a62": {
+        "aspect": null,
+        "claim_id": "ed64d3af-a62",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "eeaad779-7f5": {
+        "aspect": "uncategorized",
+        "claim_id": "eeaad779-7f5",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "f28c9f8e-17e": {
+        "aspect": "social.health_safety.ltifr",
+        "claim_id": "f28c9f8e-17e",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": 100.0,
+        "value_ambiguous": false
+      }
+    },
+    "sha256": "197f0f02ff948e665f3ea06db62ed99192b896858e1a496bb65598549d92e585",
+    "version": 1
+  },
+  "gold_set_docling_tata.json": {
+    "claims": 50,
+    "labels": {
+      "0434a20c-416": {
+        "aspect": "waste.total",
+        "claim_id": "0434a20c-416",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": 5828617,
+        "value_ambiguous": false
+      },
+      "13ce46e9-8ef": {
+        "aspect": null,
+        "claim_id": "13ce46e9-8ef",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "155cddf8-d54": {
+        "aspect": "emissions.total",
+        "claim_id": "155cddf8-d54",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "co2e_mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "16c1fdd7-33a": {
+        "aspect": "social.health_safety.ltifr",
+        "claim_id": "16c1fdd7-33a",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": 0.31,
+        "value_ambiguous": false
+      },
+      "1b159503-659": {
+        "aspect": "energy.total",
+        "claim_id": "1b159503-659",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "energy",
+        "value": 505276706,
+        "value_ambiguous": false
+      },
+      "23c90edc-d8f": {
+        "aspect": "social.human_rights",
+        "claim_id": "23c90edc-d8f",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "29a9ff47-92e": {
+        "aspect": "water.discharge",
+        "claim_id": "29a9ff47-92e",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "volume",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "29da62cd-dcc": {
+        "aspect": "social.posh_complaints",
+        "claim_id": "29da62cd-dcc",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "2c3ae42c-454": {
+        "aspect": null,
+        "claim_id": "2c3ae42c-454",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "2ccc040e-4e0": {
+        "aspect": "emissions.scope2",
+        "claim_id": "2ccc040e-4e0",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "co2e_mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "30c141b7-c99": {
+        "aspect": "social.labor_relations",
+        "claim_id": "30c141b7-c99",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "338c617f-61a": {
+        "aspect": "water.discharge",
+        "claim_id": "338c617f-61a",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "volume",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "3599aa7f-c98": {
+        "aspect": "emissions.scope1",
+        "claim_id": "3599aa7f-c98",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "co2e_mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "44d0044d-605": {
+        "aspect": "water.discharge",
+        "claim_id": "44d0044d-605",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "volume",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "4e18c9e6-7c7": {
+        "aspect": "water.discharge",
+        "claim_id": "4e18c9e6-7c7",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "volume",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "540b6683-2c1": {
+        "aspect": null,
+        "claim_id": "540b6683-2c1",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "5b15575c-53c": {
+        "aspect": null,
+        "claim_id": "5b15575c-53c",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "5ded4ff9-145": {
+        "aspect": "emissions.scope2",
+        "claim_id": "5ded4ff9-145",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "co2e_mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "6ebc707c-642": {
+        "aspect": "energy.total",
+        "claim_id": "6ebc707c-642",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "energy",
+        "value": 505440434,
+        "value_ambiguous": false
+      },
+      "6f5c2b86-cf2": {
+        "aspect": "emissions.air_pollutants.sox",
+        "claim_id": "6f5c2b86-cf2",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "721fe9f3-23d": {
+        "aspect": "emissions.scope3",
+        "claim_id": "721fe9f3-23d",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "co2e_mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "72dc8ac8-295": {
+        "aspect": null,
+        "claim_id": "72dc8ac8-295",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "76474519-f7e": {
+        "aspect": "social.diversity.gender.female",
+        "claim_id": "76474519-f7e",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "77c09368-fec": {
+        "aspect": null,
+        "claim_id": "77c09368-fec",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "85dece47-684": {
+        "aspect": "social.supply_chain.training",
+        "claim_id": "85dece47-684",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "8954d957-e2d": {
+        "aspect": "social.community",
+        "claim_id": "8954d957-e2d",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "currency",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "8bc01d03-1be": {
+        "aspect": null,
+        "claim_id": "8bc01d03-1be",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "8f04fbe6-bda": {
+        "aspect": "social.posh_complaints",
+        "claim_id": "8f04fbe6-bda",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "9310029a-c2b": {
+        "aspect": "emissions.air_pollutants.pm",
+        "claim_id": "9310029a-c2b",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "952ad59b-1ab": {
+        "aspect": "energy.total",
+        "claim_id": "952ad59b-1ab",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "energy",
+        "value": 408727250,
+        "value_ambiguous": false
+      },
+      "9a7b5441-e7c": {
+        "aspect": "social.accessibility",
+        "claim_id": "9a7b5441-e7c",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "9d703d0b-508": {
+        "aspect": "social.health_safety.ltifr",
+        "claim_id": "9d703d0b-508",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": 0.26,
+        "value_ambiguous": false
+      },
+      "a1c4b56a-089": {
+        "aspect": "waste.total",
+        "claim_id": "a1c4b56a-089",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": 177,
+        "value_ambiguous": false
+      },
+      "a22d7638-bb3": {
+        "aspect": "social.health_safety.ltifr",
+        "claim_id": "a22d7638-bb3",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": 0.06,
+        "value_ambiguous": false
+      },
+      "ace5b28c-37f": {
+        "aspect": null,
+        "claim_id": "ace5b28c-37f",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "b15ffaa4-0bd": {
+        "aspect": "emissions.air_pollutants.pm",
+        "claim_id": "b15ffaa4-0bd",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "b19e1867-972": {
+        "aspect": "energy.total",
+        "claim_id": "b19e1867-972",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "rate",
+        "value": 0.00795,
+        "value_ambiguous": false
+      },
+      "b21dea72-e63": {
+        "aspect": "water.consumption",
+        "claim_id": "b21dea72-e63",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "volume",
+        "value": 9117850,
+        "value_ambiguous": false
+      },
+      "c1daca10-4ac": {
+        "aspect": "waste.total",
+        "claim_id": "c1daca10-4ac",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "c8da11f6-abd": {
+        "aspect": "energy.efficiency",
+        "claim_id": "c8da11f6-abd",
+        "claim_type": "target",
+        "is_esg_claim": true,
+        "unit_base": "rate",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "cc3420bc-f76": {
+        "aspect": null,
+        "claim_id": "cc3420bc-f76",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "d039d72e-97f": {
+        "aspect": null,
+        "claim_id": "d039d72e-97f",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "d35f4781-313": {
+        "aspect": "water.recycled",
+        "claim_id": "d35f4781-313",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "d3faf144-bec": {
+        "aspect": "waste.total",
+        "claim_id": "d3faf144-bec",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "rate",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "d7f25237-551": {
+        "aspect": null,
+        "claim_id": "d7f25237-551",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "dae8b94d-0ca": {
+        "aspect": null,
+        "claim_id": "dae8b94d-0ca",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "ec689e2f-ee9": {
+        "aspect": "waste.total",
+        "claim_id": "ec689e2f-ee9",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": 5828617,
+        "value_ambiguous": false
+      },
+      "f971072b-324": {
+        "aspect": "biodiversity.conservation",
+        "claim_id": "f971072b-324",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "fd0c4e56-2e3": {
+        "aspect": null,
+        "claim_id": "fd0c4e56-2e3",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "ff14e47c-3d5": {
+        "aspect": "energy.efficiency",
+        "claim_id": "ff14e47c-3d5",
+        "claim_type": "target",
+        "is_esg_claim": true,
+        "unit_base": "rate",
+        "value": 2460,
+        "value_ambiguous": false
+      }
+    },
+    "sha256": "e5190474d8baaaa5114905b3aefd4fb47a6847c214d0d005351f47cbe9504f5c",
+    "version": 1
+  },
+  "gold_set_shell_v03.json": {
+    "claims": 50,
+    "labels": {
+      "05561dbc-d93": {
+        "aspect": "water.discharge",
+        "claim_id": "05561dbc-d93",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": 0.9,
+        "value_ambiguous": false
+      },
+      "05d9a723-ce3": {
+        "aspect": "energy.renewable",
+        "claim_id": "05d9a723-ce3",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 50.0,
+        "value_ambiguous": false
+      },
+      "0ce797c2-21d": {
+        "aspect": "emissions.total",
+        "claim_id": "0ce797c2-21d",
+        "claim_type": "target",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": 50.0,
+        "value_ambiguous": false
+      },
+      "1b1d699a-f2a": {
+        "aspect": "social.community",
+        "claim_id": "1b1d699a-f2a",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "26bd6103-d5d": {
+        "aspect": "energy.renewable",
+        "claim_id": "26bd6103-d5d",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 62.0,
+        "value_ambiguous": false
+      },
+      "3a6197b8-470": {
+        "aspect": "energy.renewable",
+        "claim_id": "3a6197b8-470",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 307.0,
+        "value_ambiguous": false
+      },
+      "3c32b71d-ec3": {
+        "aspect": "energy.renewable",
+        "claim_id": "3c32b71d-ec3",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 4.0,
+        "value_ambiguous": false
+      },
+      "3efc1b56-202": {
+        "aspect": "social.health_safety",
+        "claim_id": "3efc1b56-202",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": 67.0,
+        "value_ambiguous": false
+      },
+      "4340b6da-e07": {
+        "aspect": "emissions.ccs",
+        "claim_id": "4340b6da-e07",
+        "claim_type": "target",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": 800000.0,
+        "value_ambiguous": false
+      },
+      "4a1c848d-d16": {
+        "aspect": "social.supply_chain",
+        "claim_id": "4a1c848d-d16",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 24000.0,
+        "value_ambiguous": false
+      },
+      "51b21b32-7cf": {
+        "aspect": "social.training",
+        "claim_id": "51b21b32-7cf",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 3500.0,
+        "value_ambiguous": false
+      },
+      "57a4171a-bb1": {
+        "aspect": "emissions.scope1",
+        "claim_id": "57a4171a-bb1",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "580c4837-da7": {
+        "aspect": "emissions.intensity",
+        "claim_id": "580c4837-da7",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": 3.8,
+        "value_ambiguous": false
+      },
+      "5afb5710-c11": {
+        "aspect": "emissions.total",
+        "claim_id": "5afb5710-c11",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": 15.0,
+        "value_ambiguous": false
+      },
+      "5e0978f6-cbb": {
+        "aspect": "water.consumption",
+        "claim_id": "5e0978f6-cbb",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": 15.0,
+        "value_ambiguous": false
+      },
+      "5f778e17-cab": {
+        "aspect": "social.human_rights",
+        "claim_id": "5f778e17-cab",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 460.0,
+        "value_ambiguous": false
+      },
+      "622d71b9-9c7": {
+        "aspect": "governance.lobbying",
+        "claim_id": "622d71b9-9c7",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "currency",
+        "value": 5500000.0,
+        "value_ambiguous": false
+      },
+      "6ae04fc1-5db": {
+        "aspect": "social.health_safety",
+        "claim_id": "6ae04fc1-5db",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 49.0,
+        "value_ambiguous": false
+      },
+      "762ce80b-3a8": {
+        "aspect": "energy.investment",
+        "claim_id": "762ce80b-3a8",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "currency",
+        "value": 8200000000.0,
+        "value_ambiguous": false
+      },
+      "79f9498a-305": {
+        "aspect": "energy.renewable",
+        "claim_id": "79f9498a-305",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 197.5,
+        "value_ambiguous": false
+      },
+      "806d50f1-d96": {
+        "aspect": "social.community",
+        "claim_id": "806d50f1-d96",
+        "claim_type": "target",
+        "is_esg_claim": true,
+        "unit_base": "currency",
+        "value": 100.0,
+        "value_ambiguous": false
+      },
+      "8a8f0aa4-777": {
+        "aspect": "emissions.methane",
+        "claim_id": "8a8f0aa4-777",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "92a1ba83-ed4": {
+        "aspect": "energy.renewable",
+        "claim_id": "92a1ba83-ed4",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 759.0,
+        "value_ambiguous": false
+      },
+      "9494861a-c6f": {
+        "aspect": "social.supply_chain.training",
+        "claim_id": "9494861a-c6f",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 503.0,
+        "value_ambiguous": false
+      },
+      "965e7c80-e2a": {
+        "aspect": "energy.renewable",
+        "claim_id": "965e7c80-e2a",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 1509.0,
+        "value_ambiguous": false
+      },
+      "978c5915-8a7": {
+        "aspect": "energy.ev_charging",
+        "claim_id": "978c5915-8a7",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 87000.0,
+        "value_ambiguous": false
+      },
+      "9f5c8eb4-bcd": {
+        "aspect": "energy.renewable",
+        "claim_id": "9f5c8eb4-bcd",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 760.0,
+        "value_ambiguous": false
+      },
+      "9feb9b63-ef2": {
+        "aspect": "emissions.scope1",
+        "claim_id": "9feb9b63-ef2",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "aff300b1-f24": {
+        "aspect": "energy.investment",
+        "claim_id": "aff300b1-f24",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "currency",
+        "value": 4300000000.0,
+        "value_ambiguous": false
+      },
+      "b35d3874-e7b": {
+        "aspect": "social.health_safety",
+        "claim_id": "b35d3874-e7b",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "b51cdef8-66d": {
+        "aspect": "energy.renewable",
+        "claim_id": "b51cdef8-66d",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 300.0,
+        "value_ambiguous": false
+      },
+      "b5c12197-fd4": {
+        "aspect": null,
+        "claim_id": "b5c12197-fd4",
+        "claim_type": null,
+        "is_esg_claim": false,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "bac3a89b-0e7": {
+        "aspect": "governance.payments_to_governments",
+        "claim_id": "bac3a89b-0e7",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "currency",
+        "value": 221.0,
+        "value_ambiguous": false
+      },
+      "bc9164c4-dfa": {
+        "aspect": "energy.supply",
+        "claim_id": "bc9164c4-dfa",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 194.0,
+        "value_ambiguous": false
+      },
+      "c613ca14-f1d": {
+        "aspect": "governance.stakeholder_engagement",
+        "claim_id": "c613ca14-f1d",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 300.0,
+        "value_ambiguous": false
+      },
+      "c9f178ab-048": {
+        "aspect": "energy.renewable",
+        "claim_id": "c9f178ab-048",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 41.0,
+        "value_ambiguous": false
+      },
+      "cb619003-d7d": {
+        "aspect": "social.health_safety.sif",
+        "claim_id": "cb619003-d7d",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "rate",
+        "value": 6.9,
+        "value_ambiguous": false
+      },
+      "cc0f0dbc-cb0": {
+        "aspect": "energy.renewable",
+        "claim_id": "cc0f0dbc-cb0",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 108.0,
+        "value_ambiguous": false
+      },
+      "d5d4b65a-3fc": {
+        "aspect": "energy.investment",
+        "claim_id": "d5d4b65a-3fc",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": 9.0,
+        "value_ambiguous": false
+      },
+      "d9e3ffc6-c07": {
+        "aspect": "emissions.offsets",
+        "claim_id": "d9e3ffc6-c07",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": 5.1,
+        "value_ambiguous": false
+      },
+      "dced3115-8e2": {
+        "aspect": "energy.renewable",
+        "claim_id": "dced3115-8e2",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 732.0,
+        "value_ambiguous": false
+      },
+      "dd0069e8-11d": {
+        "aspect": "energy.renewable",
+        "claim_id": "dd0069e8-11d",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 1200.0,
+        "value_ambiguous": false
+      },
+      "e1c09137-94b": {
+        "aspect": "energy.renewable",
+        "claim_id": "e1c09137-94b",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 182.0,
+        "value_ambiguous": false
+      },
+      "e3129e0c-dee": {
+        "aspect": "waste.recycled",
+        "claim_id": "e3129e0c-dee",
+        "claim_type": "target",
+        "is_esg_claim": true,
+        "unit_base": "percent",
+        "value": 30.0,
+        "value_ambiguous": false
+      },
+      "e50f6d22-d69": {
+        "aspect": "emissions.scope1",
+        "claim_id": "e50f6d22-d69",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "co2e_mass",
+        "value": null,
+        "value_ambiguous": true
+      },
+      "e6366eec-af9": {
+        "aspect": "emissions.offsets",
+        "claim_id": "e6366eec-af9",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "count",
+        "value": 11.0,
+        "value_ambiguous": false
+      },
+      "f03abaf9-1c4": {
+        "aspect": "emissions.air_pollutants",
+        "claim_id": "f03abaf9-1c4",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "mass",
+        "value": 93.0,
+        "value_ambiguous": false
+      },
+      "f8c8e3a3-b13": {
+        "aspect": "energy.renewable",
+        "claim_id": "f8c8e3a3-b13",
+        "claim_type": "narrative",
+        "is_esg_claim": true,
+        "unit_base": null,
+        "value": null,
+        "value_ambiguous": false
+      },
+      "ff2de84a-282": {
+        "aspect": "energy.renewable",
+        "claim_id": "ff2de84a-282",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "power_capacity",
+        "value": 789.0,
+        "value_ambiguous": false
+      },
+      "ff5be554-9ba": {
+        "aspect": "governance.compliance",
+        "claim_id": "ff5be554-9ba",
+        "claim_type": "performance",
+        "is_esg_claim": true,
+        "unit_base": "currency",
+        "value": 13000.0,
+        "value_ambiguous": false
+      }
+    },
+    "sha256": "e397d786e76ae27d255a12dcafff1b478528ed62da85d43cdd83ee890b671355",
+    "version": 1
+  }
+}
