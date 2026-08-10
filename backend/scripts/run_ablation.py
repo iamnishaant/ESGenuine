@@ -45,6 +45,21 @@ layer. The S0->S5 total therefore flatters the deterministic stack. Report BOTH:
 
 Both are printed. S1->S5 is the conservative claim; use it when a reviewer is watching.
 
+SECOND HONESTY NOTE — added by the 2026-08-10 audit, and it outranks the first.
+BOTH gold sets are DEVELOPMENT sets. Shell v0.3 is described elsewhere as "out-of-sample";
+it is not. It was built in `dd63093` (scoring 81.1) and the ontology was tuned against the
+errors it revealed in `48555ea` the same day, reaching 89.7 — a commit that also rewrote 2
+of its gold labels to match the taxonomy nodes it introduced. `95e1f20` did the same to 4
+Tata labels. So S1->S5 is defensible as *an ablation of the repair layer* (the stages are
+paired on identical claims, which the contamination does not disturb) but the ABSOLUTE
+endpoints are development scores. Never present 96.1 or 89.7 as generalization.
+
+Third: this composite has no recall term, and the repair layer's gain is not free —
+`run_baselines.py` measures it costing 5.5pp of table-fact recall on Tata. Report the
+trade, not just the gain.
+
+See `backend/tests/eval/README.md` and `docs/ANNOTATION_PROTOCOL.md`.
+
 Run:
     python backend/scripts/run_ablation.py              # table to stdout
     python backend/scripts/run_ablation.py --json out.json
@@ -71,9 +86,9 @@ _GOLD = _REPO / "backend" / "tests" / "eval"
 
 # (label, fixture jsonl, docling cache, gold set)
 CASES = [
-    ("Tata Power BRSR FY24 (in-sample)",
+    ("Tata Power BRSR FY24 (DEV set — gate tuned on it)",
      "tata_docling_full.jsonl", "docling_tata.json", "gold_set_docling_tata.json"),
-    ("Shell SR2022 (out-of-sample)",
+    ("Shell SR2022 (DEV set — ontology r2 tuned on it, 48555ea)",
      "shell_2022_raw.jsonl", "docling_shell2022.json", "gold_set_shell_v03.json"),
 ]
 
@@ -191,7 +206,17 @@ def _print_table(res):
         print(f"{'S1->S5 (DEFENSIBLE)':<22}{'':>6}"
               f"{last['extraction_score'] - s1['extraction_score']:>+9.1f}"
               f"   ({s1['extraction_score']} -> {last['extraction_score']})"
-              f"  <- repair layer alone, zero LLM cost. QUOTE THIS.")
+              f"  <- repair layer alone, zero LLM cost.")
+    print("\n  QUOTING GUIDANCE (audit 2026-08-10)")
+    print("    The DELTA is quotable: stages are paired on identical claims, so the")
+    print("    contamination below does not disturb the within-document comparison.")
+    print("    The ENDPOINTS are not: both gold sets are DEVELOPMENT sets — the ontology")
+    print("    was tuned against each, and 6 gold labels were rewritten to match new")
+    print("    taxonomy nodes. Neither 96.1 nor 89.7 is out-of-sample. No held-out set")
+    print("    exists yet; see docs/ANNOTATION_PROTOCOL.md.")
+    print("    The composite also has NO RECALL TERM, and the gain is not free —")
+    print("    run_baselines.py measures the repair layer costing 5.5pp of table-fact")
+    print("    recall on Tata. Report the trade, not just the gain.")
 
 
 def _print_markdown(res):

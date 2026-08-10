@@ -30,8 +30,15 @@ sys.path.insert(0, str(_REPO / "backend" / "scripts"))
 import run_ablation                                                # noqa: E402
 import run_recall                                                  # noqa: E402
 
-TATA = "Tata Power BRSR FY24 (in-sample)"
-SHELL = "Shell SR2022 (out-of-sample)"
+# Resolved from run_ablation.CASES rather than hardcoded, so a label edit cannot break
+# CI. It already did once: the 2026-08-10 audit renamed both cases (dropping the false
+# "out-of-sample" from Shell — the ontology was tuned on it in 48555ea) and these two
+# string literals silently stopped matching any case, failing both floor tests.
+TATA = run_ablation.CASES[0][0]
+SHELL = run_ablation.CASES[1][0]
+assert "Tata" in TATA and "Shell" in SHELL, (
+    f"run_ablation.CASES order changed — TATA={TATA!r}, SHELL={SHELL!r}. "
+    f"The floors below are per-document and would be applied to the wrong one.")
 
 # Measured 2026-08-09. Floors sit under the measured value so noise does not fail CI.
 #   Tata  S1 71.5 -> S5 96.1  (+24.6)
