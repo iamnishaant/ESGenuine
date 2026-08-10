@@ -1,3 +1,26 @@
+> **⚠ The shipped code has DIVERGED from this spec. Verify before citing.**
+>
+> This is implemented — as `GroundabilityClassifier` in
+> [`src/extractors/models.py`](../../src/extractors/models.py), which its own docstring
+> calls a "CVE-lite / rule-based pre-CVE scorer" — but not as written below. Two
+> differences change the numbers:
+>
+> | | this spec | shipped `GroundabilityClassifier.score()` |
+> |---|---|---|
+> | combination | `0.25 × each of 4 terms` | `min(points / 2.5, 1.0)` — a 2.5 denominator, so three terms can saturate it |
+> | claim type | not mentioned | multiplier `performance 1.0 / target 0.6 / other 0.5`, floored at 0.7 for optically observable aspects (fix #17) |
+>
+> The claim-type multiplier is a real behavioural change with a documented rationale
+> (forward-looking targets should not score as groundable as delivered performance) that
+> was never written back here. The field is stored as `groundability_score`, not
+> `cve_score`; nothing in the codebase is named CVE.
+>
+> Flagged by the 2026-08-10 audit alongside
+> [`integrity_formula.md`](integrity_formula.md), which is unimplemented outright.
+> Reconcile the two before either is used as a methods reference.
+
+---
+
 # Claim Verifiability Estimator (CVE) Rules
 
 The CVE determines if a claim is physically verifiable, gating whether the system triggers satellite imagery or relies on text-only evaluation.

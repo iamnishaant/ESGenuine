@@ -1,4 +1,37 @@
-# Integrity Gap Formula
+> # ⚠ UNIMPLEMENTED DESIGN NOTE — DO NOT CITE AS THE SYSTEM'S METHOD
+>
+> **Status: never built.** Nothing on this page exists in the codebase. Grepping
+> `backend/src/` for `Integrity_Gap`, `w_C`, `w_E`, `CVE_score` or `uncertainty_penalty`
+> returns zero hits. There is no per-claim integrity gap, no CVE term, and no
+> uncertainty penalty anywhere in the running system.
+>
+> **What actually ships** is a different formula, at document level rather than per
+> claim, in [`src/reasoning/integrity_report.py`](../../src/reasoning/integrity_report.py)
+> (`_score_flags`, report version 2.3):
+>
+> ```
+> score = 100 − Σ over flags ( severity_weight × prevalence )
+>         severity_weight = {Critical: 50, High: 30, Medium: 16, Low: 6}
+>         prevalence      = claims_triggering_flag / total_claims
+>                           (structural flags use a fixed 0.5)
+> ```
+>
+> Fact-check and satellite evidence fold in additively on top of that, not as the
+> weighted `w_E` term described below.
+>
+> **Why this banner exists:** an audit on 2026-08-10 found this page was the only written
+> specification of "the integrity score", making it the natural source for a paper's
+> methods section — which would have described a system that does not exist. Kept rather
+> than deleted because the design is a reasonable target, and the per-claim framing plus
+> the uncertainty term are both things the shipped score lacks and arguably needs.
+>
+> **Before implementing any of it:** note that the weights below are as uncalibrated as
+> the shipped ones. Neither set has ever been validated against an external criterion.
+> See roadmap item 6.4.
+
+---
+
+# Integrity Gap Formula *(design target, not built)*
 
 The Integrity Gap is the final output score per claim: **how much does the evidence support or contradict the claim?**
 
