@@ -43,12 +43,15 @@ const sizeFactor = (claimsCount: number) =>
 // Height of the beam that lifts a pin head clear of the globe surface.
 const BEAM_H = 0.26;
 
+// Radius of the Earth mesh. Pins anchor here and the horizon test below uses it.
+const EARTH_R = 2.0;
+
 function CompanyPin({ marker, onClick, isSelected }: { marker: CompanyMarker; onClick: () => void; isSelected: boolean }) {
   // Anchor ON the surface (r = 2.0, the Earth mesh radius) and build upward along the
   // local normal. The old pin sat at r = 2.02 with a 0.057 radius, so most of it was
   // BURIED inside the globe and the cloud layer drew at that exact radius — which is
   // why the markers were effectively invisible.
-  const surface = latLngToVector3(marker.lat, marker.lng, 2.0);
+  const surface = latLngToVector3(marker.lat, marker.lng, EARTH_R);
   // Rotate local +Y to point straight out from the globe centre.
   const orientation = useMemo(() => {
     const q = new THREE.Quaternion();
@@ -62,12 +65,24 @@ function CompanyPin({ marker, onClick, isSelected }: { marker: CompanyMarker; on
   const ringRef = useRef<THREE.Mesh>(null);
   const outerRingRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
+  // Whether this pin is on the hemisphere facing the camera. drei's <Html> is a DOM
+  // overlay and is NOT depth-tested against the globe, so without this every pin on
+  // the FAR side still printed its company name straight through the Earth — half
+  // the labels on screen belonged to markers you could not see or click.
+  const [frontFacing, setFrontFacing] = useState(true);
+  const worldPos = useRef(new THREE.Vector3());
 
   useFrame((state) => {
     if (groupRef.current) {
       const pulse = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.18;
       const emphasis = isSelected ? 1.5 : hovered ? 1.25 : 1;
       groupRef.current.scale.setScalar(base * pulse * emphasis);
+
+      // Horizon test for a sphere centred at the origin: a surface point P is visible
+      // from camera C exactly when P·C > r². Cheaper and steadier than raycasting.
+      groupRef.current.getWorldPosition(worldPos.current);
+      const visible = worldPos.current.dot(state.camera.position) > EARTH_R * EARTH_R;
+      if (visible !== frontFacing) setFrontFacing(visible);
     }
     // Rings always face the camera.
     if (ringRef.current) ringRef.current.lookAt(state.camera.position);
@@ -90,12 +105,15 @@ function CompanyPin({ marker, onClick, isSelected }: { marker: CompanyMarker; on
 
   return (
     <group position={surface} quaternion={orientation}>
-      {/* Generous invisible hit target spanning the whole pin, so clicking is easy. */}
+      {/* Generous invisible hit target spanning the whole pin, so clicking is easy.
+          Only live on the near side: an invisible mesh is still raycastable through
+          the globe, so far-side pins used to steal clicks aimed at the Earth. */}
       <mesh
         position={[0, BEAM_H * 0.6, 0]}
-        onClick={handleClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
+        visible={frontFacing}
+        onClick={frontFacing ? handleClick : undefined}
+        onPointerOver={frontFacing ? handlePointerOver : undefined}
+        onPointerOut={frontFacing ? handlePointerOut : undefined}
       >
         <cylinderGeometry args={[0.13, 0.13, BEAM_H * 1.6, 12]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
@@ -129,9 +147,10 @@ function CompanyPin({ marker, onClick, isSelected }: { marker: CompanyMarker; on
         </mesh>
       </group>
 
-      {/* Company name is always legible; the full card appears on hover/selection. */}
+      {/* Company name is always legible; the full card appears on hover/selection.
+          Suppressed entirely on the far side - see frontFacing above. */}
       <Html distanceFactor={9} position={[0, BEAM_H + 0.11 * base, 0]} style={{ pointerEvents: 'none' }} center>
-        {isSelected || hovered ? (
+        {!frontFacing ? null : isSelected || hovered ? (
           <div className="glass-panel px-3 py-2 text-xs whitespace-nowrap text-center">
             <div className="text-foreground font-semibold">{marker.name}</div>
             <div className="text-muted-foreground text-[11px]">{marker.city}, {marker.country}</div>
@@ -182,25 +201,40 @@ function Earth({ markers, selectedCompany, onCompanySelect }: {
     });
   }, [dayTexture, nightTexture, cloudTexture]);
 
-  // Yaw that brings the selected company's HQ to the front (facing the camera).
-  const focusYaw = useMemo(() => {
+  // The selected HQ's yaw in the globe's OWN (unrotated) frame.
+  const focusAlpha = useMemo(() => {
     if (!selectedCompany) return null;
     const m = markers.find((x) => x.name === selectedCompany);
     if (!m) return null;
     const local = latLngToVector3(m.lat, m.lng, 1);
-    const alpha = Math.atan2(local.z, local.x);
-    return Math.PI / 2 - alpha;
+    return Math.atan2(local.z, local.x);
   }, [selectedCompany, markers]);
 
-  useFrame(() => {
+  // Once the flight has landed we stop steering, so the user can orbit freely
+  // instead of the globe counter-rotating to keep the pin glued to the camera.
+  const settled = useRef(false);
+  useEffect(() => { settled.current = false; }, [focusAlpha]);
+
+  useFrame((state) => {
     if (!earthGroupRef.current) return;
-    if (focusYaw === null) {
+    if (focusAlpha === null) {
       // Idle: gentle auto-rotation.
       earthGroupRef.current.rotation.y += 0.0008;
-    } else {
-      // Selected: ease the HQ toward the camera, then hold.
-      const delta = shortestAngle(earthGroupRef.current.rotation.y, focusYaw);
+    } else if (!settled.current) {
+      // Rotating the group by y maps a point's local yaw `a` to the world yaw
+      // `a - y`. To face the camera that world yaw must equal the camera's own
+      // azimuth, so the target is `alpha - cameraAzimuth`.
+      //
+      // The previous formula was `PI/2 - alpha`, which only lands correctly for a
+      // single longitude (alpha = PI/2) and for every other company drives the
+      // marker to `alpha - (PI/2 - alpha)` - i.e. straight round to the FAR side.
+      // That is the "globe spins the company away from you" bug. Deriving the
+      // target from the live camera also survives the user having orbited first,
+      // which a hardcoded +z assumption did not.
+      const camAzimuth = Math.atan2(state.camera.position.z, state.camera.position.x);
+      const delta = shortestAngle(earthGroupRef.current.rotation.y, focusAlpha - camAzimuth);
       earthGroupRef.current.rotation.y += delta * 0.08;
+      if (Math.abs(delta) < 0.002) settled.current = true;
     }
     if (cloudsRef.current) cloudsRef.current.rotation.y += 0.0004;
     if (atmosphereRef.current) atmosphereRef.current.rotation.y -= 0.0004;

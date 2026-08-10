@@ -42,7 +42,7 @@ const typeConfig = {
 
 const AuditTrail = () => {
   const { claimId } = useParams<{ claimId: string }>();
-  const { claims, loading } = useClaims();
+  const { claims, loading, error } = useClaims();
   
   // Find claim or default to the first one that is a gap, or just the first one
   const currentClaim = useMemo(() => {
@@ -174,12 +174,43 @@ const AuditTrail = () => {
   }
 
   if (!currentClaim) {
+    // Three different reasons land here and they need three different messages.
+    // This used to say "No Claims Available" for all of them - so following a
+    // stale link claimed the corpus was empty while 1,730 claims sat in the DB,
+    // and a failed fetch looked identical to an empty one.
+    const emptyCorpus = claims.length === 0;
     return (
       <AppLayout>
-        <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6 text-center">
           <AlertTriangle className="w-12 h-12 text-warning" />
-          <h2 className="text-xl font-semibold">No Claims Available</h2>
-          <p className="text-muted-foreground">Could not find any claims for the audit trail.</p>
+          {error ? (
+            <>
+              <h2 className="text-xl font-semibold">Could not load claims</h2>
+              <p className="text-muted-foreground max-w-md">
+                The claims query failed, so the audit trail has nothing to render. This is a
+                data-loading failure, not an empty corpus.
+              </p>
+              <p className="text-xs font-mono text-muted-foreground">{error.message}</p>
+            </>
+          ) : emptyCorpus ? (
+            <>
+              <h2 className="text-xl font-semibold">No claims in the corpus yet</h2>
+              <p className="text-muted-foreground max-w-md">
+                Nothing has been ingested. Upload an ESG report to build an audit trail.
+              </p>
+              <Link to="/submit-report" className="text-primary underline text-sm">Ingest a report</Link>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-semibold">Claim not found</h2>
+              <p className="text-muted-foreground max-w-md">
+                No claim with ID <span className="font-mono text-foreground">{claimId}</span> exists
+                in the {claims.length.toLocaleString()} loaded claims. The link is probably stale -
+                claim IDs change when a report is re-ingested.
+              </p>
+              <Link to="/claims" className="text-primary underline text-sm">Browse the Claim Directory</Link>
+            </>
+          )}
         </div>
       </AppLayout>
     );

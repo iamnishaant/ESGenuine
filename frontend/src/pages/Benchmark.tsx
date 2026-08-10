@@ -96,6 +96,23 @@ export default function Benchmark() {
           <CardContent>
             {cross.isLoading ? (
               <Loader2 className="animate-spin" />
+            ) : cross.isError ? (
+              // A failed request used to fall through to the "no company shares this
+              // metric" message below — telling the user their CORPUS was thin when in
+              // fact the backend was unreachable. Two very different problems.
+              <div className="text-sm text-warning flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>
+                  Could not reach the benchmark backend, so nothing can be compared right now.
+                  This is a connection failure, not an empty corpus — start the API and retry.
+                  <button
+                    onClick={() => cross.refetch()}
+                    className="ml-2 underline hover:text-foreground"
+                  >
+                    Retry
+                  </button>
+                </span>
+              </div>
             ) : entries.length === 0 ? (
               <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" /> No two companies share this metric on a common
@@ -155,6 +172,12 @@ export default function Benchmark() {
             <CardContent>
               {traj.isLoading ? (
                 <Loader2 className="animate-spin" />
+              ) : traj.isError ? (
+                <p className="text-sm text-warning flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  Trajectory request failed — the backend is unreachable, so year-over-year drift
+                  is unknown (not absent).
+                </p>
               ) : (traj.data?.series?.length ?? 0) < 2 ? (
                 <p className="text-sm text-muted-foreground">
                   Only one reporting year on record for this metric — drift appears once a second

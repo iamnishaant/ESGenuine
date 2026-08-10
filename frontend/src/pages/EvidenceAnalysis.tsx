@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   CheckCircle2,
@@ -51,9 +52,17 @@ const ScoreBar = ({ label, value, hint }: { label: string; value: number; hint?:
 
 const EvidenceAnalysis = () => {
   const { claimId } = useParams<{ claimId: string }>();
-  const { claims, conflicts, loading } = useClaims();
+  const { claims, conflicts, loading, error } = useClaims();
 
-  const currentClaim = claims.find(c => c.id === claimId);
+  // The sidebar links here as /evidence with NO claim id, so "find by id" returned
+  // undefined and a top-level nav item rendered "Claim Not Found - the requested
+  // claim ID does not exist". With no id there is no request to fail: fall back to
+  // the most interesting claim, the way the Audit Trail page already does.
+  const currentClaim = useMemo(() => {
+    if (claims.length === 0) return undefined;
+    if (claimId) return claims.find((c) => c.id === claimId);
+    return claims.find((c) => c.status === 'gap') ?? claims[0];
+  }, [claims, claimId]);
 
   if (loading) {
     return (
@@ -69,13 +78,36 @@ const EvidenceAnalysis = () => {
   if (!currentClaim) {
     return (
       <AppLayout>
-        <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6 text-center">
           <AlertTriangle className="w-12 h-12 text-warning" />
-          <h2 className="text-xl font-semibold">Claim Not Found</h2>
-          <p className="text-muted-foreground">The requested claim ID does not exist in the database.</p>
-          <Link to="/claims" className="btn-neon mt-4">
-            Return to Claims Explorer
-          </Link>
+          {error ? (
+            <>
+              <h2 className="text-xl font-semibold">Could not load claims</h2>
+              <p className="text-muted-foreground max-w-md">
+                The claims query failed. Nothing is missing from the corpus — the fetch did not
+                complete.
+              </p>
+              <p className="text-xs font-mono text-muted-foreground">{error.message}</p>
+            </>
+          ) : claims.length === 0 ? (
+            <>
+              <h2 className="text-xl font-semibold">No claims in the corpus yet</h2>
+              <p className="text-muted-foreground max-w-md">
+                Ingest an ESG report and its claims will appear here for analysis.
+              </p>
+              <Link to="/submit-report" className="btn-neon mt-4">Ingest a report</Link>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-semibold">Claim not found</h2>
+              <p className="text-muted-foreground max-w-md">
+                No claim with ID <span className="font-mono text-foreground">{claimId}</span> exists
+                in the {claims.length.toLocaleString()} loaded claims — the link is probably stale,
+                since claim IDs are regenerated when a report is re-ingested.
+              </p>
+              <Link to="/claims" className="btn-neon mt-4">Browse the Claim Directory</Link>
+            </>
+          )}
         </div>
       </AppLayout>
     );

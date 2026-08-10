@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, MapPin, X, ChevronRight, CheckCircle, HelpCircle, AlertCircle } from 'lucide-react';
+import { Building2, MapPin, X, ChevronRight, CheckCircle, HelpCircle, AlertCircle, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useClaims, Claim } from '@/hooks/useClaims';
 import { useBackendScores } from '@/hooks/useBackendScores';
@@ -101,6 +102,16 @@ export const CompanyPanel = ({ companyName, onClaimSelect, onClose }: CompanyPan
           <span className="flex items-center gap-1 text-warning"><HelpCircle className="w-3.5 h-3.5" />{counts.review} review</span>
           <span className="flex items-center gap-1 text-danger"><AlertCircle className="w-3.5 h-3.5" />{counts.gap} gaps</span>
         </div>
+
+        {/* This panel is a scrolling list with no filtering; hand off to the
+            directory, keeping the company you selected on the globe. */}
+        <Link
+          to={`/claims?view=claims&company=${encodeURIComponent(companyName)}`}
+          className="mt-3 flex items-center justify-center gap-1.5 w-full py-1.5 rounded-md border border-border/50 text-xs text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
+        >
+          Filter these claims in the Claim Directory
+          <ExternalLink className="w-3 h-3" />
+        </Link>
       </div>
 
       {/* Claims list */}

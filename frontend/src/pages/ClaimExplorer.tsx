@@ -1,112 +1,114 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  ChevronDown, 
-  MapPin, 
-  Calendar,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  ArrowUpDown,
-  LayoutDashboard,
-  ListFilter,
-  FileText
+import {
+  AlertTriangle, LayoutDashboard, ListFilter, LayoutGrid, ChevronRight, ArrowLeft, FileText,
 } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
 import { cn } from '@/lib/utils';
-import { Link } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
-import { Claim, Conflict, mapDbToClaim, fetchAllClaimRows } from '@/hooks/useClaims';
+import { useClaims, Claim } from '@/hooks/useClaims';
 import { metricLabel } from '@/lib/metricLabels';
+import {
+  ClaimFacets, EMPTY_FACETS, applyFacets, groupClaimsByCompany,
+} from '@/lib/claimFacets';
+
+import { CompanyGrid } from '@/components/explorer/CompanyGrid';
+import { ClaimFilters } from '@/components/explorer/ClaimFilters';
+import { ClaimTable } from '@/components/explorer/ClaimTable';
 
 import ClaimGraph from '@/components/reasoning/ClaimGraph';
 import ContradictionExplorer from '@/components/reasoning/ContradictionExplorer';
 import RiskScorePanel from '@/components/reasoning/RiskScorePanel';
 import MetricTimeline from '@/components/reasoning/MetricTimeline';
 
-// -----------------------------
-// TYPES & MAPPING
-// -----------------------------
-// Claim, Conflict, and mapDbToClaim are shared from '@/hooks/useClaims'
-// (single source of truth — see import above).
-
-const statusConfig = {
-  verified: { label: 'Verified', icon: CheckCircle2, class: 'text-success bg-success/10 border-success/20' },
-  review: { label: 'Under Review', icon: Clock, class: 'text-warning bg-warning/10 border-warning/20' },
-  gap: { label: 'Integrity Gap', icon: AlertTriangle, class: 'text-danger bg-danger/10 border-danger/20' },
-};
+type ViewMode = 'companies' | 'claims' | 'dashboard';
+const VIEW_MODES: ViewMode[] = ['companies', 'claims', 'dashboard'];
 
 const ClaimExplorer = () => {
-  const [claims, setClaims] = useState<Claim[]>([]);
-  const [conflicts, setConflicts] = useState<Conflict[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'list' | 'dashboard'>('list');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sortField, setSortField] = useState<keyof Claim>('date');
+  // Data comes from the shared hook. This page used to run its OWN copy of the
+  // paginated fetch + conflict join, which meant every visit re-downloaded the
+  // whole corpus and the page never saw invalidateClaimsCache() after an ingest.
+  const { claims, conflicts, loading } = useClaims();
+
+  // The current view and drill-down live in the URL, not in component state.
+  // That is what lets every other page hand off a company ("show me Shell's
+  // claims") instead of dumping the user into the unfiltered directory and
+  // losing the thing they just clicked - and it makes Back work.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const companyParam = searchParams.get('company');
+  const reportParam = searchParams.get('report');
+  const viewParam = searchParams.get('view') as ViewMode | null;
+
+  const drilldown = companyParam ? { company: companyParam, docId: reportParam } : null;
+  const viewMode: ViewMode =
+    viewParam && VIEW_MODES.includes(viewParam) ? viewParam : companyParam ? 'claims' : 'companies';
+
+  const navigate = useCallback(
+    (next: { view: ViewMode; company?: string | null; report?: string | null }) => {
+      const params = new URLSearchParams();
+      params.set('view', next.view);
+      if (next.company) params.set('company', next.company);
+      if (next.report) params.set('report', next.report);
+      setSearchParams(params);
+    },
+    [setSearchParams],
+  );
+
+  const [companySearch, setCompanySearch] = useState('');
+  const [facets, setFacets] = useState<ClaimFacets>({ ...EMPTY_FACETS });
+  const [sortField, setSortField] = useState<keyof Claim>('confidence');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [activeNode, setActiveNode] = useState<any>(null);
-  const [highlightedClaims, setHighlightedClaims] = useState<string[]>([]);
+  const [pinnedClaims, setPinnedClaims] = useState<string[]>([]);
 
-  // 1. Fetch Data
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        // Shared paginated fetch — a plain .select() stops at PostgREST's 1000-row
-        // cap and silently hid 730 of the 1730 claims from this page.
-        const claimsData = await fetchAllClaimRows();
+  const companyGroups = useMemo(() => groupClaimsByCompany(claims), [claims]);
 
-        const { data: conflictsData } = await supabase
-          .from('contradictions')
-          .select('*');
+  // Claims the current view is about, BEFORE facets. Facet option counts are
+  // derived from this, so the dropdowns describe the drill-down you are in.
+  const scope = useMemo(() => {
+    if (pinnedClaims.length > 0) return claims.filter((c) => pinnedClaims.includes(c.id));
+    if (!drilldown) return claims;
+    return claims.filter(
+      (c) => c.company === drilldown.company && (drilldown.docId === null || c.docId === drilldown.docId),
+    );
+  }, [claims, drilldown, pinnedClaims]);
 
-        if (claimsData) {
-          const mappedClaims = claimsData.map(mapDbToClaim);
-          setClaims(mappedClaims);
-          
-          if (conflictsData) {
-            setConflicts(conflictsData.map(c => {
-              const claimA = mappedClaims.find(cl => cl.id === c.claim_a_id);
-              const claimB = mappedClaims.find(cl => cl.id === c.claim_b_id);
-              return {
-                ...c,
-                claim_a_text: claimA?.claim || "Referenced Claim A",
-                claim_b_text: claimB?.claim || "Referenced Claim B",
-                claim_a_page: (claimA as any)?.page || 0,
-                claim_b_doc: (claimB as any)?.company || "Target"
-              };
-            }));
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching data:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, []);
+  const visibleClaims = useMemo(() => {
+    const filtered = applyFacets(scope, facets);
+    const dir = sortDirection === 'asc' ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      const av = a[sortField];
+      const bv = b[sortField];
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;          // missing values sink, either direction
+      if (bv == null) return -1;
+      if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
+      return String(av).localeCompare(String(bv)) * dir;
+    });
+  }, [scope, facets, sortField, sortDirection]);
 
-  // 2. Computed Risk Metrics
+  // ---- risk dashboard inputs (whole corpus, not the drill-down) -------------
   const riskData = {
-    greenwashing_risk: claims.length > 0 ? (claims.filter(c => c.status === 'gap').length / claims.length) * 0.8 + (claims.filter(c => c.status === 'review').length / claims.length) * 0.2 : 0,
-    status: claims.filter(c => c.status === 'gap').length > (claims.length * 0.1) ? "High Risk" : "Moderate Risk",
-    vague_claims: claims.filter(c => c.status === 'review').length,
-    narrative_claims: claims.filter(c => c.verifiabilityClass === 'Narrative').length,
-    missing_metrics: claims.filter(c => c.confidence < 30).length,
+    greenwashing_risk: claims.length > 0
+      ? (claims.filter((c) => c.status === 'gap').length / claims.length) * 0.8
+        + (claims.filter((c) => c.status === 'review').length / claims.length) * 0.2
+      : 0,
+    status: claims.filter((c) => c.status === 'gap').length > claims.length * 0.1 ? 'High Risk' : 'Moderate Risk',
+    vague_claims: claims.filter((c) => c.status === 'review').length,
+    // claim_type is stored lowercase ('narrative'); the old `=== 'Narrative'`
+    // test matched nothing and this counter read 0 on every corpus.
+    narrative_claims: claims.filter((c) => c.verifiabilityClass.toLowerCase() === 'narrative').length,
+    missing_metrics: claims.filter((c) => c.confidence < 30).length,
     contradictions: conflicts.length,
-    high_severity: conflicts.filter(c => c.severity === 'Critical' || c.severity === 'High').length
+    high_severity: conflicts.filter((c) => c.severity === 'Critical' || c.severity === 'High').length,
   };
 
-  // 3. Graph Data
   const graphData = {
-    nodes: claims.slice(0, 20).map(c => ({
+    nodes: claims.slice(0, 20).map((c) => ({
       id: c.id,
       label: c.claim.substring(0, 35) + '...',
       group: c.status === 'verified' ? 1 : c.status === 'review' ? 2 : 3,
-      val: 15 + (c.confidence / 10),
+      val: 15 + c.confidence / 10,
       details: {
         page: c.page,
         metric: c.metricKey ? metricLabel(c.metricKey) : undefined,
@@ -115,266 +117,202 @@ const ClaimExplorer = () => {
         text: c.claim,
       },
     })),
-    links: conflicts.map(c => ({
+    links: conflicts.map((c) => ({
       source: c.claim_a_id,
       target: c.claim_b_id,
       type: 'contradiction',
-      severity: c.severity
-    }))
+      severity: c.severity,
+    })),
   };
 
-  // Clear specific highlights if the user begins searching manually
+  // A manual search/filter means the user has moved on from the pinned pair.
   useEffect(() => {
-    if (searchQuery || statusFilter !== 'all') {
-      setHighlightedClaims([]);
-    }
-  }, [searchQuery, statusFilter]);
+    if (facets.search || facets.status !== 'all') setPinnedClaims([]);
+  }, [facets.search, facets.status]);
+
+  const openReport = (company: string, docId: string | null) => {
+    setPinnedClaims([]);
+    setFacets({ ...EMPTY_FACETS });
+    navigate({ view: 'claims', company, report: docId });
+  };
 
   const handleConflictClick = (conflict: any) => {
-    setViewMode('list');
-    setSearchQuery('');
-    setStatusFilter('all');
-    setHighlightedClaims([conflict.claim_a_id, conflict.claim_b_id]);
+    setFacets({ ...EMPTY_FACETS });
+    setPinnedClaims([conflict.claim_a_id, conflict.claim_b_id]);
+    navigate({ view: 'claims' });
   };
-
-  const getConfidenceLevel = (score: number) => {
-    if (score >= 80) return { label: 'High', class: 'text-success bg-success/10 border-success/20' };
-    if (score >= 50) return { label: 'Medium', class: 'text-warning bg-warning/10 border-warning/20' };
-    return { label: 'Low', class: 'text-danger bg-danger/10 border-danger/20' };
-  };
-
-  const filteredClaims = claims
-    .filter(claim => {
-      if (highlightedClaims.length > 0) {
-        return highlightedClaims.includes(claim.id);
-      }
-      const matchesSearch = claim.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           claim.claim.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           claim.location.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || claim.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => {
-      const aVal = a[sortField];
-      const bVal = b[sortField];
-      const direction = sortDirection === 'asc' ? 1 : -1;
-      return aVal > bVal ? direction : -direction;
-    });
 
   const handleSort = (field: keyof Claim) => {
-    if (sortField === field) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
-    }
+    if (sortField === field) setSortDirection((p) => (p === 'asc' ? 'desc' : 'asc'));
+    else { setSortField(field); setSortDirection('desc'); }
   };
+
+  const drilldownReport = drilldown?.docId
+    ? companyGroups.find((g) => g.name === drilldown.company)?.reports.find((r) => r.docId === drilldown.docId)
+    : undefined;
+
+  const TABS: { id: ViewMode; label: string; icon: typeof LayoutGrid }[] = [
+    { id: 'companies', label: 'Companies', icon: LayoutGrid },
+    { id: 'claims', label: 'All Claims', icon: ListFilter },
+    { id: 'dashboard', label: 'Risk Dashboard', icon: LayoutDashboard },
+  ];
+
   return (
     <AppLayout>
       {/* Header */}
-      <motion.header 
+      <motion.header
         className="h-[72px] border-b border-border/30 glass-panel flex items-center justify-between px-6 shrink-0"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         <div>
           <h1 className="text-xl font-bold text-foreground text-glow-primary tracking-tight">Claim Directory</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Filter, search, and analyze ESG claims across your portfolio</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Browse by company, drill into a report year, then filter its claims
+          </p>
         </div>
-        
-        {/* Toggle Switch */}
+
         <div className="flex bg-background/50 border border-border/50 rounded-lg p-1 backdrop-blur-md">
-          <button
-            onClick={() => setViewMode('list')}
-            className={cn(
-              "flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
-              viewMode === 'list' ? "bg-primary/20 text-primary shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-            )}
-          >
-            <ListFilter className="w-4 h-4" /> List View
-          </button>
-          <button
-            onClick={() => setViewMode('dashboard')}
-            className={cn(
-              "flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
-              viewMode === 'dashboard' ? "bg-primary/20 text-primary shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-            )}
-          >
-            <LayoutDashboard className="w-4 h-4" /> Risk Dashboard
-          </button>
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                // "All Claims" means all of them - entering it from a drill-down
+                // must drop the scope, or the tab silently lies about what it shows.
+                setPinnedClaims([]);
+                navigate({ view: tab.id });
+              }}
+              className={cn(
+                'flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200',
+                viewMode === tab.id
+                  ? 'bg-primary/20 text-primary shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/5',
+              )}
+            >
+              <tab.icon className="w-4 h-4" /> {tab.label}
+            </button>
+          ))}
         </div>
       </motion.header>
 
-      {/* Main Content Area */}
       <div className="flex-1 overflow-auto bg-transparent relative">
         <AnimatePresence mode="wait">
-          
-          {/* ========================================================= */}
-          {/* LIST VIEW (The Original Layout) */}
-          {/* ========================================================= */}
-          {viewMode === 'list' && (
-            <motion.div 
-              key="list"
+
+          {/* ===================== COMPANY GRID (default) ===================== */}
+          {viewMode === 'companies' && (
+            <motion.div
+              key="companies"
               className="p-6 h-full flex flex-col"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Controls */}
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <input 
-                    type="text" 
-                    placeholder="Search claims, companies, or locations..." 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-background/50 border border-border/50 text-foreground text-sm rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all glass-panel"
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <select 
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="bg-background/50 border border-border/50 text-foreground text-sm rounded-lg px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-primary appearance-none glass-panel"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="verified">Verified</option>
-                    <option value="review">Under Review</option>
-                    <option value="gap">Integrity Gap</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Active Filters / Highlights Indicator */}
-              {highlightedClaims.length > 0 && (
-                 <div className="mb-4 flex items-center gap-3 bg-primary/10 border border-primary/20 text-primary px-4 py-2 rounded-lg text-sm">
-                    <AlertTriangle className="w-4 h-4" />
-                    Viewing {highlightedClaims.length} Claims from specific Contradiction.
-                    <button onClick={() => setHighlightedClaims([])} className="ml-auto underline font-medium hover:text-primary/80">Clear View</button>
-                 </div>
-              )}
-
-              {/* Table */}
-              <div className="flex-1 glass-panel border border-border/30 rounded-xl overflow-hidden shadow-2xl flex flex-col">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm whitespace-nowrap">
-                    <thead className="text-xs uppercase bg-secondary/30 text-muted-foreground border-b border-border/30 sticky top-0 backdrop-blur-md z-10">
-                      <tr>
-                        <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('id')}>
-                          <div className="flex items-center gap-1">Claim ID <ArrowUpDown className="w-3 h-3" /></div>
-                        </th>
-                        <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('claim')}>
-                          <div className="flex items-center gap-1">Extracted Claim <ArrowUpDown className="w-3 h-3" /></div>
-                        </th>
-                        <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('status')}>
-                          <div className="flex items-center gap-1">Verification <ArrowUpDown className="w-3 h-3" /></div>
-                        </th>
-                        <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('confidence')}>
-                          <div className="flex items-center gap-1">Confidence <ArrowUpDown className="w-3 h-3" /></div>
-                        </th>
-                        <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('date')}>
-                          <div className="flex items-center gap-1">Date <ArrowUpDown className="w-3 h-3" /></div>
-                        </th>
-                        <th className="px-6 py-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/20">
-                      {filteredClaims.map((claim) => {
-                        const StatusIcon = statusConfig[claim.status].icon;
-                        return (
-                          <tr key={claim.id} className="hover:bg-white/[0.02] transition-colors group">
-                            <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{claim.id}</td>
-                            <td className="px-6 py-4">
-                              <div className="font-medium text-foreground tracking-wide max-w-md truncate">{claim.claim}</div>
-                              <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
-                                <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {claim.location}</span>
-                                <span>•</span>
-                                {/* Company alone is AMBIGUOUS: the corpus holds two Shell
-                                    reports (2022, 2023) and two Infosys reports (2023, 2025),
-                                    so "Shell" does not say which document a claim came from.
-                                    Always pair the company with its source report. */}
-                                <span className="text-foreground/80">{claim.company}</span>
-                                {claim.reportYear && (
-                                  <>
-                                    <span>•</span>
-                                    <span
-                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-border/50 bg-muted/30 font-mono text-[10px]"
-                                      title={claim.docId ? `Source report: ${claim.docId}` : undefined}
-                                    >
-                                      <FileText className="w-2.5 h-2.5" />
-                                      {claim.reportYear} report
-                                    </span>
-                                  </>
-                                )}
-                                {claim.page != null && (
-                                  <>
-                                    <span>•</span>
-                                    <span className="font-mono text-[10px]">p{claim.page}</span>
-                                  </>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border", statusConfig[claim.status].class)}>
-                                <StatusIcon className="w-3.5 h-3.5" />
-                                {statusConfig[claim.status].label}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                
-                                <div className="flex-1 w-16 h-1.5 bg-background rounded-full overflow-hidden border border-border/50">
-                                  <div 
-                                    className={cn("h-full rounded-full transition-all duration-1000", claim.confidence >= 80 ? "bg-success glow-success" : claim.confidence >= 50 ? "bg-warning glow-warning" : "bg-danger glow-danger")}
-                                    style={{ width: `${claim.confidence}%` }}
-                                  />
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs font-mono w-7">{claim.confidence}%</span>
-                                  <span className={cn("text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded border", getConfidenceLevel(claim.confidence).class)}>
-                                    {getConfidenceLevel(claim.confidence).label}
-                                  </span>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-1.5 text-muted-foreground">
-                                <Calendar className="w-3.5 h-3.5" />
-                                {claim.date}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 text-right">
-                              <Link to={`/claims/${claim.id}`} className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all">
-                                <ChevronDown className="w-4 h-4 -rotate-90" />
-                              </Link>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {filteredClaims.length === 0 && (
-                        <tr>
-                          <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                            <div className="flex flex-col items-center justify-center opacity-70">
-                              <Search className="w-8 h-8 mb-3" />
-                              <p className="text-sm">No claims found matching your filters.</p>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              <CompanyGrid
+                groups={companyGroups}
+                search={companySearch}
+                onSearchChange={setCompanySearch}
+                onOpenReport={openReport}
+                loading={loading}
+              />
             </motion.div>
           )}
 
-          {/* ========================================================= */}
-          {/* DASHBOARD VIEW (The New Reasoning Engine Layout) */}
-          {/* ========================================================= */}
+          {/* ===================== CLAIMS (scoped or all) ==================== */}
+          {viewMode === 'claims' && (
+            <motion.div
+              key="claims"
+              className="p-6 h-full flex flex-col"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Breadcrumb - says exactly which slice of the corpus is on screen */}
+              {(drilldown || pinnedClaims.length > 0) && (
+                <div className="flex items-center gap-2 mb-4 text-sm">
+                  <button
+                    onClick={() => { setPinnedClaims([]); navigate({ view: 'companies' }); }}
+                    className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" /> Companies
+                  </button>
+                  {drilldown && (
+                    <>
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                      <button
+                        onClick={() => navigate({ view: 'claims', company: drilldown.company })}
+                        className={cn(
+                          'transition-colors',
+                          drilldown.docId ? 'text-muted-foreground hover:text-primary' : 'text-foreground font-medium',
+                        )}
+                      >
+                        {drilldown.company}
+                      </button>
+                      {drilldown.docId && (
+                        <>
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                          <span className="flex items-center gap-1.5 text-foreground font-medium">
+                            <FileText className="w-3.5 h-3.5" />
+                            {drilldownReport?.year ?? drilldown.docId} report
+                            <span className="font-mono text-[10px] text-muted-foreground">({drilldown.docId})</span>
+                          </span>
+                        </>
+                      )}
+                    </>
+                  )}
+                  {pinnedClaims.length > 0 && (
+                    <>
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="flex items-center gap-1.5 text-warning">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        The {pinnedClaims.length} claims in one contradiction
+                      </span>
+                      <button
+                        onClick={() => setPinnedClaims([])}
+                        className="ml-2 underline text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        show all
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+
+              <ClaimFilters
+                facets={facets}
+                onChange={setFacets}
+                scope={scope}
+                resultCount={visibleClaims.length}
+              />
+
+              <ClaimTable
+                claims={visibleClaims}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                emptyMessage={
+                  loading ? 'Loading claims…'
+                    : scope.length === 0 ? 'No claims in this report.'
+                    : 'No claims match these filters.'
+                }
+                emptyAction={
+                  !loading && scope.length > 0 ? (
+                    <button
+                      onClick={() => setFacets({ ...EMPTY_FACETS })}
+                      className="text-xs text-primary underline hover:text-primary/80"
+                    >
+                      Clear all filters
+                    </button>
+                  ) : undefined
+                }
+              />
+            </motion.div>
+          )}
+
+          {/* ===================== RISK DASHBOARD ============================ */}
           {viewMode === 'dashboard' && (
-            <motion.div 
+            <motion.div
               key="dashboard"
               className="p-6 space-y-6 max-w-[1600px] mx-auto h-full overflow-y-auto"
               initial={{ opacity: 0, x: 20 }}
@@ -382,45 +320,39 @@ const ClaimExplorer = () => {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Top Panel: Risk Score */}
               <div className="h-48">
-                 <RiskScorePanel data={riskData} />
+                <RiskScorePanel data={riskData} />
               </div>
 
-              {/* Bottom Split: List vs Graph */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[400px]">
-                 
-                 {/* Left List: Contradiction Explorer */}
-                 <div className="col-span-1 h-full flex flex-col">
-                    <h2 className="text-sm font-semibold text-foreground/90 mb-3 uppercase tracking-wider flex items-center justify-between">
-                       Active Contradictions
-                       <span className="bg-danger/10 text-danger border border-danger/20 px-2 py-0.5 rounded text-[10px] animate-pulse">Live</span>
-                    </h2>
-                    <div className="flex-1 border border-border/50 rounded-xl shadow-sm overflow-hidden p-2 glass-panel">
-                       <ContradictionExplorer 
-                         conflicts={conflicts} 
-                         onHover={(c) => console.log('Hovered conflict', c)} 
-                         onClick={handleConflictClick}
-                       />
-                    </div>
-                 </div>
+                <div className="col-span-1 h-full flex flex-col">
+                  <h2 className="text-sm font-semibold text-foreground/90 mb-3 uppercase tracking-wider flex items-center justify-between">
+                    Active Contradictions
+                    <span className="bg-danger/10 text-danger border border-danger/20 px-2 py-0.5 rounded text-[10px]">
+                      {conflicts.length}
+                    </span>
+                  </h2>
+                  <div className="flex-1 border border-border/50 rounded-xl shadow-sm overflow-hidden p-2 glass-panel">
+                    <ContradictionExplorer
+                      conflicts={conflicts}
+                      onHover={() => undefined}
+                      onClick={handleConflictClick}
+                    />
+                  </div>
+                </div>
 
-                 {/* Right Area: The Interactive Graph */}
-                 <div className="col-span-2 h-full flex flex-col">
-                    <h2 className="text-sm font-semibold text-foreground/90 mb-3 uppercase tracking-wider">Semantic Claim Graph</h2>
-                    <div className="flex-1 border border-border/50 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.5)] relative glass-panel overflow-hidden">
-                       <ClaimGraph 
-                          data={graphData} 
-                          onNodeClick={(n) => setActiveNode(n)}
-                       />
-                    </div>
-                 </div>
-
+                <div className="col-span-2 h-full flex flex-col">
+                  <h2 className="text-sm font-semibold text-foreground/90 mb-3 uppercase tracking-wider">
+                    Semantic Claim Graph
+                  </h2>
+                  <div className="flex-1 border border-border/50 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.5)] relative glass-panel overflow-hidden">
+                    <ClaimGraph data={graphData} onNodeClick={(n) => setActiveNode(n)} />
+                  </div>
+                </div>
               </div>
 
-              {/* Bottom Row: ESG Metric Timeline */}
               <div className="h-[380px] w-full pb-6">
-                 <MetricTimeline title="Historical ESG Metric Trends" />
+                <MetricTimeline title="Historical ESG Metric Trends" />
               </div>
             </motion.div>
           )}

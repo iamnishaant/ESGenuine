@@ -17,7 +17,18 @@ export interface Claim {
   vagueness: number;        // raw vagueness score, 0-100
   sector: string;
   riskLevel: 'low' | 'medium' | 'high';
+  /** Raw `claims.claim_type`, LOWERCASE as stored: 'performance' | 'narrative' |
+   *  'target' (or 'General' when the column is null). Compare case-insensitively —
+   *  a `=== 'Narrative'` test silently matched nothing and zeroed out the Risk
+   *  Dashboard's narrative count. */
   verifiabilityClass: string;
+  /** How this claim could be checked, from the extractor:
+   *  'reported_metric' | 'directly_observable' | 'optical_possible' | 'not_observable'. */
+  observabilityType?: string;
+  /** Disclosure clause IDs, e.g. ['GRI 305-1', 'ESRS E1-6']. */
+  frameworkTags: string[];
+  /** Quality-gate findings, e.g. ['value_not_in_source', 'implausible_unit']. */
+  qualityFlags: string[];
   page?: number;
   metricKey?: string;
   metricValue?: number;
@@ -82,6 +93,9 @@ export const mapDbToClaim = (dbRow: any): Claim => {
     sector: dbRow.metric_family?.split('.')[0] || 'Uncategorized',
     riskLevel: gScore > 0.7 ? 'low' : gScore > 0.4 ? 'medium' : 'high',
     verifiabilityClass: realOrNull(dbRow.claim_type) || 'General',
+    observabilityType: realOrNull(dbRow.observability_type) || undefined,
+    frameworkTags: Array.isArray(dbRow.framework_tags) ? dbRow.framework_tags.filter(Boolean) : [],
+    qualityFlags: Array.isArray(dbRow.quality_flags) ? dbRow.quality_flags.filter(Boolean) : [],
     page: dbRow.page_number,
     metricKey: dbRow.metric_family,
     metricValue: dbRow.metric_value != null ? parseFloat(dbRow.metric_value) : undefined,

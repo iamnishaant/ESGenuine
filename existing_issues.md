@@ -6,6 +6,60 @@
 
 ---
 
+## Batch 2026-08-10 — #21–#27: frontend UX defects (globe focus, dead controls, failure-vs-empty)
+
+Found by reading the render paths and reproducing the math/data, not by theory. All fixed in this batch.
+
+#### 21. 🔴 Globe rotated the selected company to the FAR side of the Earth
+- **Test:** `Globe.tsx` `focusYaw = Math.PI / 2 - alpha`, where `alpha = atan2(local.z, local.x)`.
+- **Root cause:** rotating the group by `y` maps a point's local yaw `a` to world yaw `a - y`. Facing a camera at azimuth `beta` therefore requires `y = alpha - beta`. The old formula gives world yaw `2*alpha - PI/2`, which equals `beta` for exactly **one** longitude.
+- **Reproduced numerically** on the real HQ registry, camera at (0,0,5) — `visible` is the horizon test `P·C > r²`:
+
+  | Company | old facing | old visible | fixed facing | fixed visible |
+  |---|---|---|---|---|
+  | Shell | −0.622 | **false** | 0.622 | true |
+  | Microsoft | 0.293 | **false** | 0.673 | true |
+  | Infosys | 0.886 | true | 0.975 | true |
+  | Tata Power | 0.781 | true | 0.946 | true |
+
+- **Impact:** clicking Shell or Microsoft spun their own pin behind the globe. It looked intermittent because Infosys/Tata sit near `alpha ≈ PI/2`, where the wrong formula happens to be right.
+- **Fix:** target `alpha - cameraAzimuth`, derived from the live camera (so it also survives the user having orbited first), and stop steering once settled so the globe doesn't counter-rotate against a drag.
+
+#### 22. 🟠 Far-side pins drew labels and stole clicks through the Earth
+- **Root cause:** drei `<Html>` is a DOM overlay with no depth test, and an invisible raycast mesh is still hit on the back hemisphere.
+- **Fix:** per-pin horizon test (`P·C > r²`) gates both the label and the pointer handlers.
+
+#### 23. 🟠 Risk Dashboard's narrative counter was permanently 0
+- **Test:** `claims.filter(c => c.verifiabilityClass === 'Narrative')`.
+- **Root cause:** `claims.claim_type` is stored **lowercase** (`performance` 1263 / `narrative` 370 / `target` 97). The comparison never matched.
+- **Fix:** case-insensitive compare; the type is now documented as lowercase on the `Claim` interface and centralised in `lib/claimFacets.ts`.
+
+#### 24. 🟠 Backend failure was rendered as "you have no data"
+- **Benchmark:** a failed `getCrossCompany` fell through to *"No two companies share this metric on a common canonical unit yet"* — blaming the corpus for a connection failure.
+- **Audit Trail:** any missing claim rendered *"No Claims Available — could not find any claims"*, including a stale claim URL while 1730 claims were loaded.
+- **Header:** the status light was a hardcoded green dot reading **"Connected"** regardless of backend state — it said Connected while every score on the page showed "—".
+- **Fix:** all three now distinguish *request failed* / *corpus empty* / *id not found*, and the header light reads the same probe (`useBackendScores.availability`) the scores use.
+
+#### 25. 🟠 Selecting a company anywhere threw the selection away
+- **Test:** Portfolio Overview rows had `cursor-pointer` + hover styling, but only the 20px chevron was a `<Link>`, and it pointed at the unscoped `/claims`.
+- **Fix:** the Claim Directory now takes `?view=&company=&report=` from the URL; the whole Portfolio row links to that company's drill-down, and the globe's CompanyPanel links there too. Back/forward and deep links work.
+
+#### 26. 🟡 Controls that animated but did nothing
+- `Filter Portfolio` (Portfolio Overview) and the Header's bell / settings / user buttons had **no `onClick` at all** while carrying `whileHover`/`whileTap` press animations.
+- **Fix:** the portfolio filter is a real search + risk filter; settings and the user chip are links (the chip shows the actually signed-in email via `/v1/auth/me`); the bell is removed rather than faked.
+
+#### 27. 🟡 Sidebar "Evidence Analysis" was a dead end
+- **Test:** the sidebar links to `/evidence` with **no** `claimId`, so the find-by-id returned undefined and a top-level nav item rendered *"Claim Not Found — the requested claim ID does not exist in the database."*
+- **Fix:** with no id there is nothing to fail — it defaults to the first integrity-gap claim, matching what Audit Trail already did.
+
+#### 28. 🟡 ClaimExplorer duplicated the corpus fetch
+- **Root cause:** the page ran its own copy of `fetchAllClaimRows` + the contradiction join instead of `useClaims()`, so every visit re-downloaded all 1730 rows and the page never observed `invalidateClaimsCache()` after an ingest.
+- **Fix:** switched to the shared hook.
+
+> Verified: `tsc --noEmit` clean, `vite build` clean, and the new grouping/facet logic run against all 1730 live rows — 4 companies / 6 report cells, cell totals reconcile to 1730 exactly, drill-down count matches the cell, and no filter leakage on a 3-facet combination.
+
+---
+
 ## Status rollup — 2026-06-26
 
 All 🔴 Critical and 🟠 major data defects are **resolved & verified on live data**. #1–#19 are closed except the items explicitly listed below. Verified this date:

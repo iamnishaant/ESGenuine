@@ -8,14 +8,14 @@ import {
   CheckCircle2,
   MapPin,
   ChevronRight,
-  Filter,
+  Search,
   Loader2
 } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { useClaims } from '@/hooks/useClaims';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useBackendScores } from '@/hooks/useBackendScores';
 
 // Backend greenwashing_risk ("Low"/"Moderate"/"High") → the UI's risk band.
@@ -24,6 +24,10 @@ const riskFromBackend = (r?: string | null): 'low' | 'medium' | 'high' =>
 
 const PortfolioOverview = () => {
   const { companies, loading } = useClaims();
+  // Replaces a "Filter Portfolio" button that had no onClick at all - it animated
+  // on hover and press, so it read as working while doing nothing.
+  const [query, setQuery] = useState('');
+  const [riskFilter, setRiskFilter] = useState<'all' | 'low' | 'medium' | 'high' | 'unscored'>('all');
 
   // Integrity scores come EXCLUSIVELY from the backend build_report() portfolio
   // endpoint (same methodology as the Integrity Audit page). When the backend is
@@ -40,6 +44,16 @@ const PortfolioOverview = () => {
   }), [companies, forCompany]);
 
   const scored = useMemo(() => resolved.filter((c) => c.integrityScore != null), [resolved]);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return resolved.filter((c) => {
+      if (q && !`${c.name} ${c.sector} ${c.locations.join(' ')}`.toLowerCase().includes(q)) return false;
+      if (riskFilter === 'all') return true;
+      if (riskFilter === 'unscored') return c.integrityScore == null;
+      return c.integrityScore != null && c.riskLevel === riskFilter;
+    });
+  }, [resolved, query, riskFilter]);
   const totalClaims = resolved.reduce((acc, c) => acc + c.claims.verified + c.claims.review + c.claims.gap, 0);
   const avgScore = scored.length > 0
     ? Math.round(scored.reduce((acc, c) => acc + (c.integrityScore as number), 0) / scored.length)
@@ -125,14 +139,32 @@ const PortfolioOverview = () => {
           <h1 className="text-lg font-semibold text-foreground">Portfolio Overview</h1>
           <p className="text-xs text-muted-foreground">Company-level integrity summary across your investment portfolio</p>
         </div>
-        <motion.button
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted/50 border border-border/50 text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Filter className="w-4 h-4" />
-          Filter Portfolio
-        </motion.button>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Filter companies..."
+              className="w-56 bg-muted/50 border border-border/50 text-foreground text-sm rounded-lg pl-9 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+            />
+          </div>
+          <select
+            value={riskFilter}
+            onChange={(e) => setRiskFilter(e.target.value as typeof riskFilter)}
+            className={cn(
+              'bg-muted/50 border border-border/50 text-foreground text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary appearance-none',
+              riskFilter !== 'all' && 'border-primary/60 text-primary',
+            )}
+          >
+            <option value="all">All risk</option>
+            <option value="low">Low risk</option>
+            <option value="medium">Medium risk</option>
+            <option value="high">High risk</option>
+            <option value="unscored">Unscored</option>
+          </select>
+        </div>
       </motion.header>
 
       {/* Content */}
@@ -195,18 +227,33 @@ const PortfolioOverview = () => {
             >
               <div className="px-4 py-3 border-b border-border/30 flex items-center justify-between">
                 <h3 className="text-sm font-medium text-foreground">Portfolio Companies</h3>
-                <span className="text-xs text-muted-foreground">{resolved.length} companies</span>
+                <span className="text-xs text-muted-foreground">
+                  {visible.length === resolved.length
+                    ? `${resolved.length} companies`
+                    : `${visible.length} of ${resolved.length} companies`}
+                </span>
               </div>
               <div className="divide-y divide-border/20">
-                {resolved.map((company, index) => (
+                {visible.length === 0 && (
+                  <div className="p-8 text-center text-sm text-muted-foreground">
+                    No company matches this filter.
+                  </div>
+                )}
+                {visible.map((company, index) => (
                   <motion.div
                     key={company.id}
-                    className="p-4 hover:bg-muted/20 transition-colors cursor-pointer group"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + index * 0.05 }}
                   >
-                    <div className="flex items-center gap-4">
+                    {/* The WHOLE row is the link. It already had cursor-pointer and a
+                        hover state, but only the 20px chevron actually navigated - and
+                        it went to the unscoped /claims, throwing away the company you
+                        just clicked. Now it opens that company's drill-down. */}
+                    <Link
+                      to={`/claims?view=claims&company=${encodeURIComponent(company.name)}`}
+                      className="flex items-center gap-4 p-4 hover:bg-muted/20 transition-colors group"
+                    >
                       {/* Company Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -297,10 +344,8 @@ const PortfolioOverview = () => {
                         </div>
                       </div>
 
-                      <Link to="/claims">
-                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                      </Link>
-                    </div>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                    </Link>
                   </motion.div>
                 ))}
               </div>
