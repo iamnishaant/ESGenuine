@@ -2,7 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [main, ESG_V1]
+    # V2 is the default branch (origin/HEAD -> origin/V2) and is where work actually
+    # lands, but it was missing here until 2026-08-10 — so every direct push to it ran
+    # NO CI at all. Only `pull_request` (unfiltered, so it did cover PRs into V2) was
+    # keeping the branch honest. Recent history was written by direct pushes.
+    branches: [V2, main, ESG_V1]
   pull_request:
 
 jobs:

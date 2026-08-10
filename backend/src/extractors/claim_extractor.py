@@ -375,7 +375,9 @@ class LLMClient:
         from openai import OpenAI
         client = OpenAI()
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            # Overridable so the baseline harness can swap in a frontier model without
+            # touching this file (scripts/run_baselines.py sets OPENAI_MODEL).
+            model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1,
             response_format={"type": "json_object"},
@@ -386,7 +388,10 @@ class LLMClient:
         import anthropic
         client = anthropic.Anthropic()
         response = client.messages.create(
-            model="claude-3-5-haiku-latest",
+            # Overridable (see _call_openai). The default is a FLOATING tag: it resolves to
+            # whatever Anthropic currently ships, so a run recorded today is not reproducible
+            # later. Pin ANTHROPIC_MODEL to a dated id for anything whose number gets quoted.
+            model=os.environ.get("ANTHROPIC_MODEL", "claude-3-5-haiku-latest"),
             max_tokens=2000,
             messages=[{"role": "user", "content": prompt}],
         )
