@@ -19,7 +19,7 @@ Metrics reported
   value_acc           : on real, non-ambiguous, numeric claims, |x-gold|/gold <= tol
   unit_base_acc       : on real, numeric claims, unit canonicalizes to the same family
   type_acc            : on real claims, performance/target/narrative match
-  extraction_score    : composite 0-100 = 100 * mean(precision, node_acc, value_acc,
+  precision_composite : composite 0-100 = 100 * mean(precision, node_acc, value_acc,
                         unit_acc, type_acc). One headline number to track.
 
 Usage
@@ -233,11 +233,25 @@ def evaluate(gold, extraction, want_report=False):
         "unit_base_acc": rate(tallies["unit_num"], tallies["unit_den"]),
         "type_acc": rate(tallies["type_num"], tallies["type_den"]),
     }
-    # composite: mean of the five load-bearing rates that exist
+    # Composite: mean of the five load-bearing rates that exist.
+    #
+    # NAMING (2026-08-10 audit). This is `precision_composite`, not "extraction score" and
+    # emphatically not accuracy or F1. Every one of the five terms is precision-family, and
+    # there is NO RECALL TERM — nor can there be one here, because the gold sets are sampled
+    # from claims the extractor already emitted, so a missed claim is invisible to this
+    # harness by construction. Measured recall lives in `run_recall.py` and is far lower
+    # (Tata: 59.5% distinct-fact vs this metric's 96.1), so quoting this number alone
+    # materially overstates the system.
+    #
+    # `extraction_score` is kept as a DEPRECATED ALIAS so the CI gold-floor gate, the
+    # ablation harness and the baseline harness keep working. Read from
+    # `precision_composite` in new code; the alias will be removed once those are migrated.
     parts = [metrics["candidate_precision"], metrics["aspect_node_acc"],
              metrics["value_acc"], metrics["unit_base_acc"], metrics["type_acc"]]
     parts = [p for p in parts if p is not None]
-    metrics["extraction_score"] = round(100.0 * sum(parts) / len(parts), 1) if parts else None
+    composite = round(100.0 * sum(parts) / len(parts), 1) if parts else None
+    metrics["precision_composite"] = composite
+    metrics["extraction_score"] = composite      # deprecated alias — see above
 
     return {"tallies": tallies, "metrics": metrics, "per_claim": per_claim}
 
@@ -263,7 +277,11 @@ def print_summary(result, gold_meta):
     print(f"unit_base_acc        {pct(m['unit_base_acc'])}   ({t['unit_num']}/{t['unit_den']})")
     print(f"type_acc             {pct(m['type_acc'])}   ({t['type_num']}/{t['type_den']})")
     print("-" * 60)
-    print(f"EXTRACTION_SCORE     {m['extraction_score']}/100")
+    print(f"PRECISION_COMPOSITE  {m['precision_composite']}/100   (mean of the 5 rates above)")
+    print("=" * 60)
+    print("NOT accuracy, NOT F1: all five terms are precision-family and there is no recall")
+    print("term. The gold set is sampled from claims the extractor EMITTED, so anything it")
+    print("missed cannot appear here. For recall run:  python backend/scripts/run_recall.py")
     print("=" * 60)
 
 
