@@ -30,6 +30,7 @@ Run:
 """
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -313,12 +314,25 @@ def fig_metrics(data, outdir: Path):
     _save(fig, outdir, "fig3_per_metric_by_regime")
 
 
+# main.tex does \includegraphics{figures/...} relative to docs/paper/, so the PDFs the
+# paper actually compiles live in docs/paper/figures/ — a second copy from docs/figures/.
+# Writing only one of the two let the paper keep compiling stale figures after a rerun,
+# silently, which is exactly the drift "values are computed at render time" is meant to
+# prevent. Mirror the PDFs there so the two cannot diverge.
+_PAPER_FIGS = _REPO / "docs" / "paper" / "figures"
+
+
 def _save(fig, outdir: Path, stem: str):
     outdir.mkdir(parents=True, exist_ok=True)
     for ext in ("pdf", "png"):
         p = outdir / f"{stem}.{ext}"
         fig.savefig(p)
         print(f"  wrote {p.relative_to(_REPO)}")
+    if outdir.resolve() != _PAPER_FIGS.resolve():
+        _PAPER_FIGS.mkdir(parents=True, exist_ok=True)
+        mirrored = _PAPER_FIGS / f"{stem}.pdf"
+        shutil.copyfile(outdir / f"{stem}.pdf", mirrored)
+        print(f"  wrote {mirrored.relative_to(_REPO)}  (mirror for main.tex)")
     plt.close(fig)
 
 
