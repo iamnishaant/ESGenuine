@@ -6,7 +6,10 @@ on:
     # lands, but it was missing here until 2026-08-10 — so every direct push to it ran
     # NO CI at all. Only `pull_request` (unfiltered, so it did cover PRs into V2) was
     # keeping the branch honest. Recent history was written by direct pushes.
-    branches: [V2, main, ESG_V1]
+    # `paper/**` added 2026-08-11: the paper branch carries the gold-set tamper gate
+    # (test_gold_integrity.py) and the eval harnesses, and was getting NO CI on push —
+    # the one branch where ground truth must not drift was the one branch not checked.
+    branches: [V2, main, ESG_V1, "paper/**"]
   pull_request:
 
 jobs:
