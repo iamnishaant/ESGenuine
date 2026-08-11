@@ -20,6 +20,7 @@ already written into the paper*, so they are listed first.
 | ✅ | **P2** corpus statistics | collected; roadmap's provisional figures confirmed exactly |
 | ✅ | **P3** offline harnesses | **all 8 expected values reproduce exactly** |
 | 🔴 | *(new)* fixture provenance | **the frozen "raw LLM" fixtures are not raw.** Retracts one published finding. |
+| 🔴 | *(new)* 2×2 design | **the A and B rows came from different code paths.** Plus a verdict bug that printed a conclusion the numbers contradict. |
 | 🟠 | *(new)* cost figure | 0.58 ms/claim had **no harness**; measured 0.45 ms/claim, harness added |
 | 🟡 | *(new)* figure pipeline | regenerating figures never updated the copies `main.tex` compiles |
 | 🟡 | *(new)* CI coverage | CI did not run on `paper/**` — the gold-set tamper gate was unguarded |
@@ -145,7 +146,67 @@ whose entire purpose is attributing a difference to the model, lacked the same d
 
 ---
 
-## Finding 3 — the cost number had no harness behind it 🟠
+## Finding 3 — the 2×2 compared two different code paths 🔴
+
+*Found while executing P1. It invalidates the harness's headline output, not just a
+number, so it is reported before the smaller items.*
+
+`run_baselines.run()` built the **A row** (`A0/A1 llama`) from the **shipped fixture** and
+the **B row** from the **generated fixture**. Those come from different pipelines:
+
+| fixture | claims | table | text | pages | gate flags |
+|---|--:|--:|--:|--:|--:|
+| `tata_docling_full.jsonl` (A) | 373 | 179 | 194 | 29 | 178 |
+| `baseline_frontier_tata.jsonl` (B) | 451 | **451** | 0 | 27 | 0 |
+| `shell_2022_raw.jsonl` (A) | 247 | **13** | 234 | 50 | 174 |
+| `baseline_frontier_shell.jsonl` (B) | 191 | **191** | 0 | 4 | 0 |
+
+The shipped fixtures are full-document runs (text **and** tables, with that run's own page
+coverage). A generated fixture comes from `extract_from_table_markdown` over the cached
+pages — table surface only. Both are then scored against a **table-cell** recall
+denominator. On Shell that is **13 table claims against 191**: the resulting 9.2% vs 89.7%
+gap measures which claims are in each file, not which model produced them.
+
+Two further asymmetries compound it:
+
+- The shipped fixtures carry 178 / 174 `apply_gate` flags (Finding 1); a generated fixture
+  carries none. So `_no_repair` does not produce the same condition on the two rows — the A
+  row's "no repair" is already gate-repaired, the B row's genuinely is not.
+- The shipped run used `max_tokens=3000`; the frontier run needed 8000. Different budget.
+
+The module docstring states that generation *"extracts from the COMMITTED page markdown …
+so the input is byte-identical across systems and the only variable is the model."* That
+holds for a generated fixture against itself. It does **not** hold for the comparison the
+harness actually printed, which is the one a reader would quote.
+
+### Fix applied
+
+The A row now comes from `baseline_incumbent_<case>.jsonl` — the incumbent model driven
+through the *identical* code path, pages and token budget as the frontier run, so the model
+is the only variable. The shipped fixture is retained as a clearly-labelled `S` row for
+context and is never differenced. When no matched arm exists, the harness prints an
+`[UNMATCHED ARMS]` warning and withholds the interaction term instead of printing an
+uninterpretable one.
+
+### And a verdict bug in the same function
+
+`_print_interaction` decided the headline with `interaction > -0.02 -> "repair SURVIVES the
+model upgrade"`. That fires on a *positive* interaction regardless of how it arose. In the
+run that actually occurred — repair costing llama **−5.5pp** of recall and doing **0.0pp**
+for the frontier model — the interaction is **+5.5pp**, and the harness duly printed
+"repair SURVIVES", a conclusion its own two numbers contradict. The verdict now reads the
+sign of each tier's delta, and distinguishes *helps both* / *helps only one* / *costs* /
+*inert*.
+
+A second clarification was added to the same block: L1 and L2 read only `metric.value` and
+`page_number`, so they see the repair layer **only where it adds, removes or rewrites a
+claim**. Aspect, type and unit corrections are invisible to them by construction. A zero
+delta there is not evidence the gate did nothing — only that it did nothing *these lanes
+can see*. Without that note the natural misreading is that the gate is worthless.
+
+---
+
+## Finding 4 — the cost number had no harness behind it 🟠
 
 `PAPER_README.md` §3.3 and `main.tex` quote **0.58 ms/claim, 218 ms per report**. §6 claims
 every reported number recomputes from committed fixtures. That was true of every number
@@ -169,7 +230,7 @@ cite the harness, and make the load-bearing claim the order of magnitude
 
 ---
 
-## Finding 4 — regenerating figures did not update the ones the paper compiles 🟡
+## Finding 5 — regenerating figures did not update the ones the paper compiles 🟡
 
 `main.tex` does `\includegraphics{figures/…}` relative to `docs/paper/`, so the PDFs the
 paper actually builds from live in **`docs/paper/figures/`**. `make_figures.py` wrote only to
@@ -188,7 +249,7 @@ colourblind/greyscale properties that were validated when they were made.
 
 ---
 
-## Finding 5 — CI did not run on the paper branch 🟡
+## Finding 6 — CI did not run on the paper branch 🟡
 
 `.github/workflows/ci.yml` triggered on push to `[V2, main, ESG_V1]`. `paper/icmlde-evaluation`
 was not among them, so pushes to it ran no CI — including `test_gold_integrity.py`, the

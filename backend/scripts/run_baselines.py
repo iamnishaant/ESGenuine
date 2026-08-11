@@ -120,6 +120,12 @@ def _frontier_fixture(case: str) -> Path:
     return _FIX / f"baseline_frontier_{case}.jsonl"
 
 
+# The A row must come from the SAME code path as the B row or the 2x2 is not an
+# experiment. See `run()` — generate with `--generate incumbent --case <case>`.
+def _incumbent_fixture(case: str) -> Path:
+    return _FIX / f"baseline_incumbent_{case}.jsonl"
+
+
 # ─────────────────────────────────────────────────────────── loading
 
 def _load_pages(cache: str) -> dict:
@@ -306,11 +312,36 @@ def run(case_keys=None) -> dict:
         gold = json.loads((_GOLD / gold_file).read_text(encoding="utf-8"))
         shipped_raw = _load_claims(_FIX / fixture)
 
-        systems = {
-            "A0 llama, no repair":   _no_repair(shipped_raw),
-            "A1 llama + repair":     _repair(shipped_raw, pages),
-            "R  rule-based (no LLM)": _rule_extract(pages),
-        }
+        systems = {"R  rule-based (no LLM)": _rule_extract(pages)}
+
+        # ── the A row ────────────────────────────────────────────────────────────
+        # The SHIPPED fixture is not a valid A row. It came from a full-document run
+        # (text + tables, its own page coverage) while a generated B row comes from
+        # extract_from_table_markdown over the cached pages. Measured composition:
+        #
+        #   tata  shipped 373 = 179 table + 194 text, 29 pages | frontier 451 = 451 table, 27 pages
+        #   shell shipped 247 =  13 table + 234 text, 50 pages | frontier 191 = 191 table,  4 pages
+        #
+        # Scoring those against a table-cell denominator compares fixture composition,
+        # not models — on shell, 13 table claims against 191. The shipped fixture also
+        # carries 178/174 gate flags (an older apply_gate ran before it was frozen)
+        # where a generated fixture carries none, so even "no repair" is not the same
+        # condition on both rows.
+        #
+        # So A comes from `baseline_incumbent_<case>.jsonl`: the incumbent model driven
+        # through the identical code path, pages and token budget as the frontier run,
+        # leaving the model as the only variable. Without it there is no interaction
+        # term, and the shipped fixture is reported as context only.
+        ipath = _incumbent_fixture(key)
+        matched = ipath.exists()
+        if matched:
+            incumbent_raw = _load_claims(ipath)
+            systems["A0 llama, no repair"] = _no_repair(incumbent_raw)
+            systems["A1 llama + repair"] = _repair(incumbent_raw, pages)
+            systems["S  shipped (full-doc)"] = _repair(shipped_raw, pages)
+        else:
+            systems["A0 llama, no repair"] = _no_repair(shipped_raw)
+            systems["A1 llama + repair"] = _repair(shipped_raw, pages)
 
         fpath = _frontier_fixture(key)
         if fpath.exists():
@@ -320,6 +351,8 @@ def run(case_keys=None) -> dict:
 
         # Systems built FROM the L1 enumerator cannot be scored BY it — see _rule_extract.
         _TAUTOLOGICAL = {"R  rule-based (no LLM)"}
+        # Different code path from the A/B rows; shown for context, never differenced.
+        _UNMATCHED = {"S  shipped (full-doc)"}
 
         scored = {}
         for name, claims in systems.items():
@@ -332,7 +365,8 @@ def run(case_keys=None) -> dict:
                 rec = {**rec, "recall": None, "recall_raw_circular": rec["recall"]}
                 grd = {**grd, "grounding_precision": None,
                        "grounding_precision_raw_circular": grd["grounding_precision"]}
-            entry = {"claims": len(claims), "tautological": taut, **rec, **grd,
+            entry = {"claims": len(claims), "tautological": taut,
+                     "unmatched": name in _UNMATCHED, **rec, **grd,
                      "gold": _lane_gold(claims, gold)}
             if taut:
                 named = sum(1 for c in claims
@@ -345,6 +379,8 @@ def run(case_keys=None) -> dict:
             "pages_cached": len(pages),
             "frontier_available": fpath.exists(),
             "frontier_fixture": str(fpath.relative_to(_REPO)) if fpath.exists() else None,
+            "matched_arms": matched,
+            "incumbent_fixture": str(ipath.relative_to(_REPO)) if matched else None,
             "systems": scored,
         }
     return out
@@ -486,6 +522,8 @@ def _print(res):
             g = s["gold"]
             mr = g["match_rate"]
             notes = []
+            if s.get("unmatched"):
+                notes.append("different code path (full-doc) — context only, never differenced")
             if s.get("tautological"):
                 notes.append("L1/L2 circular (built from the L1 enumerator) — suppressed")
             if mr is not None and mr < 0.5:
@@ -501,6 +539,13 @@ def _print(res):
                       f"  (the rest is what needs a model)")
 
         print("-" * 100)
+        if not d.get("matched_arms"):
+            print("  [UNMATCHED ARMS] The A row is the SHIPPED fixture, which came from a")
+            print("            full-document run (text + tables) while any B row comes from the")
+            print("            table-only path. Their compositions differ, so a difference between")
+            print("            them is not attributable to the model. Generate a matched A row:")
+            print(f"              python backend/scripts/run_baselines.py --generate incumbent "
+                  f"--case {key} --provider <p>")
         _print_tradeoff(d["systems"])
         if not d["frontier_available"]:
             print("  [NOT RUN] frontier cells B0/B1 are missing — the 2x2 is HALF EMPTY, so no")
@@ -508,6 +553,14 @@ def _print(res):
             print("            ('does repair survive a better model?') is still UNANSWERED.")
             print(f"            Generate with:  python backend/scripts/run_baselines.py "
                   f"--generate frontier --case {key}")
+        elif not d.get("matched_arms"):
+            # Both rows exist but are not comparable. Printing the interaction anyway is
+            # how a reader ends up quoting it; withholding it is the whole point of the
+            # check above.
+            print("  2x2 INTERACTION — WITHHELD. Both rows exist, but the A row is not")
+            print("            comparable to the B row (see [UNMATCHED ARMS]), so any")
+            print("            interaction term would be attributing a code-path difference")
+            print("            to the model. Generate the matched incumbent arm first.")
         else:
             _print_interaction(d["systems"])
 
@@ -549,6 +602,32 @@ def _print_tradeoff(systems: dict):
               f"claims dropped {dropped:>4}   -> {note}")
 
 
+def _verdict(d_llama: float, d_frontier: float, eps: float = 0.005) -> str:
+    """Read the two repair deltas, not just their difference.
+
+    The previous rule was `interaction > -0.02 -> "repair SURVIVES"`, which is wrong in
+    the case that actually occurred: repair COST llama 5.5pp of recall and did nothing
+    for the frontier model (-5.5, 0.0). That is a positive interaction (+5.5pp) and the
+    old rule printed "repair SURVIVES the model upgrade" — a conclusion the numbers
+    contradict. What survives has to be judged from d_frontier's own sign, with the
+    interaction describing only how the two tiers differ.
+    """
+    helps_f, helps_l = d_frontier > eps, d_llama > eps
+    hurts_f, hurts_l = d_frontier < -eps, d_llama < -eps
+    if helps_f and helps_l:
+        return ("repair helps at BOTH tiers -> complementary to scale"
+                if d_frontier >= d_llama - eps
+                else "repair helps at both tiers but SHRINKS with scale")
+    if helps_f and not helps_l:
+        return "repair helps ONLY the stronger model"
+    if helps_l and not helps_f:
+        return "repair helps the weaker model ONLY -> gain is absorbed by scale; reframe to cost"
+    if hurts_f or hurts_l:
+        return "repair COSTS on this lane at " + ("both tiers" if hurts_f and hurts_l
+                                                  else ("the frontier tier" if hurts_f else "the llama tier"))
+    return "repair is INERT on this lane at both tiers"
+
+
 def _print_interaction(systems: dict):
     """The point of the whole harness: does the repair delta survive a better model?"""
     def rec(n):
@@ -566,11 +645,15 @@ def _print_interaction(systems: dict):
             continue
         d_llama, d_frontier = a[0] - a[1], b[0] - b[1]
         inter = d_frontier - d_llama
-        verdict = ("repair SURVIVES the model upgrade" if inter > -0.02
-                   else "repair ERODES as the model improves -> reframe to cost")
         print(f"    {metric:<11} llama {100 * d_llama:+6.1f}pp   "
               f"frontier {100 * d_frontier:+6.1f}pp   interaction {100 * inter:+6.1f}pp"
-              f"   -> {verdict}")
+              f"   -> {_verdict(d_llama, d_frontier)}")
+    print("    NOTE  these lanes see the repair layer only where it ADDS OR REMOVES a claim")
+    print("          or changes a value. Aspect/type/unit corrections are invisible here by")
+    print("          construction — L1/L2 read metric.value and page only. A zero delta on")
+    print("          this table is not evidence that the gate did nothing; it is evidence")
+    print("          that it did nothing THESE LANES CAN SEE. The gold composite is where")
+    print("          those corrections land, and it is not comparable across models.")
 
 
 def _print_markdown(res):
