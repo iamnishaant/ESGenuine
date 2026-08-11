@@ -1,11 +1,18 @@
-import psycopg2
 import os
+from urllib.parse import urlsplit
 
-# Use the credentials from setup_db.py
-conn_str = "postgresql://postgres:***REMOVED***@db.fpxgspimlsgiuvalwcmx.supabase.co:5432/postgres"
+import psycopg2
+from dotenv import load_dotenv
+from pathlib import Path
+
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+
+# No default. A KeyError here is the correct outcome: falling back to a literal would
+# reintroduce the hardcoded superuser credential this file used to carry.
+conn_str = os.environ["DATABASE_URL"]
 
 def audit_db():
-    print("Connecting to: db.fpxgspimlsgiuvalwcmx.supabase.co")
+    print(f"Connecting to: {urlsplit(conn_str).hostname}")
     try:
         conn = psycopg2.connect(conn_str)
         cur = conn.cursor()

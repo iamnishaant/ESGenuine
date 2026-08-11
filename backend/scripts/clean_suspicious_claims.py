@@ -1,6 +1,14 @@
-import psycopg2
+import os
+from pathlib import Path
 
-CONN_STR = "postgresql://postgres:***REMOVED***@db.fpxgspimlsgiuvalwcmx.supabase.co:5432/postgres"
+import psycopg2
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+
+# No default — see audit_pharos_db.py. This script issues DELETEs; a silent fallback to
+# a stale hardcoded credential is the last thing it should do.
+CONN_STR = os.environ["DATABASE_URL"]
 
 def clean_db():
     print("Connecting to Supabase for rigorous cleanup...")

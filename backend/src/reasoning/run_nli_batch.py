@@ -6,12 +6,18 @@ Uses pgvector (HNSW) to find the Top 3 most semantically identical claims
 across the dataset, and evaluates only those highly-linked pairs using NLI.
 """
 import os
-import psycopg2
 import uuid
+from pathlib import Path
+
+import psycopg2
+from dotenv import load_dotenv
 
 from nli_engine import ContradictionEngine
 
-CONN_STR = "postgresql://postgres:***REMOVED***@db.fpxgspimlsgiuvalwcmx.supabase.co:5432/postgres"
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+
+# No default — see backend/scripts/audit_pharos_db.py.
+CONN_STR = os.environ["DATABASE_URL"]
 
 def run_semantic_nli():
     engine = ContradictionEngine()
