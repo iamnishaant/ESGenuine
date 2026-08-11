@@ -21,6 +21,7 @@ already written into the paper*, so they are listed first.
 | ✅ | **P3** offline harnesses | **all 8 expected values reproduce exactly** |
 | 🔴 | *(new)* fixture provenance | **the frozen "raw LLM" fixtures are not raw.** Retracts one published finding. |
 | 🔴 | *(new)* 2×2 design | **the A and B rows came from different code paths.** Plus a verdict bug that printed a conclusion the numbers contradict. |
+| 🟠 | *(new)* metered runs | generation never used the repo's own checkpoint, so any failure discarded every completed page |
 | 🟠 | *(new)* cost figure | 0.58 ms/claim had **no harness**; measured 0.45 ms/claim, harness added |
 | 🟡 | *(new)* figure pipeline | regenerating figures never updated the copies `main.tex` compiles |
 | 🟡 | *(new)* CI coverage | CI did not run on `paper/**` — the gold-set tamper gate was unguarded |
@@ -206,7 +207,44 @@ can see*. Without that note the natural misreading is that the gate is worthless
 
 ---
 
-## Finding 4 — the cost number had no harness behind it 🟠
+## Finding 4 — metered generation threw away completed work on any failure 🟠
+
+The repo contains `backend/src/extractors/checkpoint.py`, written for precisely this
+situation:
+
+> *Without checkpointing, a single crash — a network read-timeout, a bad-JSON reply … a
+> re-run RESUMES — units already in the checkpoint are skipped, not re-paid for.*
+
+`extract_from_table_markdown` takes a `checkpoint_path`, records every **completed** page,
+and deliberately does **not** record a failed one, so a resume re-pays only for what broke.
+`run_baselines.generate()` never passed it.
+
+The consequence, observed twice on 2026-08-11: an incumbent run over 40 pages lost 14 pages
+to a DNS failure late in the run, and every one of the 26 pages that had already succeeded
+was discarded with them. The same run had to be started from zero afterwards. For the one
+part of the eval stack that costs money and wall-clock time, an unrelated failure at the
+end destroyed all of it.
+
+Fixed: `generate()` now checkpoints to `fixtures/.ckpt_<tag>_<case>.jsonl` (gitignored —
+the fixture is the artifact, this is only crash insurance).
+
+### The write guard, corrected
+
+An earlier version of the guard added in this session counted **pages that produced zero
+claims**. That conflates two different things, and the numbers show how badly: on the
+frontier Tata run 13 of 40 pages were empty but only **2** had failed — the other 11 hold
+no extractable numeric table at all. A ceiling tight enough to catch the broken run would
+have rejected the good one.
+
+The extractor already tracks `failed_units`, the count of pages whose call exhausted its
+retries. The guard now uses that, and the meta records `failed_pages`,
+`pages_with_claims` and `pages_without_claims`, so anything scoring a fixture can see how
+much of the document it actually reached rather than reading a lost page as "the model
+found nothing here".
+
+---
+
+## Finding 5 — the cost number had no harness behind it 🟠
 
 `PAPER_README.md` §3.3 and `main.tex` quote **0.58 ms/claim, 218 ms per report**. §6 claims
 every reported number recomputes from committed fixtures. That was true of every number
@@ -230,7 +268,7 @@ cite the harness, and make the load-bearing claim the order of magnitude
 
 ---
 
-## Finding 5 — regenerating figures did not update the ones the paper compiles 🟡
+## Finding 6 — regenerating figures did not update the ones the paper compiles 🟡
 
 `main.tex` does `\includegraphics{figures/…}` relative to `docs/paper/`, so the PDFs the
 paper actually builds from live in **`docs/paper/figures/`**. `make_figures.py` wrote only to
@@ -249,7 +287,7 @@ colourblind/greyscale properties that were validated when they were made.
 
 ---
 
-## Finding 6 — CI did not run on the paper branch 🟡
+## Finding 7 — CI did not run on the paper branch 🟡
 
 `.github/workflows/ci.yml` triggered on push to `[V2, main, ESG_V1]`. `paper/icmlde-evaluation`
 was not among them, so pushes to it ran no CI — including `test_gold_integrity.py`, the

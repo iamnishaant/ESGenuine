@@ -1,0 +1,20 @@
+{
+  "case": "shell",
+  "tag": "frontier",
+  "provider": "pool[nvidiax6]",
+  "model": "openai/gpt-oss-120b",
+  "pool_providers": [
+    "nvidia"
+  ],
+  "pool_models": [
+    "openai/gpt-oss-120b"
+  ],
+  "pool_size": 6,
+  "isolated_provider": "nvidia",
+  "llm_max_tokens": 8000,
+  "temperature": 0.1,
+  "pages": 5,
+  "claims": 191,
+  "source_cache": "docling_shell2022.json",
+  "note": "Generated from committed Docling page markdown, so the input is byte-identical to the shipped fixture's table surface and the model is the only variable. TABLE SURFACE ONLY \u2014 no text/narrative claims."
+}

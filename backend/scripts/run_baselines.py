@@ -478,7 +478,45 @@ def generate(case: str, tag: str = "frontier", limit: int = 0, provider: str = "
                  or os.environ.get("NVIDIA_MODEL") or os.environ.get("GROQ_MODEL") or "?")
     print(f"[baseline] case={case} ({label})  pages={len(tables)}  provider={probe.provider}  model={model}")
 
-    claims = ClaimExtractor().extract_from_table_markdown(tables, document_id=f"baseline_{case}")
+    # Resume across runs. extract_from_table_markdown records each COMPLETED page and
+    # deliberately does not record a failed one, so a re-run re-pays only for what broke.
+    # Without this a late failure discards every page that already succeeded: a DNS drop
+    # on 2026-08-11 threw away 26 good pages of 40 to save none, twice. Metered work
+    # should never be lost to an unrelated failure at the end of it.
+    ckpt = _FIX / f".ckpt_{tag}_{case}.jsonl"
+    extractor = ClaimExtractor()
+    claims = extractor.extract_from_table_markdown(
+        tables, document_id=f"baseline_{case}", checkpoint_path=str(ckpt))
+
+    # A page the extractor could not parse contributes zero claims, and once the fixture is
+    # on disk that is indistinguishable from "the model found nothing here". A run
+    # interrupted by a network failure therefore writes a file that looks like a measurement
+    # and is not one: an incumbent run on 2026-08-11 lost 14/40 pages to DNS failure on one
+    # document and 5/5 on the other, and this function wrote a 0-claim fixture without
+    # complaint. Scored, that reads as "the model recalled 0% of table facts".
+    #
+    # `failed_units` counts pages whose LLM call exhausted its retries — the precise signal.
+    # Counting zero-claim pages instead would conflate failures with pages that genuinely
+    # hold no numeric table: on the frontier Tata run 13/40 pages were empty but only 2 had
+    # failed, so a heuristic tuned to catch the bad run would have rejected the good one.
+    failed = getattr(extractor, "failed_units", 0)
+    loss = failed / len(tables) if tables else 0.0
+    ceiling = float(os.environ.get("BASELINE_MAX_PAGE_LOSS", "0.10"))
+    if not claims or loss > ceiling:
+        raise SystemExit(
+            f"REFUSING TO WRITE — {failed}/{len(tables)} pages ({100 * loss:.0f}%) failed "
+            f"after retries,\nover the {100 * ceiling:.0f}% ceiling. See the [Failed] lines "
+            f"above.\nA fixture missing this much of the document cannot be compared against "
+            f"a complete\none. The checkpoint at {ckpt.name} retains every page that "
+            f"succeeded, so re-running\nwhen the endpoint is healthy re-pays only for the "
+            f"failures. Set BASELINE_MAX_PAGE_LOSS\nto accept the gap deliberately.")
+    if failed:
+        print(f"[baseline] NOTE: {failed}/{len(tables)} pages failed after retries — "
+              f"recorded in the meta so the gap is visible to anything scoring this fixture.")
+
+    covered = {c.provenance.page_number for c in claims
+               if c.provenance and c.provenance.page_number is not None}
+    missing = sorted({t["page_number"] for t in tables} - covered)
 
     out = _FIX / f"baseline_{tag}_{case}.jsonl"
     with open(out, "w", encoding="utf-8") as f:
@@ -496,6 +534,12 @@ def generate(case: str, tag: str = "frontier", limit: int = 0, provider: str = "
         "llm_max_tokens": int(os.environ.get("LLM_MAX_TOKENS", "3000")),
         "temperature": 0.1,
         "pages": len(tables), "claims": len(claims), "source_cache": cache,
+        # A page lost to a failed call scores as "the model found nothing here" unless the
+        # gap is recorded. Anything comparing two fixtures must be able to see how much of
+        # each document was actually reached — hence both counts, and the page list.
+        "failed_pages": failed,
+        "pages_with_claims": len(covered),
+        "pages_without_claims": missing,
         "note": "Generated from committed Docling page markdown, so the input is "
                 "byte-identical to the shipped fixture's table surface and the model is "
                 "the only variable. TABLE SURFACE ONLY — no text/narrative claims.",

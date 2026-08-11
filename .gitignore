@@ -34,6 +34,10 @@ __pycache__/
 # Geocode disk caches (regenerated on demand from Nominatim)
 backend/.geocode_cache*.json
 
+# Baseline-generation resume checkpoints. Scratch state for an in-progress metered run:
+# the fixture it produces IS committed, this is only the means of surviving a crash.
+backend/tests/eval/fixtures/.ckpt_*.jsonl
+
 # Backend runtime artifacts
 backend/uploads/
 _upgrade_inspect/
