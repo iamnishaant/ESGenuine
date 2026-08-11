@@ -1,5 +1,21 @@
 # Handoff roadmap — tasks needing credentials
 
+> ## ✅ EXECUTED 2026-08-11 — results in [`CROSSCHECK_FINDINGS.md`](CROSSCHECK_FINDINGS.md)
+>
+> This document is kept as the record of what was asked. **Read the findings before
+> re-running anything here.** Two corrections you need:
+>
+> - **P1's procedure is unsafe on a machine with a populated `.env`.** `LLMClient` builds a
+>   round-robin pool from every NVIDIA/Groq/HF key and takes that path *instead of* the
+>   OpenAI/Anthropic branch, so `OPENAI_API_KEY=...` never calls OpenAI, and the fixture
+>   blends a 70B with two 8B models while the meta records whatever `OPENAI_MODEL` said.
+>   `run_baselines.py` now requires `--provider` and refuses a heterogeneous pool. See
+>   findings §2.
+> - **P3's expected values all reproduced exactly** — nothing to flag. See findings §P3.
+>
+> A finding that was *not* on this roadmap outranks everything on it: the frozen
+> "raw LLM" fixtures are not raw, which retracts §3.2 finding (ii). See findings §1.
+
 **For:** the repo owner (holds `.env`, live Supabase, LLM API keys)
 **From:** paper-readiness audit, 2026-08-10
 **Deadline context:** ICMLDE 5.0 submission, 15 Aug 2026

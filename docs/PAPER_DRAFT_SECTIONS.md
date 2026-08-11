@@ -124,8 +124,10 @@ at zero API cost.
 
 ### 5.2 Ablation: which part of the deterministic layer earns the gain
 
-Six cumulative stages applied to frozen raw LLM output. **S0** resets each claim's aspect
-to the model's own free text (no deterministic layer); **S1** adds taxonomy normalisation;
+Six cumulative stages applied to the frozen extractor fixtures — which are **not** raw model
+output; see [`CROSSCHECK_FINDINGS.md`](CROSSCHECK_FINDINGS.md) §1 before quoting per-stage
+numbers. **S0** resets each claim's aspect to the model's own free text (no taxonomy layer),
+along with the repair flags and framework tags; **S1** adds taxonomy normalisation;
 **S2** repairs fiscal-year column misalignment; **S3** flags table values absent from the
 source table; **S4** applies aspect/type repairs and suspicion flags; **S5** drops page
 furniture. S5 is the shipped configuration.
@@ -158,10 +160,15 @@ baseline**, at zero inference cost. We quote S1 → S5 rather than S0 → S5 bec
 accuracy is 0% by construction — free text cannot exact-match a controlled vocabulary — so
 the S0 → S5 totals (+28.4, +17.6) flatter the method.
 
-**(ii) Only two of the five components pay for themselves.** FY repair and the
-value-in-table check are not distinguishable from zero on either document. The method is
-better described as *taxonomy normalisation plus rule-based repair* than as a five-stage
-pipeline.
+**(ii) Two components carry the layer; two more are not identifiable.** Taxonomy mapping and
+the gate account for essentially all of the gain, so the method is better described as
+*taxonomy normalisation plus rule-based repair* than as a five-stage pipeline. The near-zero
+deltas for FY repair and the value-in-table check are **not** evidence that those stages do
+nothing: the extractor applies both before the fixtures are written
+(`claim_extractor.py:862-868`), so replaying them over an already-repaired fixture moves 3
+values on Tata and 0 on Shell. They measure a residual between layer revisions, not the value
+of the stage. Report as *not identifiable under this design*. See
+[`CROSSCHECK_FINDINGS.md`](CROSSCHECK_FINDINGS.md) §1.
 
 **(iii) Which component dominates is determined by the disclosure regime.** On the
 form-heavy BRSR filing the gate carries the result (+20.5, node accuracy 18.9% → 94.6%);
@@ -173,10 +180,13 @@ on one regime will under-serve the other.
 
 ### 5.3 Cost
 
-The deterministic layer runs in **0.58 ms per claim** — 218 ms for a 373-claim report,
-single-threaded, no network, no API spend. Against an LLM re-extraction pass this is
-effectively free, which is what makes (iii) actionable: a deployment can afford to carry
-repair rules for every regime it might encounter.
+The deterministic layer runs in **0.45 ms per claim** — 168 ms for the 373-claim BRSR and
+105 ms for the 247-claim IR report, single-threaded, no network, no API spend (best of 15,
+`backend/scripts/run_cost.py`). Against an LLM re-extraction pass this is effectively free,
+which is what makes (iii) actionable: a deployment can afford to carry repair rules for every
+regime it might encounter. The figure is hardware-dependent — quote the order of magnitude,
+not the digits. *(Was 0.58 ms; that value had no harness behind it. See
+[`CROSSCHECK_FINDINGS.md`](CROSSCHECK_FINDINGS.md) §3.)*
 
 ### 5.4 Recall, and what the repair layer costs
 

@@ -235,9 +235,22 @@ cumulative corrections, none of which calls a model or the network:
   invented numbers, and page furniture are dropped.
 \end{description}
 
-We denote by \textbf{S0} the condition in which no deterministic layer is applied
-and each claim retains the model's own free-text aspect. S5 is the shipped
+We denote by \textbf{S0} the condition in which the taxonomy layer is removed and
+each claim retains the model's own free-text aspect. S5 is the shipped
 configuration.
+
+\paragraph{What the frozen fixtures contain.} The ablation replays stages over
+committed extractor output rather than over a pristine model transcript, and the
+distinction matters for how the per-stage results should be read. The stored
+records already carry the taxonomy assignment and the repair flags produced by
+the revision of the layer that was current when they were written. S0 is
+therefore \emph{reconstructed}: we reset the taxonomy assignment, repair flags and
+framework tags, then replay the current stack. Two consequences follow. The
+reconstruction is conservative for the aggregate result---the S0 baseline retains
+repairs we cannot undo, so the reported S1$\to$S5 increments are a lower bound on
+what the layer contributes over an unrepaired extractor. It is not conservative
+for per-stage attribution of S2 and S3, which the extractor applies before the
+fixture is written; we return to this in finding~(ii).
 
 %==============================================================================
 \section{Evaluation setup}
@@ -245,15 +258,27 @@ configuration.
 
 \subsection{Corpus}
 
-\FILL{confirm against the live corpus before submitting} The corpus comprises
-\FILL{N} extracted claims from \FILL{N} sustainability reports across \FILL{N}
-companies, spanning statutory BRSR filings, narrative investor-relations reports
-and tabular ESG datasheets.
+The corpus comprises $1{,}730$ extracted claims from six sustainability reports
+($461$ PDF pages) published by four companies. One report is a
+\textbf{statutory BRSR filing}; the remaining five are \textbf{narrative
+investor-relations and ESG reports}, three of which carry a tabular performance
+annex. Of the extracted claims, $1{,}394$ ($80.6\,\%$) carry a numeric value, and
+the type distribution is $1{,}263$ performance, $370$ narrative and $97$ target.
 
 Evaluation uses two documents in depth, chosen because they sit at opposite ends
 of the disclosure-format spectrum: a \textbf{statutory BRSR filing} (form-heavy,
-373 raw claims) and a \textbf{narrative investor-relations report} (247 raw
-claims).
+42 pages, 373 raw claims) and a \textbf{narrative investor-relations report}
+(91 pages, 247 raw claims).
+
+Two properties of this corpus bound what follows, and we state them here rather
+than in the limitations alone. First, \textbf{each disclosure regime is
+represented by a single document} in the in-depth evaluation, so the
+regime-dependence result of Section~\ref{sec:ablation} is a contrast between two
+documents, not between two populations. Second, the two evaluated documents are
+the corpus's \emph{most} tractable: the share of claims that the taxonomy leaves
+\texttt{uncategorized} is $23.0\,\%$ and $24.7\,\%$ for them, against $52.2\,\%$
+and $53.3\,\%$ for the two reports not evaluated in depth. Absolute scores
+reported here should therefore be read as an upper region of the corpus range.
 
 \subsection{Annotated sets}
 
@@ -376,7 +401,7 @@ percentile bootstrap returns a degenerate interval.}
 \toprule
 Stage & BRSR & IR\\
 \midrule
-S0 raw LLM            & 67.7 & 72.1\\
+S0 no taxonomy layer  & 67.7 & 72.1\\
 S1 $+$ ontology       & 71.5 & 82.7\\
 S2 $+$ FY repair      & 73.2 & 82.7\\
 S3 $+$ value-in-table & 73.2 & 82.7\\
@@ -427,12 +452,20 @@ measure an artifact of comparing free text against a fixed taxonomy. S1, an LLM
 plus a vocabulary mapping, is the minimum sane baseline, and the increment over
 it is the defensible claim.
 
-\paragraph{(ii) Only two of five components pay for themselves.} Fiscal-year
-repair and source-value verification are indistinguishable from zero on both
-documents. The method is more accurately described as \emph{taxonomy
-normalisation plus rule-based repair} than as a five-stage pipeline. Fiscal-year
-repair is arguably net-negative: Section~\ref{sec:recall} shows it also costs
-$1.1$ percentage points of recall.
+\paragraph{(ii) Two components carry the layer; two others are not identifiable
+from this design.} Taxonomy mapping and the rule-based gate account for
+essentially all of the gain, so the method is more accurately described as
+\emph{taxonomy normalisation plus rule-based repair} than as a five-stage
+pipeline. The near-zero deltas for fiscal-year repair and source-value
+verification, however, must not be read as evidence that those stages do no work.
+Both are applied by the extractor at the time claims are produced, before the
+fixtures this ablation replays were frozen; re-applying them to an already-repaired
+fixture moves three values on the statutory filing and none on the narrative
+report. What the ablation measures for S2 and S3 is therefore the residual between
+the revision that produced the fixtures and the current one---not the value of the
+operations. We report them as \emph{not identifiable} under this design. Isolating
+them would require re-extracting the corpus with each stage disabled at extraction
+time, which we did not do.
 
 \paragraph{(iii) The dominant component is set by the disclosure regime.} On the
 statutory filing the gate carries the result ($+20.5$; aspect node accuracy rises
@@ -445,11 +478,17 @@ pipeline tuned on one regime will systematically under-serve the other.
 
 \subsection{Cost}
 
-The deterministic layer runs in $0.58$\,ms per claim---$218$\,ms for a 373-claim
-report, single-threaded, no network, no API spend. Relative to an LLM
-re-extraction pass this is effectively free, which is what makes finding (iii)
-actionable: a deployment can afford to carry repair rules for every disclosure
-regime it might encounter, and select among them per document.
+The deterministic layer runs in $0.45$\,ms per claim---$168$\,ms for the 373-claim
+statutory filing and $105$\,ms for the 247-claim narrative report, single-threaded,
+no network, no API spend (best of 15 runs, commodity laptop CPU). The measurement
+covers the layer alone: taxonomy normalisation, key refresh, fiscal-year repair,
+source-value verification, gate corrections and the furniture filter. It excludes
+the LLM call, which is the point, and PDF parsing, which is upstream and cached.
+The absolute figure is hardware-dependent; the claim that matters is the order of
+magnitude. Sub-millisecond per claim is free relative to an LLM re-extraction pass,
+which is what makes finding (iii) actionable: a deployment can afford to carry
+repair rules for every disclosure regime it might encounter, and select among them
+per document.
 
 \subsection{Recall, and what precision costs}
 \label{sec:recall}
@@ -527,9 +566,20 @@ Narrative-claim recall is unmeasured.
 surfaced. Facts in unparsed figures or scanned tables lie outside the frame and
 are not counted as misses.
 
-\paragraph{Two documents.} The regime-divergence finding rests on one document
-per regime. It supports a claim about these two disclosure formats, not about ESG
-reporting in general.
+\paragraph{Two documents, and the easier two.} The regime-divergence finding rests
+on one document per regime. It supports a claim about these two disclosure
+formats, not about ESG reporting in general. The two are also the corpus's most
+tractable: $23.0\,\%$ and $24.7\,\%$ of their claims fall outside the taxonomy,
+against $52.2\,\%$ and $53.3\,\%$ for the two reports we did not evaluate in
+depth. Absolute scores would very likely be lower on the rest of the corpus.
+
+\paragraph{Reconstructed ablation baseline.} The committed fixtures are extractor
+output, not a pristine model transcript: they carry the taxonomy assignment and
+repair flags emitted by the layer revision current when they were written. We
+reset those fields and replay the current stack, so S0 retains repairs we cannot
+undo. The reported layer increments are consequently a lower bound, and the two
+stages the extractor applies before writing---fiscal-year repair and source-value
+verification---are not separately identifiable, as discussed in finding~(ii).
 
 \paragraph{Extraction is not reproducible end to end.} The extraction model is a
 hosted endpoint at non-zero temperature. Frozen fixtures make every reported

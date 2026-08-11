@@ -25,11 +25,15 @@ git fetch origin && git checkout paper/icmlde-evaluation
 | | |
 |---|---|
 | ✅ Done | ablation, per-metric evaluation, bootstrap CIs, table recall, cost/latency, no-LLM floor, grounding precision, 3 figures, reproducibility (pinned weights, seeds, frozen fixtures) |
-| ⏳ Needs a key | **frontier baseline** — the only thing blocking the paper |
-| ⏳ Needs the DB | corpus counts for §4.1 |
+| ✅ Done 08-11 | **frontier baseline** (§3.5), **corpus counts** (§4.1), offline harnesses re-verified on a second machine, cost harness added, credential leak patched in code |
+| 🔴 Owner action | **rotate the Supabase DB password** — still live. See [`CROSSCHECK_FINDINGS.md`](CROSSCHECK_FINDINGS.md) §P0 |
 | ❌ Not started | **related work (zero citations — biggest rejection risk)**, Procedia template, §1–3, §7 |
 
 The evaluation is no longer the weak point. **Related work and the template are.**
+
+> **Read [`CROSSCHECK_FINDINGS.md`](CROSSCHECK_FINDINGS.md) before writing §3.** The
+> 2026-08-11 cross-check confirmed every offline number exactly, but retracted §3.2
+> finding (ii) and revised the §3.3 cost figure. Both are corrected below.
 
 ---
 
@@ -132,8 +136,15 @@ claimed.
 
 ### 3.2 Ablation: which component earns the gain
 
-Six cumulative stages over frozen raw LLM output. **S0** resets each aspect to the model's
-free text (no deterministic layer); S5 is the shipped configuration.
+Six cumulative stages over the frozen extractor fixtures. **S0** resets each aspect to the
+model's free text (no taxonomy layer); S5 is the shipped configuration.
+
+> ⚠️ **The fixtures are not raw model output** — see
+> [`CROSSCHECK_FINDINGS.md`](CROSSCHECK_FINDINGS.md) §1. They carry `type_fixed`,
+> `scope_fixed`, `aspect_fixed` and `value_not_in_table` flags written by an earlier
+> revision of the gate. S0 is a *reconstruction* (three fields reset, current stack
+> replayed). The aggregate deltas survive and are conservative; the S2/S3 per-stage
+> deltas do not mean what they appear to.
 
 | Stage | BRSR | IR |
 |---|--:|--:|
@@ -162,10 +173,15 @@ inference cost. Quote S1→S5, not S0→S5: S0's node accuracy is 0% *by constru
 text cannot exact-match a controlled vocabulary), so the S0→S5 totals (+28.4, +17.6)
 flatter the method.
 
-**(ii) Only two of five components pay for themselves.** FY repair and value-in-table are
-indistinguishable from zero on both documents. Describe the method as *taxonomy
-normalisation plus rule-based repair*, not a five-stage pipeline. FY repair is arguably
-net-negative: it also costs 1.1 pp of recall (§3.4).
+**(ii) Two components carry the layer; two more are *not identifiable*.** ~~FY repair and
+value-in-table are indistinguishable from zero, so they don't pay for themselves.~~
+**Retracted 2026-08-11.** Both stages are applied by the extractor *before the fixtures are
+written* (`claim_extractor.py:862-868`), so replaying them over an already-repaired fixture
+moves 3 values on Tata and 0 on Shell. Their ≈0 deltas measure the residual between the old
+and current revision, not the value of the stage. Say **not identifiable under this design**,
+never "ineffective" — a reviewer can check this by grepping the artifact. Taxonomy mapping
+and the gate do carry the layer, so *taxonomy normalisation plus rule-based repair* is still
+the right description of the method.
 
 **(iii) The dominant component is set by the disclosure regime.** Gate fixes carry the
 statutory filing (+20.5, node accuracy 18.9%→94.6%); taxonomy mapping carries the
@@ -175,9 +191,15 @@ a single pipeline tuned on one regime will under-serve the other.
 
 ### 3.3 Cost
 
-**0.58 ms per claim** — 218 ms for a 373-claim report, single-threaded, no network, no API
-spend. Against an LLM re-extraction pass this is free, which is what makes (iii)
-actionable: a deployment can afford repair rules for every regime it may meet.
+**0.45 ms per claim** — 168 ms for the 373-claim BRSR, 105 ms for the 247-claim IR report.
+Single-threaded, no network, no API spend; best of 15 runs. Against an LLM re-extraction
+pass this is free, which is what makes (iii) actionable: a deployment can afford repair
+rules for every regime it may meet.
+
+> Revised 2026-08-11. The previous **0.58 ms / 218 ms** had **no harness behind it** — it
+> was prose only, the one number in the paper that §6 could not regenerate. `run_cost.py`
+> now measures it. The figure is hardware-dependent, so quote the order of magnitude
+> ("sub-millisecond per claim") and cite the harness, not the digits.
 
 ### 3.4 Recall, and what precision costs
 
@@ -307,6 +329,7 @@ python backend/scripts/run_ablation.py  --markdown     # §3.2
 python backend/scripts/run_bootstrap.py --markdown     # §3.1 CIs
 python backend/scripts/run_recall.py                   # §3.4
 python backend/scripts/run_baselines.py --markdown     # §3.5
+python backend/scripts/run_cost.py      --markdown     # §3.3
 python backend/scripts/make_figures.py                 # §4
 cd backend && python -m pytest -m "not live"           # 178 passed
 ```
