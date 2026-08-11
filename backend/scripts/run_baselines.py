@@ -352,13 +352,59 @@ def run(case_keys=None) -> dict:
 
 # ─────────────────────────────────────────────────────────── generation (metered)
 
-def generate(case: str, tag: str = "frontier", limit: int = 0) -> Path:
+# Which env vars feed each provider's slot in LLMClient's round-robin pool. Used to
+# BLANK every provider except the one under test — see `_isolate_provider`.
+_POOL_VARS = {
+    "nvidia": ("NVIDIA_API_KEYS", "NVIDIA_API_KEY"),
+    "groq":   ("GROQ_API_KEYS", "GROQ_API_KEY"),
+    "hf":     ("HF_API_KEYS", "HF_TOKEN", "HUGGING_FACE_HUB_TOKEN"),
+}
+
+
+def _isolate_provider(provider: str) -> None:
+    """Force a SINGLE-provider, single-model pool.
+
+    Two traps this defuses, both of which silently corrupt a 'frontier' fixture:
+
+    1. `LLMClient.__init__` builds a round-robin pool from *every* NVIDIA/Groq/HF key it
+       finds, and `extract()` takes the pool path whenever that pool is non-empty. With a
+       populated `.env` the pool is heterogeneous — NVIDIA 70B *and* Groq 8B *and* an HF
+       8B — so the claims in one fixture come from a mix of models. `reingest_corpus.py`
+       already blanks the small ones for exactly this reason ("8B = quality pollution");
+       the baseline harness needs the same discipline, more so, because its whole purpose
+       is attributing a difference to the model.
+    2. The pool ALSO short-circuits the OpenAI/Anthropic branches: they are only reached
+       when the pool is empty. So `OPENAI_API_KEY=... OPENAI_MODEL=gpt-4o` on a machine
+       that has an NVIDIA key in `.env` never calls OpenAI at all — it calls llama and
+       writes `"model": "gpt-4o"` into the meta, which is worse than failing.
+
+    Blank rather than pop: imported modules re-run `load_dotenv()`, which repopulates a
+    missing key from `.env` but leaves an empty one alone.
+    """
+    for names in (v for k, v in _POOL_VARS.items() if k != provider):
+        for n in names:
+            if n in os.environ:
+                os.environ[n] = ""
+    # OpenAI/Anthropic are only reachable with an EMPTY pool, so blank every pool var.
+    if provider in ("openai", "anthropic"):
+        for names in _POOL_VARS.values():
+            for n in names:
+                if n in os.environ:
+                    os.environ[n] = ""
+
+
+def generate(case: str, tag: str = "frontier", limit: int = 0, provider: str = "") -> Path:
     """Re-extract table claims from the COMMITTED page markdown with a different model.
 
     Input is the cached markdown, so the only variable versus the shipped fixture is the
     model. Writes a JSONL fixture; after this runs once, scoring is offline forever.
     """
+    # Import FIRST: claim_extractor runs load_dotenv() at import time, so isolating
+    # before the import would just be undone by it.
     from extractors.claim_extractor import ClaimExtractor, LLMClient
+
+    if provider:
+        _isolate_provider(provider)
 
     label, _fixture, cache, _gold = CASES[case]
     pages = _load_pages(cache)
@@ -374,8 +420,26 @@ def generate(case: str, tag: str = "frontier", limit: int = 0) -> Path:
             "nothing of the sort. Set one of NVIDIA_API_KEY / GROQ_API_KEY /\n"
             "OPENAI_API_KEY / ANTHROPIC_API_KEY (plus the matching *_MODEL) and retry.")
 
-    model = (os.environ.get("OPENAI_MODEL") or os.environ.get("ANTHROPIC_MODEL")
-             or os.environ.get("NVIDIA_MODEL") or os.environ.get("GROQ_MODEL") or "?")
+    # A fixture whose claims came from more than one model is not a measurement of any
+    # model. Refuse rather than produce one — the failure this guards is silent.
+    pool_models = sorted({e["model"] for e in probe.endpoints})
+    pool_providers = sorted({e["provider"] for e in probe.endpoints})
+    if len(pool_models) > 1:
+        raise SystemExit(
+            f"HETEROGENEOUS POOL — refusing to generate.\n"
+            f"  providers: {', '.join(pool_providers)}\n"
+            f"  models   : {', '.join(pool_models)}\n"
+            f"LLMClient round-robins across all of these, so the fixture would be a blend "
+            f"of models\nand could not be attributed to any one of them. Re-run with "
+            f"--provider <{'|'.join(sorted(_POOL_VARS))}> to isolate a single provider.")
+
+    if probe.endpoints:
+        # Authoritative: what the pool will ACTUALLY call. The env-precedence guess below
+        # is only a fallback for the pool-less OpenAI/Anthropic path.
+        model = pool_models[0]
+    else:
+        model = (os.environ.get("OPENAI_MODEL") or os.environ.get("ANTHROPIC_MODEL")
+                 or os.environ.get("NVIDIA_MODEL") or os.environ.get("GROQ_MODEL") or "?")
     print(f"[baseline] case={case} ({label})  pages={len(tables)}  provider={probe.provider}  model={model}")
 
     claims = ClaimExtractor().extract_from_table_markdown(tables, document_id=f"baseline_{case}")
@@ -388,6 +452,13 @@ def generate(case: str, tag: str = "frontier", limit: int = 0) -> Path:
     meta = out.with_suffix(".meta.json")
     meta.write_text(json.dumps({
         "case": case, "tag": tag, "provider": probe.provider, "model": model,
+        "pool_providers": pool_providers, "pool_models": pool_models,
+        "pool_size": len(probe.endpoints), "isolated_provider": provider or None,
+        # Reasoning-style models spend completion tokens before emitting JSON, so the
+        # 3000 default truncates them mid-object and the page is lost. Recorded because
+        # it differs from the shipped fixture's run and a reader must be able to see that.
+        "llm_max_tokens": int(os.environ.get("LLM_MAX_TOKENS", "3000")),
+        "temperature": 0.1,
         "pages": len(tables), "claims": len(claims), "source_cache": cache,
         "note": "Generated from committed Docling page markdown, so the input is "
                 "byte-identical to the shipped fixture's table surface and the model is "
@@ -529,6 +600,10 @@ if __name__ == "__main__":
                     help="METERED: re-extract table claims with the configured model and "
                          "write a fixture (requires --case)")
     ap.add_argument("--limit", type=int, default=0, help="generate: cap pages (smoke test)")
+    ap.add_argument("--provider", choices=["nvidia", "groq", "hf", "openai", "anthropic"],
+                    help="generate: isolate ONE provider by blanking every other pool key. "
+                         "Required in practice — LLMClient otherwise round-robins across "
+                         "every NVIDIA/Groq/HF key in .env and blends models into one fixture.")
     ap.add_argument("--markdown", action="store_true", help="paper-ready markdown table")
     ap.add_argument("--json", dest="json_out")
     a = ap.parse_args()
@@ -536,7 +611,7 @@ if __name__ == "__main__":
     if a.generate:
         if not a.case:
             raise SystemExit("--generate requires --case (it spends money; be explicit)")
-        generate(a.case, tag=a.generate, limit=a.limit)
+        generate(a.case, tag=a.generate, limit=a.limit, provider=a.provider or "")
         sys.exit(0)
 
     res = run([a.case] if a.case else None)
