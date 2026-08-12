@@ -20,6 +20,13 @@ Unlike typical LLM document pipelines, this system:
 
 ---
 
+> 📘 **For the full end-to-end trace** — every stage, threshold, constant and decision rule,
+> with file:line references and the evaluation methodology in depth — see
+> **[`EXACT_FLOW.md`](EXACT_FLOW.md)**. That document is the source for a report's
+> Methodology section; this one is the summary.
+
+---
+
 ## 🧭 TL;DR
 
 - **Problem:** ESG disclosures are unstructured, unverified, and inconsistent between
