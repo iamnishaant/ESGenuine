@@ -1,6 +1,10 @@
 # Handoff roadmap — tasks needing credentials
 
-> ## ✅ EXECUTED 2026-08-11 — results in [`CROSSCHECK_FINDINGS.md`](CROSSCHECK_FINDINGS.md)
+> ## ✅ EXECUTED — answers in [`HANDOFF_RETURN.md`](HANDOFF_RETURN.md) ← **start here**
+>
+> Detail in [`CROSSCHECK_FINDINGS.md`](CROSSCHECK_FINDINGS.md). Headlines: **P3 reproduced
+> exactly (all 8)**, **P2 confirmed your figures**, **P1 done but returns a null on the
+> headline question**, **P0 rotation still outstanding**.
 >
 > This document is kept as the record of what was asked. **Read the findings before
 > re-running anything here.** Two corrections you need:
