@@ -231,8 +231,38 @@ fixture, not the pipeline.
 - **Grounding precision** (share of emitted numeric values that occur in the source page —
   mechanical, comparable across systems): **87.4%** → **89.2%** with repair.
 
-**`[FILL after P1]`** the 2×2. If the frontier gain is large and the repair delta shrinks,
-reframe around cost: report tokens, latency and dollars per report.
+### Matched-model comparison — **done 2026-08-12**
+
+`gpt-oss-120b` vs `llama-3.3-70b`, identical committed markdown, same code path, page set
+and token budget. Page-matched (only pages both arms produced claims for), so a lost page
+can't read as a model failure.
+
+| Document | Extractor | Fact recall | Grounding |
+|---|---|--:|--:|
+| BRSR | llama-3.3-70b | 41.2% | 68.3% |
+| BRSR | **gpt-oss-120b** | **97.2%** | **99.1%** |
+| IR | llama-3.3-70b | 44.1% | 100% |
+| IR | **gpt-oss-120b** | **89.8%** | 100% |
+
+**Extractor choice dominates the table surface.** The grounding line is the sharper one:
+**31.7%** of llama's emitted values don't occur on the page they cite, against **0.9%** for
+gpt-oss-120b — the exact failure class the source-value check exists to catch.
+
+> ⚠️ **The 2×2 does NOT answer "does repair survive a better model."** Report the null.
+> Recall/grounding read only value+page, so they see the layer only where it adds, removes
+> or rewrites a claim — and its one such action (furniture drop) removes **0** at both
+> tiers, because form furniture is a full-document artifact absent from table-only
+> extraction. The gold composite, where aspect/type/unit corrections would land, matches
+> **2%** and **0%** of the two arms — unusable across models. No lane is both sensitive to
+> the layer and comparable across extractors.
+
+**Do not claim "the gain is absorbed by scale."** The one comparable measurement points the
+other way: the gate's taxonomy intervention rate **rises** with the stronger model —
+15.4% → 37.7% (BRSR), 0% → 20.9% (IR). Intervention ≠ improvement, so it settles nothing,
+but it rules out the absorption story. Say the question is open.
+
+Both arms are single runs at temperature 0.1 — no variance estimate, so rest only on the
+large gaps. Reproduce: `run_baselines.py`, `run_page_matched.py`, `run_gate_workload.py`.
 
 ---
 

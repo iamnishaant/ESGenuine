@@ -1,0 +1,26 @@
+{
+  "case": "shell",
+  "tag": "incumbent",
+  "provider": "pool[nvidiax6]",
+  "model": "meta/llama-3.3-70b-instruct",
+  "pool_providers": [
+    "nvidia"
+  ],
+  "pool_models": [
+    "meta/llama-3.3-70b-instruct"
+  ],
+  "pool_size": 6,
+  "isolated_provider": "nvidia",
+  "llm_max_tokens": 8000,
+  "temperature": 0.1,
+  "pages": 5,
+  "claims": 102,
+  "source_cache": "docling_shell2022.json",
+  "failed_pages": 0,
+  "pages_with_claims": 3,
+  "pages_without_claims": [
+    2,
+    73
+  ],
+  "note": "Generated from committed Docling page markdown, so the input is byte-identical to the shipped fixture's table surface and the model is the only variable. TABLE SURFACE ONLY \u2014 no text/narrative claims."
+}

@@ -530,9 +530,73 @@ requires a model. \textbf{Grounding precision}---the share of emitted numeric
 values that actually occur in the source page, a mechanical check comparable
 across systems---is $87.4\,\%$ without the repair layer and $89.2\,\%$ with it.
 
-\FILL{2x2 frontier-model comparison: does the repair delta survive a stronger
-extractor? Run backend/scripts/run\_baselines.py --generate frontier and write
-this subsection around the interaction term.}
+\subsubsection*{A stronger extractor, on identical input}
+
+To ask whether the repair layer is merely patching one model's weaknesses, we drove a
+second, larger open-weight extractor (\texttt{gpt-oss-120b}) over the \emph{same}
+committed page markdown, through the same code path, page set and token budget as the
+incumbent (\texttt{llama-3.3-70b}), leaving the model as the only variable. Both arms
+are frozen as fixtures. We report recall and grounding restricted to pages
+\emph{both} arms produced claims for, so that a page lost to a transport failure
+cannot be read as a model finding nothing.
+
+\begin{table}[t]
+\centering
+\caption{Matched-input model comparison, page-matched. Both arms extract from identical
+committed markdown through the same code path.}
+\label{tab:models}
+\begin{tabular}{llcc}
+\toprule
+Document & Extractor & Fact recall & Grounding\\
+\midrule
+BRSR    & \texttt{llama-3.3-70b}  & $41.2\,\%$ & $68.3\,\%$\\
+BRSR    & \texttt{gpt-oss-120b}   & $\mathbf{97.2\,\%}$ & $\mathbf{99.1\,\%}$\\
+IR      & \texttt{llama-3.3-70b}  & $44.1\,\%$ & $100\,\%$\\
+IR      & \texttt{gpt-oss-120b}   & $\mathbf{89.8\,\%}$ & $100\,\%$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Extractor choice dominates the tabular surface.} On the statutory filing the
+stronger model recovers $97.2\,\%$ of enumerated table facts against $41.2\,\%$, and
+$89.8\,\%$ against $44.1\,\%$ on the narrative report. The grounding gap is the sharper
+result: $31.7\,\%$ of the incumbent's emitted values on the statutory filing do
+\emph{not} occur on the page they cite, against $0.9\,\%$ for the stronger model. That
+misattribution class is precisely what the layer's source-value check exists to catch,
+and it is roughly thirty times rarer in the newer model.
+
+\subsubsection*{What this comparison cannot settle}
+
+We had intended this experiment to answer whether the repair layer's contribution
+survives a model upgrade. \textbf{It does not answer that question, and we report the
+null rather than an inference.} The reason is structural. Fact recall and grounding read
+only a claim's value and page, so they observe the deterministic layer solely where it
+\emph{adds, removes or rewrites} a claim. On the table-only path its sole such action---the
+furniture filter---removes nothing at either tier, because statutory form furniture is an
+artifact of full-document extraction and does not arise here. The gold composite, which is
+where the layer's aspect, type and unit corrections would register, cannot be used across
+extractors at all: it was sampled from the shipped extractor's own output and matches
+$2\,\%$ and $0\,\%$ of the two arms respectively. No lane available to us is both
+sensitive to the layer and comparable across models.
+
+One measurement is comparable, and it cuts against the intuition that a better model
+needs less repair: the \emph{rate at which the gate intervenes does not fall}. The gate
+alters the taxonomy assignment of $15.4\,\%$ of the incumbent's claims and $37.7\,\%$ of
+the stronger model's on the statutory filing ($0\,\%$ and $20.9\,\%$ on the narrative
+report). An intervention is not evidence of an improvement, so this bounds speculation
+rather than settling it---but it is inconsistent with the layer being simply absorbed by
+scale, and we decline to claim that it is.
+
+The honest summary is that Section~\ref{sec:ablation}'s deltas are established
+\emph{within} one extractor and one document, and this experiment does not extend them
+across extractors. What it does establish is that on the tabular surface, the choice of
+extractor moves recall and grounding far more than anything measured in
+Section~\ref{sec:ablation} moves the composite---and that a deployment choosing between
+spending on a better model and spending on deterministic repair has no evidence here that
+the second substitutes for the first.
+
+Both arms are single runs at temperature $0.1$; we have no variance estimate, so we treat
+gaps of a few points as unresolved and rest only on the large ones.
 
 %==============================================================================
 \section{Limitations}
@@ -572,6 +636,15 @@ formats, not about ESG reporting in general. The two are also the corpus's most
 tractable: $23.0\,\%$ and $24.7\,\%$ of their claims fall outside the taxonomy,
 against $52.2\,\%$ and $53.3\,\%$ for the two reports we did not evaluate in
 depth. Absolute scores would very likely be lower on the rest of the corpus.
+
+\paragraph{The repair layer is measured against one extractor only.} Section~\ref{sec:ablation}
+establishes its contribution within a single model's output. The matched-extractor
+experiment does not extend that result, because no available lane is both sensitive to the
+layer's corrections and comparable across models---the mechanical lanes cannot see aspect,
+type or unit repairs, and the gold composite is tied to the shipped extractor's own
+phrasing. We therefore make no claim about whether the layer's value persists, shrinks or
+grows with model scale. On the tabular surface specifically, extractor choice moves recall
+and grounding by far more than the layer moves the composite.
 
 \paragraph{Reconstructed ablation baseline.} The committed fixtures are extractor
 output, not a pristine model transcript: they carry the taxonomy assignment and

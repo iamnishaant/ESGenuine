@@ -16,7 +16,7 @@ already written into the paper*, so they are listed first.
 | | Task | Result |
 |---|---|---|
 | 🔴 | **P0** password rotation | leak **confirmed live**; code fixed here, **rotation still outstanding — owner action** |
-| 🟠 | **P1** frontier baseline | roadmap procedure was **unsafe on a populated `.env`** — would have produced a mislabelled fixture. Harness hardened, then run. |
+| 🟠 | **P1** frontier baseline | roadmap procedure was **unsafe on a populated `.env`**. Harness hardened, then run: **extractor choice dominates the table surface**, but the 2×2 **cannot** answer whether repair survives a model upgrade — reported as a null. |
 | ✅ | **P2** corpus statistics | collected; roadmap's provisional figures confirmed exactly |
 | ✅ | **P3** offline harnesses | **all 8 expected values reproduce exactly** |
 | 🔴 | *(new)* fixture provenance | **the frozen "raw LLM" fixtures are not raw.** Retracts one published finding. |
@@ -337,6 +337,77 @@ git grep -nE "postgresql://[^\"' ]*:[^\"'@ ]+@"   ->  only .env.example placehol
 4. Change the password anywhere else the same pattern was used.
 
 The value remains in git history regardless; rotation is what makes it inert.
+
+---
+
+## P1 — matched-extractor baseline ✅ run, with an explicit null
+
+Completed 2026-08-12 after the harness fixes in Findings 2–4. Four fixtures, all frozen and
+committed, all from a single-provider NVIDIA pool at `max_tokens=8000`, `temperature=0.1`,
+generated from the committed Docling markdown:
+
+| arm | model | claims | pages | failed |
+|---|---|--:|--:|--:|
+| incumbent BRSR | `meta/llama-3.3-70b-instruct` | 319 | 40 | 4 |
+| frontier BRSR | `openai/gpt-oss-120b` | 451 | 40 | 2 |
+| incumbent IR | `meta/llama-3.3-70b-instruct` | 102 | 5 | 0 |
+| frontier IR | `openai/gpt-oss-120b` | 191 | 5 | 0 |
+
+`nvidia/nemotron-3-ultra-550b-a55b` was tried first and rejected: it failed 15–20% of pages
+on malformed JSON, which would have depressed its recall for formatting reasons rather than
+extraction quality. `gpt-oss-120b` is a larger open-weight model, **not** a closed frontier
+system, and the paper says so.
+
+### Result 1 — extractor choice dominates the tabular surface
+
+Page-matched (only pages both arms produced claims for, so a transport failure cannot read
+as a model finding nothing):
+
+| Document | Extractor | Fact recall | Grounding |
+|---|---|--:|--:|
+| BRSR | llama-3.3-70b | 41.2% | 68.3% |
+| BRSR | **gpt-oss-120b** | **97.2%** | **99.1%** |
+| IR | llama-3.3-70b | 44.1% | 100% |
+| IR | **gpt-oss-120b** | **89.8%** | 100% |
+
+The grounding line is the sharper one: **31.7%** of the incumbent's emitted values on the
+statutory filing do not occur on the page they cite, against **0.9%** for the newer model —
+roughly thirty times rarer. That is exactly the misattribution class the layer's
+source-value check was built for.
+
+### Result 2 — the 2×2 does not answer the question it was built for 🔴
+
+**Reported as a null, not inferred around.** Fact recall and grounding read only a claim's
+value and page, so they observe the deterministic layer solely where it *adds, removes or
+rewrites* a claim. Its one such action on this path — the furniture filter — removes **0**
+claims at **both** tiers, because statutory form furniture is an artifact of full-document
+extraction and does not arise in table-only extraction. The gold composite, where the
+layer's aspect/type/unit corrections *would* register, matched **2%** and **0%** of the two
+arms: it was sampled from the shipped extractor's own output and cannot score another
+model. No lane is both sensitive to the layer and comparable across extractors.
+
+So "does the repair delta survive a better model" remains **unanswered**, and both the paper
+and this document say so.
+
+### Result 3 — but not because the gain is absorbed by scale
+
+The one measurement that *is* comparable across models points the other way. The gate's
+taxonomy intervention rate **rises** with the stronger extractor:
+
+| | BRSR | IR |
+|---|--:|--:|
+| gate alters taxonomy, llama-3.3-70b | 15.4% | 0% |
+| gate alters taxonomy, gpt-oss-120b | **37.7%** | **20.9%** |
+
+An intervention is not evidence of an improvement, so this settles nothing — but it is
+inconsistent with the layer simply being absorbed by a better model, and that convenient
+story should not be told.
+
+**Caveat carried into the paper:** both arms are single runs at temperature 0.1. There is no
+variance estimate, so only the large gaps are rested on.
+
+Harnesses: `run_baselines.py`, `run_page_matched.py`, `run_gate_workload.py`; outputs under
+`docs/results/`.
 
 ---
 

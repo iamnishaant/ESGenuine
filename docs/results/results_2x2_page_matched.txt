@@ -1,0 +1,18 @@
+﻿=== tata  cached pages=40
+    pages with claims: incumbent=33  frontier=27  both=23
+    incumbent-only pages: [6, 7, 8, 10, 21, 22, 23, 26, 35, 42]
+    frontier-only  pages: [15, 27, 29, 33]
+    incumbent (llama-3.3-70b)  recall raw   73/365  =  20.0%   matched   73/177  =  41.2%
+                               ground raw  234/319  =  73.4%   matched  136/199  =  68.3%   claims=319
+    frontier  (gpt-oss-120b)   recall raw  244/365  =  66.8%   matched  172/177  =  97.2%
+                               ground raw  448/451  =  99.3%   matched  319/322  =  99.1%   claims=451
+
+=== shell  cached pages=5
+    pages with claims: incumbent=3  frontier=4  both=3
+    incumbent-only pages: []
+    frontier-only  pages: [73]
+    incumbent (llama-3.3-70b)  recall raw   52/184  =  28.3%   matched   52/118  =  44.1%
+                               ground raw   66/66   = 100.0%   matched   66/66   = 100.0%   claims=102
+    frontier  (gpt-oss-120b)   recall raw  165/184  =  89.7%   matched  106/118  =  89.8%
+                               ground raw  191/191  = 100.0%   matched  116/116  = 100.0%   claims=191
+

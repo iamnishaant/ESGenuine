@@ -1,0 +1,31 @@
+{
+  "case": "tata",
+  "tag": "incumbent",
+  "provider": "pool[nvidiax6]",
+  "model": "meta/llama-3.3-70b-instruct",
+  "pool_providers": [
+    "nvidia"
+  ],
+  "pool_models": [
+    "meta/llama-3.3-70b-instruct"
+  ],
+  "pool_size": 6,
+  "isolated_provider": "nvidia",
+  "llm_max_tokens": 8000,
+  "temperature": 0.1,
+  "pages": 40,
+  "claims": 319,
+  "source_cache": "docling_tata.json",
+  "failed_pages": 4,
+  "pages_with_claims": 33,
+  "pages_without_claims": [
+    9,
+    15,
+    17,
+    27,
+    29,
+    33,
+    34
+  ],
+  "note": "Generated from committed Docling page markdown, so the input is byte-identical to the shipped fixture's table surface and the model is the only variable. TABLE SURFACE ONLY \u2014 no text/narrative claims."
+}
