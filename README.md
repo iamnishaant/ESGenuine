@@ -1,5 +1,12 @@
 # ESGenuine
 
+[![CI](https://github.com/iamnishaant/ESGenuine/actions/workflows/ci.yml/badge.svg)](https://github.com/iamnishaant/ESGenuine/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-3776ab.svg)
+![Backend](https://img.shields.io/badge/backend-FastAPI-009688.svg)
+![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20Vite-61dafb.svg)
+![Database](https://img.shields.io/badge/database-Supabase%20%2B%20pgvector-3ecf8e.svg)
+
 > Corporate sustainability reports are written to be read by humans and audited by nobody. This makes them machine-checkable.
 
 An **evidence-grounded ESG claim extraction and integrity system**. It turns a 90-page
