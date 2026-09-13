@@ -65,13 +65,6 @@ const StatCard = ({ title, value, suffix = '', icon, color, delay = 0 }: StatCar
         </div>
       </div>
       
-      {/* Reflection effect */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-1/2 pointer-events-none rounded-b-xl"
-        style={{
-          background: `linear-gradient(to top, ${color}05, transparent)`,
-        }}
-      />
     </motion.div>
   );
 };

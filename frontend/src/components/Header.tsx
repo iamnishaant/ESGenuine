@@ -33,21 +33,13 @@ export const Header = () => {
   return (
     <motion.header
       className="h-16 border-b border-border/50 glass-panel flex items-center justify-between px-6"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
     >
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="relative">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center glow-primary">
+          <div className="w-9 h-9 rounded-md bg-primary flex items-center justify-center">
             <Shield className="w-5 h-5 text-primary-foreground" />
           </div>
-          <motion.div
-            className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${status.dot}`}
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
         </div>
         <div>
           <h1 className="font-semibold text-foreground tracking-tight">
@@ -64,8 +56,6 @@ export const Header = () => {
         <div className="flex items-center gap-2" title={status.title}>
           <motion.div
             className={`w-2 h-2 rounded-full ${status.dot}`}
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
           />
           <span className="text-xs text-muted-foreground">{status.label}</span>
         </div>
@@ -87,8 +77,8 @@ export const Header = () => {
           title={email ? `Signed in as ${email}` : 'Sign in on the Integrity Audit page'}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors max-w-[220px]"
         >
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center flex-shrink-0">
-            {email ? <User className="w-4 h-4 text-primary-foreground" /> : <LogIn className="w-4 h-4 text-primary-foreground" />}
+          <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+            {email ? <User className="w-4 h-4 text-muted-foreground" /> : <LogIn className="w-4 h-4 text-muted-foreground" />}
           </div>
           <span className="text-sm text-foreground truncate">{email ?? 'Sign in'}</span>
         </Link>

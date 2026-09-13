@@ -115,7 +115,7 @@ export function ClaimTable({ claims, sortField, sortDirection, onSort, emptyMess
                     <div className="flex items-center gap-3">
                       <div className="flex-1 w-16 h-1.5 bg-background rounded-full overflow-hidden border border-border/50">
                         <div
-                          className={cn('h-full rounded-full transition-all duration-1000', claim.confidence >= 80 ? 'bg-success glow-success' : claim.confidence >= 50 ? 'bg-warning glow-warning' : 'bg-danger glow-danger')}
+                          className={cn('h-full rounded-full transition-all duration-1000', claim.confidence >= 80 ? 'bg-success' : claim.confidence >= 50 ? 'bg-warning' : 'bg-danger')}
                           style={{ width: `${claim.confidence}%` }}
                         />
                       </div>
@@ -138,7 +138,7 @@ export function ClaimTable({ claims, sortField, sortDirection, onSort, emptyMess
                     <Link
                       to={`/claims/${claim.id}`}
                       aria-label={`Open claim ${claim.id}`}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all"
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
                     >
                       <ChevronDown className="w-4 h-4 -rotate-90" />
                     </Link>

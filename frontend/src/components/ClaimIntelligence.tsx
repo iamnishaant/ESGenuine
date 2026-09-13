@@ -47,7 +47,7 @@ const RadialGauge = ({ value, max, color, label }: { value: number; max: number;
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <motion.span 
-          className="text-2xl font-bold font-mono"
+          className="text-2xl font-semibold tabular-nums"
           style={{ color }}
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -76,7 +76,6 @@ const AnimatedBar = ({ value, color, label }: { value: number; color: string; la
           animate={{ width: `${value}%` }}
           transition={{ duration: 1, ease: 'easeOut' }}
         >
-          <div className="absolute inset-0 shimmer" />
         </motion.div>
       </div>
     </div>
@@ -101,7 +100,7 @@ const MetricDetailCard = ({ claim }: { claim: Claim }) => {
         Extracted Metric
       </span>
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold font-mono text-foreground">
+        <span className="text-2xl font-semibold tabular-nums text-foreground">
           {claim.metricValue.toLocaleString()}
         </span>
         <span className="text-sm text-muted-foreground">{claim.metricUnit || ''}</span>

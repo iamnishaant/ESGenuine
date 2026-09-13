@@ -457,7 +457,7 @@ export const DocumentViewer = ({ selectedClaim, onClaimSelect }: DocumentViewerP
                       </div>
                       {selectedCandidate === cand.candidate_id && (
                         <motion.div className="absolute inset-0 rounded-lg pointer-events-none" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                          style={{ background: 'linear-gradient(90deg, transparent, hsl(var(--primary) / 0.05), transparent)' }}
+                          style={{ background: 'hsl(var(--primary) / 0.05)' }}
                         />
                       )}
                     </motion.div>

@@ -125,18 +125,15 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "float": "float 6s ease-in-out infinite",
-        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
-        "spin-slow": "spin-slow 20s linear infinite",
+        // Ornamental loops are disabled; the names stay so existing classes resolve.
+        "float": "none",
+        "glow-pulse": "none",
+        "spin-slow": "none",
         "trace-border": "trace-border 2s ease forwards",
         "fade-up": "fade-up 0.5s ease forwards",
         "scale-up": "scale-up 0.3s ease forwards",
         "slide-in-right": "slide-in-right 0.4s ease forwards",
         "ripple": "ripple 0.6s ease-out",
-      },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic": "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
     },
   },

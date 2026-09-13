@@ -90,9 +90,6 @@ export const AppSidebar = () => {
         "relative z-20 h-screen glass-panel border-r border-border/30 flex flex-col transition-all duration-300",
         collapsed ? "w-16" : "w-64"
       )}
-      initial={{ x: -100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
     >
       {/* Logo */}
       <div className={cn(
@@ -100,14 +97,9 @@ export const AppSidebar = () => {
         collapsed && "justify-center"
       )}>
         <div className="relative flex-shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center glow-primary">
+          <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
             <Globe className="w-4 h-4 text-primary-foreground" />
           </div>
-          <motion.div 
-            className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-success"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
         </div>
         {!collapsed && (
           <motion.div
@@ -137,17 +129,15 @@ export const AppSidebar = () => {
                 className={cn(
                   "relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
                   isActive 
-                    ? "bg-primary/15 text-primary" 
+                    ? "bg-secondary text-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                   collapsed && "justify-center px-2"
                 )}
-                whileHover={{ x: collapsed ? 0 : 4 }}
-                whileTap={{ scale: 0.98 }}
               >
                 {/* Active indicator */}
                 {isActive && (
                   <motion.div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-primary glow-primary"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-primary"
                     layoutId="activeIndicator"
                   />
                 )}

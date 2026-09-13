@@ -291,7 +291,7 @@ const AuditTrail = () => {
           {/* Timeline */}
           <div className="relative">
             {/* Vertical spine */}
-            <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary/50 to-primary/20" />
+            <div className="absolute left-[19px] top-0 bottom-0 w-px bg-border" />
 
             <div className="space-y-4">
               {auditSteps.map((step, index) => {

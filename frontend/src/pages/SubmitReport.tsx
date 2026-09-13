@@ -470,7 +470,7 @@ const SubmitReport = () => {
                   type="button"
                   onClick={analyzeClaimsWithAI}
                   disabled={isAnalyzing || claims.filter(c => c.text.trim()).length === 0}
-                  className="w-full bg-gradient-to-r from-primary/80 to-primary hover:from-primary hover:to-primary/90 text-primary-foreground"
+                  className="w-full"
                 >
                   {isAnalyzing ? (
                     <>

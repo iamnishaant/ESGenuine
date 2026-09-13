@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CursorGlow } from '../components/CursorGlow';
 import { AnimatedBackground } from '../components/AnimatedBackground';
 import { Header } from '../components/Header';
 import { DocumentViewer } from '../components/DocumentViewer';
@@ -30,8 +29,6 @@ const Index = () => {
       {/* Animated background */}
       <AnimatedBackground />
       
-      {/* Cursor glow effect */}
-      <CursorGlow />
       
       {/* Sidebar Navigation */}
       <AppSidebar />
@@ -84,7 +81,7 @@ const Index = () => {
 
               {/* Overlay info */}
               <div className="absolute top-4 left-4 flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
                 <span>Use “Jump to company” (top right) • or drag / scroll / click a pin</span>
               </div>
 

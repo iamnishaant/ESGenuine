@@ -166,13 +166,13 @@ const ClaimExplorer = () => {
         animate={{ opacity: 1, y: 0 }}
       >
         <div>
-          <h1 className="text-xl font-bold text-foreground text-glow-primary tracking-tight">Claim Directory</h1>
+          <h1 className="text-lg font-semibold text-foreground tracking-tight">Claim Directory</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             Browse by company, drill into a report year, then filter its claims
           </p>
         </div>
 
-        <div className="flex bg-background/50 border border-border/50 rounded-lg p-1 backdrop-blur-md">
+        <div className="flex bg-background border border-border rounded-lg p-1">
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -185,7 +185,7 @@ const ClaimExplorer = () => {
               className={cn(
                 'flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200',
                 viewMode === tab.id
-                  ? 'bg-primary/20 text-primary shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+                  ? 'bg-secondary text-foreground'
                   : 'text-muted-foreground hover:text-foreground hover:bg-white/5',
               )}
             >

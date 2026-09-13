@@ -30,10 +30,12 @@ const getCategory = (key: string): 'environment' | 'social' | 'governance' => {
   return 'governance';
 };
 
-// Define a stable color palette for series
+// Stable categorical palette for series, stepped for the dark surface. The ORDER is
+// deliberate — it keeps adjacent series distinguishable under colour-vision deficiency —
+// so assign slots in order and never re-sort. Eight slots; past that, series repeat.
 const COLORS = [
-  '#f97316', '#06b6d4', '#a78bfa', '#ec4899', '#84cc16', 
-  '#3b82f6', '#f59e0b', '#10b981', '#6366f1', '#14b8a6'
+  '#3987e5', '#d95926', '#199e70', '#c98500',
+  '#d55181', '#008300', '#9085e9', '#e66767'
 ];
 
 export function useMetricTimeline(claims: Claim[]): MetricSeries[] {
