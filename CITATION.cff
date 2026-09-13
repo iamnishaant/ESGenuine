@@ -20,7 +20,7 @@ abstract: >-
   recall, a deterministic-stack ablation, and external baselines.
 type: software
 license: MIT
-repository-code: "https://github.com/REPLACE-ME/E-S-Genuine"
+repository-code: "https://github.com/iamnishaant/ESGenuine"
 version: "4.0.0"
 date-released: "2026-08-10"
 
@@ -48,7 +48,8 @@ keywords:
 #     with no recall term, computed on DEVELOPMENT sets. Neither set is held out — the
 #     ontology was tuned against both. They are not evidence of generalization.
 #   * Measured table-fact recall on the same pipeline and document is far lower
-#     (Tata 59.5%). Quote precision and recall together or neither.
+#     (Tata 54.0% for the shipped configuration; 59.5% before the repair layer).
+#     Quote precision and recall together or neither.
 #   * All 146 gold labels are single-annotator with no agreement statistic.
 #   * Local model weights are pinned by commit SHA and RNGs seeded (`src/model_config.py`),
 #     so the ablation, recall and baseline harnesses reproduce exactly and offline.
