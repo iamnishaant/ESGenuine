@@ -16,7 +16,8 @@ import { metricLabel } from '@/lib/metricLabels';
 // Honest description of the real pipeline (no satellite/NDVI claims).
 const pipelineStages = [
   { stage: 'PDF Parsing', detail: 'PyMuPDF + pdfplumber structural extraction, layout classification, section hierarchy' },
-  { stage: 'Claim Extraction', detail: 'LLM-assisted (Groq llama-3.1-8b) with rule-based candidate detection fallback' },
+  { stage: 'Claim Extraction', detail: 'LLM extraction (llama-3.3-70b-instruct via NVIDIA NIM) over section windows and table pages, with rule-based candidate detection fallback' },
+  { stage: 'Deterministic Repair', detail: 'No-model post-correction at 0.45 ms/claim: taxonomy normalisation, fiscal-year column repair, value-in-table check, rule-based aspect/type fixes, page-furniture filter' },
   { stage: 'Ontology Mapping', detail: 'Claims normalized to an ESG aspect taxonomy (emissions, water, social, governance…)' },
   { stage: 'Groundability Scoring', detail: 'Rule-based scoring of specificity, measurability, and provenance' },
   { stage: 'Contradiction Reasoning', detail: 'Semantic retrieval + DistilBERT-MNLI natural language inference over claim pairs' },
@@ -194,7 +195,7 @@ const SystemTransparency = () => {
               <div className="space-y-3 text-sm">
                 <div>
                   <span className="text-muted-foreground block text-xs">Claim Extraction</span>
-                  <span className="font-mono text-foreground">Groq llama-3.1-8b-instant</span>
+                  <span className="font-mono text-foreground">llama-3.3-70b-instruct (NVIDIA NIM)</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground block text-xs">Embeddings</span>

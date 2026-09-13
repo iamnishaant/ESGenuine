@@ -226,7 +226,8 @@ export default function Benchmark() {
         <p className="text-[11px] text-muted-foreground">
           Companies in portfolio: {portfolio.data?.count ?? '—'}. Values are the extractor's
           representative figure per company-year on the canonical unit; benchmark precision inherits
-          the measured extraction quality (89.7 out-of-sample).
+          the measured extraction quality (precision composite 89.7–96.1 on two annotated
+          development sets).
         </p>
       </div>
     </AppLayout>

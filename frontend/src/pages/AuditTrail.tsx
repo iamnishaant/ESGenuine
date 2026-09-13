@@ -78,7 +78,7 @@ const AuditTrail = () => {
         title: 'Claim Extraction',
         description: 'LLM-assisted extraction classified the claim and its structured fields.',
         details: [
-          'Model: Groq llama-3.1-8b-instant',
+          'Model: llama-3.3-70b-instruct (NVIDIA NIM)',
           `Source sentence: "${currentClaim.claim}"`,
           `ESG aspect: ${currentClaim.metricKey || currentClaim.normalizedAspect ? metricLabel(currentClaim.metricKey || currentClaim.normalizedAspect) : currentClaim.sector}`,
           `Extracted metric: ${metricStr}`,
