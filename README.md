@@ -50,6 +50,21 @@ Unlike typical LLM document pipelines, this system:
 
 ---
 
+## 🖥️ The dashboard
+
+<p align="center">
+  <img src="docs/presentation/screenshots/1-home-globe.png" width="49%" alt="Live dashboard with the portfolio globe">
+  <img src="docs/presentation/screenshots/2-claim-explorer.png" width="49%" alt="Claim explorer: companies, reports and claims">
+  <img src="docs/presentation/screenshots/3-integrity-audit.png" width="49%" alt="Integrity audit: score, flags and fact-check">
+  <img src="docs/presentation/screenshots/4-system-transparency.png" width="49%" alt="System transparency: pipeline and live statistics">
+</p>
+
+Live dashboard · claim explorer · integrity audit · system transparency — running on a
+demo database rebuilt from the claims committed to this repository (Tata Power BRSR FY24,
+Shell 2022 and 2023; 1,556 claims, 88 contradictions). See [Quick Start](#️-quick-start).
+
+---
+
 ## 🎯 Problem Statement
 
 - **Unstructured disclosure.** The same metric appears as a table cell in one report, a
@@ -286,6 +301,11 @@ cd backend && ..\.venv\Scripts\python -m pytest -m "not live" && cd ..
 
 # 3. Configure: copy .env.example to .env and fill in the Supabase values
 #    (VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY are enough for the dashboard)
+
+# 3b. Empty Supabase project? Create the schema, then load the committed claims — no LLM
+#     calls, a few minutes (needs DATABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env)
+.venv\Scripts\python backend/scripts/bootstrap_db.py
+.venv\Scripts\python backend/scripts/load_committed_claims.py
 
 # 4. Run
 cd backend && ..\.venv\Scripts\python -m uvicorn src.api.server:app --port 8000   # API
