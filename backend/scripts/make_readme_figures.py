@@ -229,10 +229,13 @@ def fig3():
         ax.set_ylim(0, 118); ax.set_yticks([0, 25, 50, 75, 100])
         ax.set_title(title); ax.grid(axis="y", **GRID); ax.set_axisbelow(True)
     a1.set_ylabel("%")
-    a1.legend(frameon=False, loc="lower left", fontsize=9.5)
+    # Legend above both panels: inside either axes it lands on a bar (they reach 97-100%).
+    handles, names = a1.get_legend_handles_labels()
+    fig.legend(handles, names, frameon=False, loc="upper center", ncol=2, fontsize=10,
+               bbox_to_anchor=(0.5, 0.965))
     fig.suptitle("Extractor choice dominates the tabular surface (identical input, page-matched)",
                  fontweight="bold", y=1.02)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0, 1, 0.90))
     _save(fig, "fig_readme_3_extractor")
 
 
