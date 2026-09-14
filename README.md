@@ -389,9 +389,7 @@ docs/
 
 ---
 
-## 👥 Contributors
 
-Ansh Bajpai · Nishant Shah
 
 ## 📄 License & Citation
 
