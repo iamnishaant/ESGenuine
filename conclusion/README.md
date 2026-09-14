@@ -279,7 +279,7 @@ misattribution class the repair layer's source-value check exists to catch.
 > and its one such action here removes nothing at either tier. The gold composite, where
 > aspect/type/unit corrections would register, matches 2% and 0% of the two arms and is
 > unusable across models. The question is open. See
-> [`docs/CROSSCHECK_FINDINGS.md`](docs/CROSSCHECK_FINDINGS.md) §P1.
+> `docs/CROSSCHECK_FINDINGS.md` §P1.
 
 ### 4. Cost, and the no-model floor
 

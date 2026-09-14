@@ -27,10 +27,8 @@ Unlike typical LLM document pipelines, this system:
 
 | | |
 |---|---|
-| 🎤 **Presentation** | [`docs/presentation/ESGenuine_presentation.pptx`](docs/presentation/ESGenuine_presentation.pptx) — 13 slides with speaker notes |
 | 📘 **Full end-to-end trace** | [`conclusion/EXACT_FLOW.md`](conclusion/EXACT_FLOW.md) — every stage, threshold and decision rule, with file:line references |
 | 🔍 **Repository audit** | [`conclusion/AUDIT.md`](conclusion/AUDIT.md) — feature-by-feature status, defects, and scores |
-| 📄 **Paper draft** | [`docs/paper/`](docs/paper/) — LaTeX source, bibliography and figures |
 
 ---
 
@@ -47,21 +45,6 @@ Unlike typical LLM document pipelines, this system:
   - Precision composite **67.7 → 96.1** (statutory), **72.1 → 89.7** (narrative)
   - Repair layer worth **+24.6** and **+7.0** points at **zero LLM cost**
   - **0.45 ms/claim** — 168 ms for a 373-claim report, single-threaded, no network
-
----
-
-## 🖥️ The dashboard
-
-<p align="center">
-  <img src="docs/presentation/screenshots/1-home-globe.png" width="49%" alt="Live dashboard with the portfolio globe">
-  <img src="docs/presentation/screenshots/2-claim-explorer.png" width="49%" alt="Claim explorer: companies, reports and claims">
-  <img src="docs/presentation/screenshots/3-integrity-audit.png" width="49%" alt="Integrity audit: score, flags and fact-check">
-  <img src="docs/presentation/screenshots/4-system-transparency.png" width="49%" alt="System transparency: pipeline and live statistics">
-</p>
-
-Live dashboard · claim explorer · integrity audit · system transparency — running on a
-demo database rebuilt from the claims committed to this repository (Tata Power BRSR FY24,
-Shell 2022 and 2023; 1,556 claims, 88 contradictions). See [Quick Start](#️-quick-start).
 
 ---
 
@@ -244,7 +227,6 @@ to catch.
 > where it adds, removes or rewrites a claim, and its one such action removes nothing at
 > either tier. The gate's intervention rate *rises* with the stronger model
 > (15.4% → 37.7%) — which rules out the convenient conclusion without settling the question.
-> See [`docs/CROSSCHECK_FINDINGS.md`](docs/CROSSCHECK_FINDINGS.md).
 
 ### 4. Cost, and the no-model floor
 
@@ -369,11 +351,6 @@ backend/
 └── database/             schema + migrations (partitions, RLS, HNSW)
 frontend/src/             React + Vite dashboard
 conclusion/               project report, end-to-end trace, audit, figures
-docs/
-├── presentation/         slide deck
-├── paper/                LaTeX paper source
-├── results/              generated result tables
-└── dev-notes/            development logs and working notes
 ```
 
 ---

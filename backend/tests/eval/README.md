@@ -29,7 +29,7 @@
 > being measured, reading the extractor's own output. No second annotator, no Cohen's κ.
 >
 > **The fix for all three** is a gold set anchored to source text units rather than to
-> extractor output — specified in [`docs/ANNOTATION_PROTOCOL.md`](../../docs/ANNOTATION_PROTOCOL.md).
+> extractor output — specified in `docs/ANNOTATION_PROTOCOL.md`.
 > Until that lands, these sets remain useful as **regression gates** (their job in CI) and
 > unsuitable as **evidence of generalization** (their job in a paper).
 

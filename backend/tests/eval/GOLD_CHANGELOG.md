@@ -34,7 +34,7 @@ revised labels are defensible readings of the source. The problem was never that
 label is wrong — it is that the *measurement stopped being independent* of the system,
 and that both sets are consequently development sets rather than held-out ones. Reverting
 six labels would not restore independence; only a fresh, never-tuned-against set will.
-See [`docs/ANNOTATION_PROTOCOL.md`](../../docs/ANNOTATION_PROTOCOL.md).
+See `docs/ANNOTATION_PROTOCOL.md`.
 
 **Consequence for reporting:** the 96.1 (Tata) and 89.7 (Shell) figures are development
 scores. They remain valid as CI regression floors and invalid as evidence of

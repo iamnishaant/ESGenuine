@@ -211,7 +211,7 @@ Comma-separated key lists are supported and de-duplicated.
 **Critical control-flow fact:** if the pool is **non-empty**, `extract()` takes the pool path
 and the OpenAI / Anthropic branches are **unreachable**. They are only consulted when the
 pool is empty. This is the trap documented in
-[`../docs/CROSSCHECK_FINDINGS.md`](../docs/CROSSCHECK_FINDINGS.md) §2 — setting
+`docs/CROSSCHECK_FINDINGS.md` §2 — setting
 `OPENAI_API_KEY` on a machine that has an NVIDIA key never calls OpenAI.
 
 **Reliability primitives:**
@@ -812,7 +812,7 @@ ontology — no data migration), plus a test asserting no partition is empty aft
 **Consequence:** the ablation's S0 is a **reconstruction** (three fields reset, current stack
 replayed), and the S2/S3 deltas measure the residual between layer revisions, not the value
 of those stages. Reported gains are therefore a **lower bound**. Full detail in
-[`../docs/CROSSCHECK_FINDINGS.md`](../docs/CROSSCHECK_FINDINGS.md) §1.
+`docs/CROSSCHECK_FINDINGS.md` §1.
 
 ### 17.3 🟠 Job state is in-process
 
@@ -822,7 +822,7 @@ no UI recovery. On a sleeping free-tier host this will happen.
 
 ### 17.4 🔴 Live superuser credential
 
-Documented in [`../docs/CROSSCHECK_FINDINGS.md`](../docs/CROSSCHECK_FINDINGS.md) §P0. Code
+Documented in `docs/CROSSCHECK_FINDINGS.md` §P0. Code
 fixed; **rotation still outstanding**.
 
 ---

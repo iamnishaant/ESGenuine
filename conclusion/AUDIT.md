@@ -83,7 +83,7 @@ ingest.
 
 ### 3.2 Live superuser credential (known, still open)
 
-Documented in [`../docs/CROSSCHECK_FINDINGS.md`](../docs/CROSSCHECK_FINDINGS.md) §P0. The
+Documented in `docs/CROSSCHECK_FINDINGS.md` §P0. The
 plaintext Postgres **superuser** password was hardcoded in three tracked files since the
 initial commit; the code is fixed but **the credential has not been rotated** and
 authenticated successfully during this audit. Superuser bypasses RLS, so the RLS migration
