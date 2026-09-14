@@ -55,7 +55,10 @@ def seed_everything(seed: int = None) -> int:
     Embedding and NLI inference are deterministic in principle, but sampling helpers,
     dropout-at-inference bugs and any future shuffling are not — seeding removes a class
     of "why did the number move?" that is very expensive to debug after the fact.
-    Torch/numpy are imported lazily so this stays cheap for callers that never load a model.
+    Torch is seeded only if something has already imported it: importing torch just to
+    seed it costs ~150 MB resident, which a read-only API process that never loads a model
+    cannot afford on a 512 MB host. The model loaders below re-seed right after they
+    import torch, so every process that actually runs a model is still seeded.
     """
     s = SEED if seed is None else seed
     random.seed(s)
@@ -65,14 +68,18 @@ def seed_everything(seed: int = None) -> int:
         np.random.seed(s)
     except ImportError:
         pass
-    try:
-        import torch
-        torch.manual_seed(s)
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed_all(s)
-    except ImportError:
-        pass
+    _seed_torch(s)
     return s
+
+
+def _seed_torch(s: int) -> None:
+    import sys
+    torch = sys.modules.get("torch")
+    if torch is None:
+        return
+    torch.manual_seed(s)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(s)
 
 
 def _rev(value: str):
@@ -86,6 +93,7 @@ def load_embedder(cache: bool = True):
     if cache and _EMBEDDER is not None:
         return _EMBEDDER
     from sentence_transformers import SentenceTransformer
+    _seed_torch(SEED)                       # torch is now loaded: seed it
     model = SentenceTransformer(EMBED_MODEL, revision=_rev(EMBED_REVISION))
     if cache:
         _EMBEDDER = model
@@ -98,6 +106,7 @@ def load_nli(cache: bool = True):
     if cache and _NLI is not None:
         return _NLI
     from transformers import pipeline
+    _seed_torch(SEED)                       # torch is now loaded: seed it
     nli = pipeline("text-classification", model=NLI_MODEL, revision=_rev(NLI_REVISION))
     if cache:
         _NLI = nli

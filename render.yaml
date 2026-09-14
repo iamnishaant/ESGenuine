@@ -1,12 +1,39 @@
-# ESGenuine — Render Blueprint: the dashboard as a free static site.
+# ESGenuine — Render Blueprint: the dashboard and a read-only API, both on free plans.
 #
-# The FastAPI backend is hosted separately, on a Hugging Face Docker Space: it needs about
-# 1 GB of RAM, more than Render's free 512 MB. See DEPLOY.md.
+# The API image leaves out PyTorch (only PDF ingest and the /audit/ask Q&A need it, and the
+# public deployment disables both), which keeps it near 190 MB resident — inside Render's
+# free 512 MB. The free API sleeps after 15 minutes idle and takes about a minute to wake.
 #
 # Deploy: Render Dashboard -> New -> Blueprint -> connect this repo -> apply, then fill the
-# three `sync: false` values when prompted.
+# `sync: false` values when prompted: the Supabase URL and publishable key, once per service.
 
 services:
+  # ── API: FastAPI, read-only (Docker) ─────────────────────────────────────────
+  - type: web
+    name: esgenuine-api
+    runtime: docker
+    dockerfilePath: ./deploy/render/api.Dockerfile
+    dockerContext: ./backend
+    region: singapore
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      # Only the dashboard (any *.onrender.com origin) may call the API from a browser.
+      - key: ALLOWED_ORIGIN_REGEX
+        value: https://.*\.onrender\.com
+      # Deliberately absent, so the deployment is read-only: DATABASE_URL (accounts and
+      # ingest), SUPABASE_SERVICE_ROLE_KEY (writes), NVIDIA_API_KEYS (LLM Q&A).
+
+  # ── Dashboard: Vite static site ──────────────────────────────────────────────
   - type: web
     name: esgenuine
     runtime: static
@@ -15,12 +42,13 @@ services:
     staticPublishPath: ./dist
     autoDeploy: true
     envVars:
-      # Public backend URL, e.g. https://<hf-user>-esgenuine-api.hf.space
+      # The API's public host, filled in by Render; resolveApiBase() adds https://.
       - key: VITE_API_BASE
-        sync: false
-      # Supabase project URL and publishable (anon) key. Both end up in the public bundle
-      # by design: the database grants this key SELECT only (row-level security), so the
-      # hosted site is read-only.
+        fromService:
+          type: web
+          name: esgenuine-api
+          property: host
+      # Public by design: the database grants the publishable key SELECT only (RLS).
       - key: VITE_SUPABASE_URL
         sync: false
       - key: VITE_SUPABASE_PUBLISHABLE_KEY

@@ -465,17 +465,26 @@ async def health():
     except OSError as e:
         checks["disk"] = f"error: {e}"
 
-    # Embedding model availability — import only (loading weights here would make
-    # every probe pay a model spin-up; the NLI model is lazy-loaded by design).
-    try:
-        import sentence_transformers  # noqa: F401
-        checks["embedding_model"] = "ok"
-    except Exception as e:
-        checks["embedding_model"] = f"error: {str(e)[:120]}"
+    # Embedding stack installed? find_spec checks WITHOUT importing: importing
+    # sentence_transformers pulls in PyTorch (~150 MB resident), which the read-only
+    # deployment otherwise never loads and a 512 MB host cannot spare. Weights stay
+    # lazy-loaded by the endpoints that need them (ingest, /audit/ask).
+    read_only = os.getenv("API_READ_ONLY") == "1"
+    if read_only:
+        # The public read-only image ships without PyTorch: nothing it serves needs the
+        # embedder (only PDF ingest and /audit/ask do, and both are disabled there).
+        checks["embedding_model"] = "not installed (read-only deployment)"
+    else:
+        try:
+            import importlib.util
+            installed = importlib.util.find_spec("sentence_transformers") is not None
+            checks["embedding_model"] = "ok" if installed else "error: sentence_transformers not installed"
+        except Exception as e:
+            checks["embedding_model"] = f"error: {str(e)[:120]}"
 
     ready = (checks.get("database") == "ok"
              and checks.get("disk") == "ok"
-             and checks.get("embedding_model") == "ok")
+             and (read_only or checks.get("embedding_model") == "ok"))
     return {"status": "ok" if ready else "degraded", "ready": ready,
             "service": "esgenuine-api", "version": app.version, "checks": checks}
 
