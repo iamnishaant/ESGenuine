@@ -21,7 +21,9 @@ router = APIRouter(prefix="/v1/auth", tags=["Auth"])
 def _conn():
     url = os.getenv("DATABASE_URL")
     if not url:
-        raise HTTPException(status_code=500, detail="DATABASE_URL not configured for auth.")
+        # The public read-only deployment deliberately runs without DATABASE_URL, so this
+        # is "feature switched off here" (503), not a server fault (500).
+        raise HTTPException(status_code=503, detail="Accounts are disabled on this deployment (read-only).")
     return psycopg2.connect(url)
 
 

@@ -1,74 +1,78 @@
 # Deploying ESGenuine
 
-The frontend reads live data two ways: **Supabase directly** (raw claims) and the
-**FastAPI backend** (integrity scores, fact-check, benchmark, audit). Locally the
-frontend falls back to `http://localhost:8000` for the backend, so a *hosted* UI needs
-the backend hosted too. This guide deploys both.
+The public deployment is two free services:
 
-`render.yaml` provisions both services as a Render Blueprint (free tier). Any Docker
-host works for the backend (Railway / Fly.io / Cloud Run) — the Dockerfile already
-binds `$PORT`; only the Render-specific wiring lives in `render.yaml`.
+| Part | Host | Why this host |
+|---|---|---|
+| Dashboard (Vite static site) | Render static site, free | Serves the built React app; static sites never sleep |
+| API (FastAPI) | Hugging Face Docker Space, free "CPU basic" (16 GB RAM) | The API holds ~1 GB (PyTorch + embedding model); Render's free 512 MB would crash it |
 
----
+The dashboard reads claims straight from Supabase with the publishable key and calls the
+API for integrity scores, fact-checks, benchmarks and the audit trail.
 
-## One-time: get the values you'll paste as secrets
-
-From the **Supabase dashboard** (Project → Settings):
-- `VITE_SUPABASE_URL` — Data API → Project URL (`https://<ref>.supabase.co`)
-- `VITE_SUPABASE_PUBLISHABLE_KEY` — Data API → anon/publishable key
-- `DATABASE_URL` — Database → Connect → **Session pooler** (IPv4). It looks like
-  `postgresql://postgres.<ref>:<password>@aws-1-<region>.pooler.supabase.com:5432/postgres`.
-  **Do NOT use the direct `db.<ref>.supabase.co` string** — that host is IPv6-only and
-  is unreachable from Render/Railway/Fly (this bit us repeatedly; see memory).
-
-Optional:
-- `NVIDIA_API_KEYS` — comma-separated NVIDIA NIM keys. Only the audit Q&A
-  (`/audit/ask`) uses an LLM; the integrity score, fact-check and benchmark are
-  deterministic and work without it.
+**The public deployment is read-only.** The API gets no `DATABASE_URL` (sign-up, login and
+PDF ingest are disabled), no service-role key and no LLM key. The publishable key is in the
+public JavaScript bundle by design: row-level security grants it `SELECT` only.
 
 ---
 
-## Deploy on Render (Blueprint)
+## 1. API on Hugging Face
 
-1. Push this repo to GitHub (already on `origin`).
-2. Render Dashboard → **New → Blueprint** → connect the repo → Render reads
-   `render.yaml` and shows two services (`esgenuine-backend`, `esgenuine-frontend`).
-3. Fill the `sync: false` secrets when prompted:
-   - **backend**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`,
-     `DATABASE_URL` (pooler), `NVIDIA_API_KEYS` (optional). `JWT_SECRET` is
-     auto-generated.
-   - **frontend**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.
-     `VITE_API_BASE` is wired to the backend automatically.
-4. **Apply**. First build takes a while (the backend image pulls the torch/CUDA
-   wheel stack). When the backend shows healthy (`/health` → `ready:true`) and the
-   frontend is live, open the frontend URL.
+1. Create a fine-grained GitHub token: *Repository access* → this repository only;
+   *Permissions* → **Contents: Read-only**. The Space uses it only to clone during the build.
+2. Create a Space: SDK **Docker**, hardware **CPU basic** (free), visibility **public**.
+3. Space → *Settings* → *Variables and secrets*:
 
-CORS: the backend already accepts any `*.onrender.com` origin
-(`ALLOWED_ORIGIN_REGEX` in `render.yaml`). For a **custom domain**, add it to the
-backend's `ALLOWED_ORIGINS` env (comma-separated) — no code change.
+   | Name | Kind | Value |
+   |---|---|---|
+   | `GITHUB_TOKEN` | secret | the token from step 1 |
+   | `JWT_SECRET` | secret | `python -c "import secrets; print(secrets.token_hex(32))"` |
+   | `VITE_SUPABASE_URL` | variable | `https://<project-ref>.supabase.co` |
+   | `VITE_SUPABASE_PUBLISHABLE_KEY` | variable | the publishable (anon) key |
+   | `ENVIRONMENT` | variable | `production` |
+   | `ALLOWED_ORIGIN_REGEX` | variable | `https://.*\.onrender\.com` |
 
----
+4. Upload [`deploy/huggingface/Dockerfile`](deploy/huggingface/Dockerfile) and
+   [`deploy/huggingface/README.md`](deploy/huggingface/README.md) to the Space. The build
+   clones this repository, installs CPU-only PyTorch and bakes in the pinned embedding model.
+   The first build takes 10–15 minutes.
+5. Verify: `https://<hf-user>-<space-name>.hf.space/health` → `"ready": true`.
+
+## 2. Dashboard on Render
+
+Render → *New* → *Blueprint* → connect this repository. [`render.yaml`](render.yaml) defines
+one static site; fill its three values when prompted:
+
+- `VITE_API_BASE` — the Space URL from step 1.5
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` — as above
+
+Every push to `main` redeploys the dashboard automatically.
 
 ## Verify
 
-- `GET https://esgenuine-backend.onrender.com/health` → `{"ready": true, ...}`
-- Frontend **Portfolio** / **Integrity Audit** pages show real scores (not "—" and no
-  "Audit backend offline" banner). If you see the banner, the frontend can't reach the
-  backend — check `VITE_API_BASE` and the backend's CORS/health.
+Open the Render URL. The header should read **Connected**, and the Integrity Audit page
+should show a score rather than "—". If it shows "Backend offline", check that
+`VITE_API_BASE` is the Space URL and that the Space is awake (`/health`).
 
-## Backend env vars (reference)
+## Operating notes
 
-| Var | Required | Purpose |
-|-----|----------|---------|
-| `VITE_SUPABASE_URL` | ✅ | Supabase REST reads (claims/reports/contradictions) |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | ✅ | anon key for the above |
-| `DATABASE_URL` | auth only | `users` table via psycopg2 — **pooler (IPv4) URL** |
-| `JWT_SECRET` | auth only | signs login tokens (Render auto-generates) |
-| `NVIDIA_API_KEYS` | audit only | LLM for `/audit/ask`; scores are deterministic |
-| `ALLOWED_ORIGINS` | — | extra exact CORS origins (custom domain) |
-| `ALLOWED_ORIGIN_REGEX` | — | regex CORS origin (set to `*.onrender.com`) |
-| `PORT` | — | injected by the host; Dockerfile defaults to 8000 |
+- A free Space sleeps after ~48 hours without traffic; the first request wakes it in
+  about a minute.
+- A free Supabase project pauses after a week without activity; resume it from the
+  Supabase dashboard.
+- Custom domain: add it to the Space's `ALLOWED_ORIGINS` (comma-separated); no code change.
+- Local development is unchanged: `start.bat`.
 
-## Free-tier caveat
-Render's free web service sleeps after ~15 min idle (~50s cold start on the next
-request). Fine for a demo; bump the plan for always-on.
+## API environment variables (reference)
+
+| Variable | Public deployment | Purpose |
+|---|---|---|
+| `VITE_SUPABASE_URL` | required | Supabase REST reads (claims, reports, contradictions) |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | required | read-only key for the above |
+| `ENVIRONMENT` | `production` | drops the localhost CORS origins; requires `JWT_SECRET` |
+| `JWT_SECRET` | required in production | signs login tokens |
+| `ALLOWED_ORIGIN_REGEX` / `ALLOWED_ORIGINS` | required | which dashboard origins may call the API |
+| `DATABASE_URL` | **unset** | enables accounts (sign-up/login) and therefore ingest |
+| `SUPABASE_SERVICE_ROLE_KEY` | **unset** | write path; bypasses RLS |
+| `NVIDIA_API_KEYS` | **unset** | LLM for the `/audit/ask` Q&A |
+| `PORT` | set by the host | the Space image listens on 7860 |
