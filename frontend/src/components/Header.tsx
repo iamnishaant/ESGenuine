@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Shield, Settings, User, LogIn } from 'lucide-react';
+import { Settings, User, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useBackendScores } from '@/hooks/useBackendScores';
@@ -37,9 +37,7 @@ export const Header = () => {
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="relative">
-          <div className="w-9 h-9 rounded-md bg-primary flex items-center justify-center">
-            <Shield className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img src="/logo.png" alt="ESGenuine" className="w-9 h-9 object-contain" />
         </div>
         <div>
           <h1 className="font-semibold text-foreground tracking-tight">

@@ -97,9 +97,7 @@ export const AppSidebar = () => {
         collapsed && "justify-center"
       )}>
         <div className="relative flex-shrink-0">
-          <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-            <Globe className="w-4 h-4 text-primary-foreground" />
-          </div>
+          <img src="/logo.png" alt="ESGenuine" className="w-8 h-8 object-contain" />
         </div>
         {!collapsed && (
           <motion.div
